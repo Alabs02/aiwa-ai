@@ -2,7 +2,6 @@
 
 import { signOut } from 'next-auth/react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User } from 'lucide-react'
+import { IconLogout, IconUserSquareRounded } from '@tabler/icons-react';
 import { Session } from 'next-auth'
 
 interface UserNavProps {
@@ -28,22 +27,20 @@ export function UserNav({ session }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {isSignedOut ? <User className="h-4 w-4" /> : initials}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
+        <Avatar className="size-full skew-2 !border">
+          <AvatarFallback className="bg-transparent !-skew-2 text-white font-button">
+            {isSignedOut ? <IconUserSquareRounded className="size-4 lg:size-5" /> : initials}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
+            <p className="text-sm font-medium leading-none font-heading">
               {isSignedOut ? 'Not signed in' : isGuest ? 'Guest User' : 'User'}
             </p>
             {session?.user?.email && (
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className="text-xs mt-0.5 tracking-wide leading-none text-muted-foreground font-body">
                 {session.user.email}
               </p>
             )}
@@ -53,12 +50,12 @@ export function UserNav({ session }: UserNavProps) {
         {(isGuest || isSignedOut) && (
           <>
             <DropdownMenuItem asChild>
-              <a href="/register" className="cursor-pointer">
+              <a href="/register" className="cursor-pointer font-button">
                 <span>Create Account</span>
               </a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/login" className="cursor-pointer">
+              <a href="/login" className="cursor-pointer font-button">
                 <span>Sign In</span>
               </a>
             </DropdownMenuItem>
@@ -71,9 +68,9 @@ export function UserNav({ session }: UserNavProps) {
               // Clear any local session data first
               await signOut({ callbackUrl: '/', redirect: true })
             }}
-            className="cursor-pointer"
+            className="cursor-pointer font-button"
           >
-            <LogOut className="mr-2 h-4 w-4" />
+            <IconLogout className="mr-2 size-4 lg:size-5" />
             <span>Sign out</span>
           </DropdownMenuItem>
         )}

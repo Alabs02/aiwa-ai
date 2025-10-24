@@ -169,8 +169,36 @@ export const PromptInput = ({
   return (
     <form
       className={cn(
-        'w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm transition-colors',
-        isDragOver && 'border-primary bg-primary/5',
+        // Base styles - removed divide-y for seamless look
+        'w-full overflow-hidden rounded-2xl',
+        // Glassmorphic effect
+        'bg-white/[0.03] dark:bg-white/[0.03]',
+        'backdrop-blur-2xl backdrop-saturate-[180%]',
+        // Border with subtle gradient
+        'border border-white/[0.08] dark:border-white/[0.08]',
+        // Shadows for depth
+        'shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]',
+        'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]',
+        // Hover state - enhance the glass effect
+        'hover:bg-white/[0.08] hover:border-white/[0.15]',
+        'hover:shadow-[0_8px_40px_0_rgba(0,0,0,0.45)]',
+        'hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]',
+        // Smooth transitions
+        'transition-all duration-500 ease-out',
+        // Inner glow with gradient overlay
+        'relative overflow-hidden',
+        // Shimmer effect on hover
+        'before:absolute before:inset-0 before:rounded-2xl',
+        'before:bg-gradient-to-br before:from-white/[0.12] before:via-white/[0.03] before:to-transparent',
+        'before:opacity-0 hover:before:opacity-100',
+        'before:transition-all before:duration-500',
+        'before:pointer-events-none',
+        // Drag over state - blue accent
+        isDragOver && [
+          'border-blue-400/50 bg-blue-500/10',
+          'shadow-[0_8px_40px_0_rgba(59,130,246,0.35)]',
+          'shadow-[inset_0_1px_0_0_rgba(96,165,250,0.2)]',
+        ],
         className,
       )}
       onDragOver={handleDragOver}
@@ -221,6 +249,10 @@ export const PromptInputTextarea = ({
         'w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0',
         'field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent',
         'focus-visible:ring-0',
+        'font-body',
+        'text-white/90 placeholder:text-white/40',
+        'focus:text-white focus:placeholder:text-white/50',
+        'transition-colors duration-300',
         className,
       )}
       name="message"
@@ -241,7 +273,10 @@ export const PromptInputToolbar = ({
   ...props
 }: PromptInputToolbarProps) => (
   <div
-    className={cn('flex items-center justify-between p-1', className)}
+    className={cn(
+      'flex items-center justify-between p-1.5 pt-2',
+      className
+    )}
     {...props}
   />
 )
@@ -255,7 +290,6 @@ export const PromptInputTools = ({
   <div
     className={cn(
       'flex items-center gap-1',
-      '[&_button:first-child]:rounded-bl-xl',
       className,
     )}
     {...props}
@@ -276,8 +310,12 @@ export const PromptInputButton = ({
   return (
     <Button
       className={cn(
-        'shrink-0 gap-1.5 rounded-lg',
-        variant === 'ghost' && 'text-muted-foreground',
+        'shrink-0 gap-1.5 rounded-full',
+        'bg-transparent hover:bg-white/[0.08]',
+        'border border-white/[0.08] hover:border-white/[0.12]',
+        'text-white/60 hover:text-white/80',
+        'transition-all duration-300',
+        'shadow-none',
         newSize === 'default' && 'px-3',
         className,
       )}
@@ -313,7 +351,19 @@ export const PromptInputSubmit = ({
 
   return (
     <Button
-      className={cn('gap-1.5 rounded-lg', className)}
+      className={cn(
+        'gap-1.5 rounded-full',
+        'bg-white/[0.15] hover:bg-white/[0.25]',
+        'text-white',
+        'shadow-[0_0_15px_rgba(255,255,255,0.15)]',
+        'hover:shadow-[0_0_20px_rgba(255,255,255,0.25)]',
+        'border border-white/[0.15] hover:border-white/[0.25]',
+        'transition-all duration-300',
+        'disabled:opacity-40 disabled:cursor-not-allowed',
+        'disabled:hover:bg-white/[0.15] disabled:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]',
+        'disabled:hover:border-white/[0.15]',
+        className,
+      )}
       size={size}
       type="submit"
       variant={variant}
@@ -477,16 +527,20 @@ export const PromptInputMicButton = ({
   return (
     <PromptInputButton
       className={cn(
-        'transition-colors',
-        isListening &&
-          'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30',
+        'transition-all duration-300',
+        isListening && [
+          'bg-red-500/20 border-red-500/30',
+          'text-red-400 hover:text-red-300',
+          'hover:bg-red-500/30 hover:border-red-500/40',
+          'shadow-[0_0_15px_rgba(239,68,68,0.25)]',
+        ],
         className,
       )}
       onClick={toggleListening}
       {...props}
     >
       {isListening ? (
-        <MicOffIcon className="size-4 text-red-600 dark:text-red-400" />
+        <MicOffIcon className="size-4" />
       ) : (
         <MicIcon className="size-4" />
       )}
@@ -573,7 +627,7 @@ export const PromptInputImagePreview = ({
       {attachments.map((attachment) => (
         <div
           key={attachment.id}
-          className="relative group rounded-lg overflow-hidden border bg-muted"
+          className="relative group rounded-lg overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm"
         >
           <img
             src={attachment.preview}
@@ -583,13 +637,13 @@ export const PromptInputImagePreview = ({
           {onRemove && (
             <button
               onClick={() => onRemove(attachment.id)}
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 hover:bg-red-600"
               type="button"
             >
               <XIcon className="size-3" />
             </button>
           )}
-          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">
+          <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs p-1 truncate">
             {attachment.file.name}
           </div>
         </div>

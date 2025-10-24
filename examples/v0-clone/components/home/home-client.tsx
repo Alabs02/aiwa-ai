@@ -26,6 +26,9 @@ import { ChatInput } from '@/components/chat/chat-input'
 import { PreviewPanel } from '@/components/chat/preview-panel'
 import { ResizableLayout } from '@/components/shared/resizable-layout'
 import { BottomToolbar } from '@/components/shared/bottom-toolbar'
+import { Toolbar } from '@/components/shared'
+import { GL } from '@/components/gl'
+import { Leva } from 'leva'
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -71,6 +74,7 @@ export function HomeClient() {
   const [activePanel, setActivePanel] = useState<'chat' | 'preview'>('chat')
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [hovering, setHovering] = useState(false)
 
   const handleReset = () => {
     // Reset all chat-related state
@@ -478,198 +482,199 @@ export function HomeClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col">
-      {/* Handle search params with Suspense boundary */}
-      <Suspense fallback={null}>
-        <SearchParamsHandler onReset={handleReset} />
-      </Suspense>
+    <>
+      <div className="min-h-svh bg-gray-50 dark:bg-black flex flex-col">
+        <GL hovering={hovering} />
 
-      <AppHeader />
+        {/* Handle search params with Suspense boundary */}
+        <Suspense fallback={null}>
+          <SearchParamsHandler onReset={handleReset} />
+        </Suspense>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl w-full">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              What can we build together?
+        {/* Toolbar */}
+        <Toolbar />
+
+        {/* Main Content */}
+        <main className="relative flex-1 z-10 border-none border-white w-full min-h-[calc(100vh-60px)] flex flex-col gap-y-12 md:gap-y-24 justify-center-safe items-center-safe px-5 md:px-4">
+          <div className="max-w-3xl w-full flex flex-col items-center-safe border-none">
+            <h2 className="text-center font-heading text-2xl sm:text-3xl md:text-5xl 2xl:text-6xl font-bold text-white">
+              Vibe. Build. Deploy.
             </h2>
-          </div>
 
-          {/* Prompt Input */}
-          <div className="max-w-2xl mx-auto">
-            <PromptInput
-              onSubmit={handleSendMessage}
-              className="w-full relative"
-              onImageDrop={handleImageFiles}
-              isDragOver={isDragOver}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <PromptInputImagePreview
-                attachments={attachments}
-                onRemove={handleRemoveAttachment}
-              />
-              <PromptInputTextarea
-                ref={textareaRef}
-                onChange={(e) => setMessage(e.target.value)}
-                value={message}
-                placeholder="Describe what you want to build..."
-                className="min-h-[80px] text-base"
-                disabled={isLoading}
-              />
-              <PromptInputToolbar>
-                <PromptInputTools>
-                  <PromptInputImageButton
-                    onImageSelect={handleImageFiles}
-                    disabled={isLoading}
-                  />
-                </PromptInputTools>
-                <PromptInputTools>
-                  <PromptInputMicButton
-                    onTranscript={(transcript) => {
-                      setMessage(
-                        (prev) => prev + (prev ? ' ' : '') + transcript,
-                      )
-                    }}
-                    onError={(error) => {
-                      console.error('Speech recognition error:', error)
-                    }}
-                    disabled={isLoading}
-                  />
-                  <PromptInputSubmit
-                    disabled={!message.trim() || isLoading}
-                    status={isLoading ? 'streaming' : 'ready'}
-                  />
-                </PromptInputTools>
-              </PromptInputToolbar>
-            </PromptInput>
-          </div>
-
-          {/* Suggestions */}
-          <div className="mt-4 max-w-2xl mx-auto">
-            <Suggestions>
-              <Suggestion
-                onClick={() => {
-                  setMessage('Landing page')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Landing page"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('Todo app')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Todo app"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('Dashboard')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Dashboard"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('Blog')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Blog"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('E-commerce')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="E-commerce"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('Portfolio')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Portfolio"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('Chat app')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Chat app"
-              />
-              <Suggestion
-                onClick={() => {
-                  setMessage('Calculator')
-                  // Submit after setting message
-                  setTimeout(() => {
-                    const form = textareaRef.current?.form
-                    if (form) {
-                      form.requestSubmit()
-                    }
-                  }, 0)
-                }}
-                suggestion="Calculator"
-              />
-            </Suggestions>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-8 md:mt-16 text-center text-sm text-muted-foreground">
-            <p>
-              Powered by{' '}
-              <Link
-                href="https://v0-sdk.dev"
-                className="text-foreground hover:underline"
-              >
-                v0 SDK
-              </Link>
+            <p className="font-body text-center text-base sm:text-lg md:text-xl text-neutral-300/95 bg-black/50 inline-block w-auto rounded-full px-4 py-2 mt-4 border">
+              Vibe-code your imagination. Bring it to life with Aiwa.
             </p>
+
+            {/* Prompt Input */}
+            <div
+              className="w-full mt-8"
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+            >
+              <PromptInput
+                onSubmit={handleSendMessage}
+                className="w-full relative"
+                onImageDrop={handleImageFiles}
+                isDragOver={isDragOver}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <PromptInputImagePreview
+                  attachments={attachments}
+                  onRemove={handleRemoveAttachment}
+                />
+                <PromptInputTextarea
+                  ref={textareaRef}
+                  onChange={(e) => setMessage(e.target.value)}
+                  value={message}
+                  placeholder="Describe what you want to build..."
+                  className="min-h-[80px] text-base"
+                  disabled={isLoading}
+                />
+                <PromptInputToolbar>
+                  <PromptInputTools>
+                    <PromptInputImageButton
+                      onImageSelect={handleImageFiles}
+                      disabled={isLoading}
+                    />
+                  </PromptInputTools>
+                  <PromptInputTools>
+                    <PromptInputMicButton
+                      onTranscript={(transcript) => {
+                        setMessage(
+                          (prev) => prev + (prev ? ' ' : '') + transcript,
+                        )
+                      }}
+                      onError={(error) => {
+                        console.error('Speech recognition error:', error)
+                      }}
+                      disabled={isLoading}
+                    />
+                    <PromptInputSubmit
+                      disabled={!message.trim() || isLoading}
+                      status={isLoading ? 'streaming' : 'ready'}
+                    />
+                  </PromptInputTools>
+                </PromptInputToolbar>
+              </PromptInput>
+            </div>
+
+            {/* Suggestions */}
+            <div className="w-full mt-4">
+              <Suggestions>
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Landing page')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Landing page"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Todo app')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Todo app"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Dashboard')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Dashboard"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Blog')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Blog"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('E-commerce')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="E-commerce"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Portfolio')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Portfolio"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Chat app')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Chat app"
+                />
+                <Suggestion
+                  onClick={() => {
+                    setMessage('Calculator')
+                    // Submit after setting message
+                    setTimeout(() => {
+                      const form = textareaRef.current?.form
+                      if (form) {
+                        form.requestSubmit()
+                      }
+                    }, 0)
+                  }}
+                  suggestion="Calculator"
+                />
+              </Suggestions>
+            </div>
           </div>
-        </div>
+          <div className="max-w-5xl w-full border-none border-[red]"></div>
+        </main>
       </div>
-    </div>
+
+      <Leva hidden />
+    </>
   )
 }

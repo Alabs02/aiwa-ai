@@ -11,5 +11,9 @@ export default function Home() {
     return <EnvSetup missingVars={missingVars} />
   }
 
-  return <HomeClient />
+  return (
+    <>        
+      <HomeClient />
+    </>
+  )
 }
