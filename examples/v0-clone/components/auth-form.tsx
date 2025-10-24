@@ -1,12 +1,12 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { signInAction, signUpAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Eye, EyeOff } from 'lucide-react'
 
 interface AuthFormProps {
   type: 'signin' | 'signup'
@@ -17,6 +17,7 @@ export function AuthForm({ type }: AuthFormProps) {
     type === 'signin' ? signInAction : signUpAction,
     undefined,
   )
+  const [showPassword, setShowPassword] = useState(false)
 
   // Show toast notifications when state changes
   useEffect(() => {
@@ -41,22 +42,35 @@ export function AuthForm({ type }: AuthFormProps) {
           disabled={isPending}
         />
       </div>
-      <div>
+      <div className="relative">
         <Input
           id="password"
           name="password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="Password"
           required
-          className="w-full md:h-10 !font-body"
+          className="w-full md:h-10 !font-body pr-10"
           minLength={type === 'signup' ? 6 : 1}
           disabled={isPending}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          disabled={isPending}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
-      <Button
-        type="submit"
-        className="w-full md:h-10 !font-button"
+      <Button 
+        type="submit" 
+        className="w-full md:h-10 !font-button" 
         disabled={isPending}
       >
         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -73,20 +87,14 @@ export function AuthForm({ type }: AuthFormProps) {
         {type === 'signin' ? (
           <>
             Don&apos;t have an account?{' '}
-            <Link
-              href="/register"
-              className="text-primary hover:underline !font-button"
-            >
+            <Link href="/register" className="text-primary hover:underline !font-button">
               Sign up
             </Link>
           </>
         ) : (
           <>
             Already have an account?{' '}
-            <Link
-              href="/login"
-              className="text-primary hover:underline !font-button"
-            >
+            <Link href="/login" className="text-primary hover:underline !font-button">
               Sign in
             </Link>
           </>

@@ -9,7 +9,7 @@ import { ToastProvider } from '@/components/providers/toast-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 
 export const metadata: Metadata = {
-  title: 'Aiwa — Vibe. Build. Deploy. ✨',
+  title: 'Aiwa | Vibe. Build. Deploy.',
   description:
     'Aiwa is the AI fullstack partner that lets you build and deploy production-ready websites and apps just by chatting. No coding required.',
   keywords: [
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Aiwa — Vibe. Build. Deploy. ✨',
+    title: 'Aiwa | Vibe. Build. Deploy.',
     description:
       'Create and deploy fullstack apps instantly by chatting with Aiwa. Build what you imagine, no coding required.',
     images: ['/aiwa-hero.webp'],
