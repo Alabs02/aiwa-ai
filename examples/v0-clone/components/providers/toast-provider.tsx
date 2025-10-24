@@ -1,14 +1,14 @@
-"use client";
+'use client'
 
-import { Toaster } from "@/components/ui/sonner";
-import { useIsMobile } from "@/lib/client-utils";
+import { Toaster } from '@/components/ui/sonner'
+import { useIsMobile } from '@/lib/client-utils'
 
 export function ToastProvider() {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile()
 
   if (isMobile) {
-    return <Toaster position="top-center" />;
+    return <Toaster position="top-center" />
   }
-  
-  return <Toaster position="bottom-right" />;
+
+  return <Toaster position="bottom-right" />
 }

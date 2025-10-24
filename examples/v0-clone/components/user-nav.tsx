@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { IconLogout, IconUserSquareRounded } from '@tabler/icons-react';
+import { IconLogout, IconUserSquareRounded } from '@tabler/icons-react'
 import { Session } from 'next-auth'
 
 interface UserNavProps {
@@ -29,7 +29,11 @@ export function UserNav({ session }: UserNavProps) {
       <DropdownMenuTrigger asChild>
         <Avatar className="size-full skew-2 !border">
           <AvatarFallback className="bg-transparent !-skew-2 text-white font-button">
-            {isSignedOut ? <IconUserSquareRounded className="size-4 lg:size-5" /> : initials}
+            {isSignedOut ? (
+              <IconUserSquareRounded className="size-4 lg:size-5" />
+            ) : (
+              initials
+            )}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
