@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import React, { MouseEvent, useEffect, useState } from "react"
+import React, { MouseEvent, useEffect, useState } from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 interface RippleButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,12 +18,12 @@ export const RippleButton = React.forwardRef<
     {
       className,
       children,
-      rippleColor = "#fff",
-      duration = "600ms",
+      rippleColor = '#fff',
+      duration = '600ms',
       onClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [buttonRipples, setButtonRipples] = useState<
       Array<{ x: number; y: number; size: number; key: number }>
@@ -52,19 +52,18 @@ export const RippleButton = React.forwardRef<
         const lastRipple = buttonRipples[buttonRipples.length - 1]
         const timeout = setTimeout(() => {
           setButtonRipples((prevRipples) =>
-            prevRipples.filter((ripple) => ripple.key !== lastRipple.key)
+            prevRipples.filter((ripple) => ripple.key !== lastRipple.key),
           )
         }, parseInt(duration))
         return () => clearTimeout(timeout)
       }
-
     }, [buttonRipples, duration])
 
     return (
       <button
         className={cn(
-          "bg-neutral-900/90 text-primary text-sm font-button relative flex cursor-pointer items-center justify-center overflow-hidden rounded-full border px-3 py-1.5 text-center",
-          className
+          'bg-neutral-900/90 text-primary text-sm font-button relative flex cursor-pointer items-center justify-center overflow-hidden rounded-full border px-3 py-1.5 text-center',
+          className,
         )}
         onClick={handleClick}
         ref={ref}
@@ -89,7 +88,7 @@ export const RippleButton = React.forwardRef<
         </span>
       </button>
     )
-  }
+  },
 )
 
-RippleButton.displayName = "RippleButton"
+RippleButton.displayName = 'RippleButton'

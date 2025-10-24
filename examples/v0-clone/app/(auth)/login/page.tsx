@@ -12,7 +12,9 @@ export default async function LoginPage() {
   return (
     <>
       <div className="flex flex-col items-center justify-center space-y-2.5 text-center w-full">
-        <h3 className="text-xl font-semibold font-heading text-foreground">Welcome back to Aiwa</h3>
+        <h3 className="text-xl font-semibold font-heading text-foreground">
+          Welcome back to Aiwa
+        </h3>
         <p className="text-sm text-muted-foreground font-body">
           Pick up where you left off.
         </p>

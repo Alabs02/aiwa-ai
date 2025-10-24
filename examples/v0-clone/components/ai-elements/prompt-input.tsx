@@ -273,10 +273,7 @@ export const PromptInputToolbar = ({
   ...props
 }: PromptInputToolbarProps) => (
   <div
-    className={cn(
-      'flex items-center justify-between p-1.5 pt-2',
-      className
-    )}
+    className={cn('flex items-center justify-between p-1.5 pt-2', className)}
     {...props}
   />
 )
@@ -287,13 +284,7 @@ export const PromptInputTools = ({
   className,
   ...props
 }: PromptInputToolsProps) => (
-  <div
-    className={cn(
-      'flex items-center gap-1',
-      className,
-    )}
-    {...props}
-  />
+  <div className={cn('flex items-center gap-1', className)} {...props} />
 )
 
 export type PromptInputButtonProps = ComponentProps<typeof Button>
