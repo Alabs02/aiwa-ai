@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,6 +41,58 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Font Families */
+  --font-heading: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body-sans: 'Geist Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-button: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', 'Courier New', monospace;
+  
+  /* Animations */
+  --animate-rippling: rippling var(--duration) ease-out;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-glow: glow 3s ease-in-out infinite alternate;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes rippling {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1),
+                  0 0 40px rgba(255, 255, 255, 0.05);
+    }
+    100% {
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2),
+                  0 0 60px rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 }
 
 :root {
@@ -121,6 +173,107 @@
   }
 }
 
+@layer utilities {
+  /* Glassmorphic utility classes */
+  .glass {
+    @apply bg-white/5 backdrop-blur-2xl backdrop-saturate-150;
+    @apply border border-white/10;
+    @apply shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+  }
+
+  .glass-strong {
+    @apply bg-white/10 backdrop-blur-3xl backdrop-saturate-[180%];
+    @apply border border-white/15;
+    @apply shadow-[0_8px_40px_0_rgba(0,0,0,0.45)];
+  }
+
+  .glass-subtle {
+    @apply bg-white/[0.02] backdrop-blur-xl backdrop-saturate-150;
+    @apply border border-white/[0.05];
+    @apply shadow-[0_4px_20px_0_rgba(0,0,0,0.25)];
+  }
+
+  /* Text gradient utilities */
+  .text-gradient-premium {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-white via-white/90 to-white/70;
+  }
+
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400;
+  }
+
+  /* Glow effects */
+  .glow-soft {
+    @apply shadow-[0_0_20px_rgba(255,255,255,0.1)];
+  }
+
+  .glow-medium {
+    @apply shadow-[0_0_30px_rgba(255,255,255,0.2)];
+  }
+
+  .glow-strong {
+    @apply shadow-[0_0_40px_rgba(255,255,255,0.3)];
+  }
+
+  /* Inner glow */
+  .inner-glow {
+    @apply shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)];
+  }
+
+  .inner-glow-strong {
+    @apply shadow-[inset_0_2px_0_0_rgba(255,255,255,0.15)];
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::before {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    @apply bg-gradient-to-r from-transparent via-white/10 to-transparent;
+    animation: shimmer 2s infinite;
+  }
+}
+
 button {
   cursor: pointer;
+}
+
+#webgl {
+  top: 0;
+  left: 0;
+  position: fixed;
+  height: 100svh;
+  width: 100%;
+  z-index: 0;
+}
+
+#webgl canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrollbar styling for glassmorphic theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-white/5;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/20 rounded-full;
+  @apply hover:bg-white/30;
+  @apply transition-colors duration-200;
+}
+
+/* Selection styling */
+::selection {
+  @apply bg-white/20 text-white;
 }

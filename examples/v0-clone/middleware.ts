@@ -5,6 +5,15 @@ import { guestRegex, isDevelopmentEnvironment } from './lib/constants'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip middleware for static files and Next.js internals
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/static') ||
+    /\.(png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|css|js)$/i.test(pathname)
+  ) {
+    return NextResponse.next()
+  }
+
   /*
    * Playwright starts the dev server and requires a 200 status to
    * begin the tests, so this ensures that the tests can start
@@ -22,7 +31,7 @@ export async function middleware(request: NextRequest) {
     console.error(
       '❌ Missing AUTH_SECRET environment variable. Please check your .env file.',
     )
-    return NextResponse.next() // Let the app handle the error with better UI
+    return NextResponse.next()
   }
 
   const token = await getToken({
@@ -67,19 +76,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/',
-    '/chats/:path*',
-    '/projects/:path*',
-    '/api/:path*',
-    '/login',
-    '/register',
-
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * - Public files (all static assets)
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot)).*)',
   ],
 }
