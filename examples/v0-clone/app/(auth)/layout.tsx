@@ -16,7 +16,7 @@ export default function AuthLayout({
     <>
       <GL hovering={hovering} />
 
-      <main className="border border-[red] min-h-screen w--full flex flex-col items-center justify-center overflow-x-hidden">
+      <main className="border-none min-h-screen w--full flex flex-col items-center justify-center overflow-x-hidden">
         {/* {children} */}
 
         <div
