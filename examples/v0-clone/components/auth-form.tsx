@@ -68,9 +68,9 @@ export function AuthForm({ type }: AuthFormProps) {
         </button>
       </div>
 
-      <Button 
-        type="submit" 
-        className="w-full md:h-10 !font-button" 
+      <Button
+        type="submit"
+        className="w-full md:h-10 !font-button"
         disabled={isPending}
       >
         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -87,14 +87,20 @@ export function AuthForm({ type }: AuthFormProps) {
         {type === 'signin' ? (
           <>
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-primary hover:underline !font-button">
+            <Link
+              href="/register"
+              className="text-primary hover:underline !font-button"
+            >
               Sign up
             </Link>
           </>
         ) : (
           <>
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline !font-button">
+            <Link
+              href="/login"
+              className="text-primary hover:underline !font-button"
+            >
               Sign in
             </Link>
           </>

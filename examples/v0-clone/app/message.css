@@ -1,0 +1,224 @@
+/* Add these styles to your global CSS or tailwind config for better message rendering */
+
+/* Markdown Preview Enhancements */
+.wmde-markdown {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.wmde-markdown p {
+  margin-bottom: 0.875rem;
+}
+
+.wmde-markdown code {
+  font-size: 13px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
+.wmde-markdown pre {
+  margin: 0.875rem 0;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.wmde-markdown pre code {
+  padding: 1rem;
+  display: block;
+  background-color: transparent;
+}
+
+.wmde-markdown h1,
+.wmde-markdown h2,
+.wmde-markdown h3,
+.wmde-markdown h4,
+.wmde-markdown h5,
+.wmde-markdown h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.875rem;
+  font-weight: 600;
+}
+
+.wmde-markdown h1 { font-size: 1.5rem; }
+.wmde-markdown h2 { font-size: 1.25rem; }
+.wmde-markdown h3 { font-size: 1.125rem; }
+
+.wmde-markdown ul,
+.wmde-markdown ol {
+  margin-bottom: 0.875rem;
+  padding-left: 1.5rem;
+}
+
+.wmde-markdown li {
+  margin-bottom: 0.25rem;
+}
+
+.wmde-markdown a {
+  color: rgb(59, 130, 246);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.wmde-markdown a:hover {
+  color: rgb(37, 99, 235);
+}
+
+.dark .wmde-markdown a {
+  color: rgb(96, 165, 250);
+}
+
+.dark .wmde-markdown a:hover {
+  color: rgb(147, 197, 253);
+}
+
+.wmde-markdown blockquote {
+  border-left: 3px solid rgb(209, 213, 219);
+  padding-left: 1rem;
+  margin: 0.875rem 0;
+  font-style: italic;
+  color: rgb(107, 114, 128);
+}
+
+.dark .wmde-markdown blockquote {
+  border-left-color: rgb(55, 65, 81);
+  color: rgb(156, 163, 175);
+}
+
+.wmde-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.875rem 0;
+  font-size: 13px;
+}
+
+.wmde-markdown th,
+.wmde-markdown td {
+  border: 1px solid rgb(229, 231, 235);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.dark .wmde-markdown th,
+.dark .wmde-markdown td {
+  border-color: rgb(55, 65, 81);
+}
+
+.wmde-markdown th {
+  background-color: rgb(249, 250, 251);
+  font-weight: 600;
+}
+
+.dark .wmde-markdown th {
+  background-color: rgb(31, 41, 55);
+}
+
+/* Message Container Enhancements */
+.message-container {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Smooth Transitions */
+.message-item {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Copy Button Hover Effect */
+.copy-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.copy-button:hover {
+  transform: scale(1.05);
+}
+
+/* Avatar Gradient Enhancements */
+.avatar-user {
+  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+}
+
+.avatar-assistant {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+}
+
+/* Message Card Hover Effect */
+.message-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.message-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Loading Indicator */
+.loading-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.loading-dots span {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: pulse 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scrollbar Styling */
+.chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+.dark .chat-container::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.3);
+}
+
+.dark .chat-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.5);
+}
