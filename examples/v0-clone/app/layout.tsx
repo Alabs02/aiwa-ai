@@ -1,5 +1,6 @@
 import '@/plugins/fonts'
 import './globals.css'
+import './message.css'
 
 import type { Metadata } from 'next'
 import { StreamingProvider } from '@/contexts/streaming-context'

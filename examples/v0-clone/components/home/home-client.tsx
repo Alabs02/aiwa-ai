@@ -29,6 +29,7 @@ import { BottomToolbar } from '@/components/shared/bottom-toolbar'
 import { Toolbar } from '@/components/shared'
 import { GL } from '@/components/gl'
 import { Leva } from 'leva'
+import { suggestions } from '../constants/suggestions'
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -563,114 +564,28 @@ export function HomeClient() {
             {/* Suggestions */}
             <div className="w-full mt-4">
               <Suggestions>
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Landing page')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Landing page"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Todo app')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Todo app"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Dashboard')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Dashboard"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Blog')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Blog"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('E-commerce')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="E-commerce"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Portfolio')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Portfolio"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Chat app')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Chat app"
-                />
-                <Suggestion
-                  onClick={() => {
-                    setMessage('Calculator')
-                    // Submit after setting message
-                    setTimeout(() => {
-                      const form = textareaRef.current?.form
-                      if (form) {
-                        form.requestSubmit()
-                      }
-                    }, 0)
-                  }}
-                  suggestion="Calculator"
-                />
+                {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
+                  <Suggestion
+                    key={`${Copy}-${idx}`}
+                    onClick={() => {
+                      setMessage(Prompt)
+                      // Submit after setting message
+                      setTimeout(() => {
+                        const form = textareaRef.current?.form
+                        if (form) {
+                          form.requestSubmit()
+                        }
+                      }, 0)
+                    }}
+                    suggestion={Copy}
+                  >
+                    {Icon}
+                    <span>{Copy}</span>
+                  </Suggestion>
+                ))}
               </Suggestions>
             </div>
           </div>
-          <div className="max-w-5xl w-full border-none border-[red]"></div>
         </main>
       </div>
 
