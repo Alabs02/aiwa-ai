@@ -1,4 +1,10 @@
-import { Rocket, BarChart3, Briefcase, ShoppingBag, ListChecks } from "lucide-react";
+import {
+  Rocket,
+  BarChart3,
+  Briefcase,
+  ShoppingBag,
+  ListChecks,
+} from 'lucide-react'
 
 export const suggestions = [
   {

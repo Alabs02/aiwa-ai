@@ -14,14 +14,19 @@ const sizeClasses = {
   lg: 'w-10 h-10 text-sm',
 }
 
-export function Avatar({ type, initials = 'U', className, size = 'md' }: AvatarProps) {
+export function Avatar({
+  type,
+  initials = 'U',
+  className,
+  size = 'md',
+}: AvatarProps) {
   if (type === 'assistant') {
     return (
       <div
         className={cn(
           'flex-shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold shadow-sm',
           sizeClasses[size],
-          className
+          className,
         )}
       >
         AI
@@ -34,7 +39,7 @@ export function Avatar({ type, initials = 'U', className, size = 'md' }: AvatarP
       className={cn(
         'flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-sm',
         sizeClasses[size],
-        className
+        className,
       )}
     >
       {initials}

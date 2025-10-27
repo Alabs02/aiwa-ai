@@ -26,14 +26,13 @@ export function useCopyToClipboard() {
  */
 export function useMessageExpansion(content: string, threshold: number = 400) {
   const [expanded, setExpanded] = useState(false)
-  
+
   const isLongMessage = content.length > threshold
-  const displayContent = !expanded && isLongMessage 
-    ? content.slice(0, threshold) + '...'
-    : content
+  const displayContent =
+    !expanded && isLongMessage ? content.slice(0, threshold) + '...' : content
 
   const toggleExpanded = useCallback(() => {
-    setExpanded(prev => !prev)
+    setExpanded((prev) => !prev)
   }, [])
 
   return {
@@ -47,7 +46,10 @@ export function useMessageExpansion(content: string, threshold: number = 400) {
 /**
  * Hook for formatting user initials from email or name
  */
-export function useUserInitials(email?: string | null, name?: string | null): string {
+export function useUserInitials(
+  email?: string | null,
+  name?: string | null,
+): string {
   if (name) {
     const parts = name.trim().split(' ')
     if (parts.length >= 2) {
@@ -55,11 +57,11 @@ export function useUserInitials(email?: string | null, name?: string | null): st
     }
     return name.slice(0, 2).toUpperCase()
   }
-  
+
   if (email) {
     return email.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'U'
   }
-  
+
   return 'U'
 }
 
@@ -69,34 +71,34 @@ export function useUserInitials(email?: string | null, name?: string | null): st
 export function useMessageTimestamp(timestamp?: Date | string) {
   const formatTimestamp = useCallback((ts?: Date | string) => {
     if (!ts) return null
-    
+
     const date = typeof ts === 'string' ? new Date(ts) : ts
     const now = new Date()
     const diff = now.getTime() - date.getTime()
-    
+
     // Less than 1 minute
     if (diff < 60000) {
       return 'Just now'
     }
-    
+
     // Less than 1 hour
     if (diff < 3600000) {
       const minutes = Math.floor(diff / 60000)
       return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
     }
-    
+
     // Less than 24 hours
     if (diff < 86400000) {
       const hours = Math.floor(diff / 3600000)
       return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
     }
-    
+
     // Less than 7 days
     if (diff < 604800000) {
       const days = Math.floor(diff / 86400000)
       return `${days} ${days === 1 ? 'day' : 'days'} ago`
     }
-    
+
     // More than 7 days, show date
     return date.toLocaleDateString('en-US', {
       month: 'short',

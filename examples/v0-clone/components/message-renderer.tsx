@@ -1,12 +1,12 @@
-import React from 'react';
-import { cn } from "@/lib/utils";
-import { sharedComponents } from './shared-components';
-import MarkdownPreview from '@uiw/react-markdown-preview';
-import { Message, MessageBinaryFormat } from '@v0-sdk/react';
-import { Copy, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar } from '@/components/ai-elements/avatar';
-import { useCopyToClipboard, useMessageExpansion } from '@/hooks/use-message';
+import React from 'react'
+import { cn } from '@/lib/utils'
+import { sharedComponents } from './shared-components'
+import MarkdownPreview from '@uiw/react-markdown-preview'
+import { Message, MessageBinaryFormat } from '@v0-sdk/react'
+import { Copy, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ai-elements/avatar'
+import { useCopyToClipboard, useMessageExpansion } from '@/hooks/use-message'
 
 // Function to preprocess message content and remove V0_FILE markers and shell placeholders
 function preprocessMessageContent(
@@ -64,19 +64,21 @@ export function MessageRenderer({
   timestamp,
 }: MessageRendererProps) {
   const { copied, copyToClipboard } = useCopyToClipboard()
-  
+
   const handleCopy = () => {
-    const textContent = typeof content === 'string' ? content : JSON.stringify(content)
+    const textContent =
+      typeof content === 'string' ? content : JSON.stringify(content)
     copyToClipboard(textContent)
   }
 
   // If content is a string (user message or fallback)
   if (typeof content === 'string') {
-    const { expanded, isLongMessage, displayContent, toggleExpanded } = useMessageExpansion(content, 400)
+    const { expanded, isLongMessage, displayContent, toggleExpanded } =
+      useMessageExpansion(content, 400)
 
     if (role === 'user') {
       return (
-        <div className={cn("group relative mb-6 message-item", className)}>
+        <div className={cn('group relative mb-6 message-item', className)}>
           <div className="flex items-start gap-3">
             <Avatar type="user" initials={userInitials} />
             <div className="flex-1 min-w-0">
@@ -103,11 +105,12 @@ export function MessageRenderer({
                   <MarkdownPreview
                     source={displayContent}
                     className="text-gray-700 dark:text-gray-300"
-                    style={{ 
-                      fontFamily: 'Geist, -apple-system, BlinkMacSystemFont, sans-serif', 
-                      fontSize: "14px",
+                    style={{
+                      fontFamily:
+                        'Geist, -apple-system, BlinkMacSystemFont, sans-serif',
+                      fontSize: '14px',
                       background: 'transparent',
-                      lineHeight: '1.6'
+                      lineHeight: '1.6',
                     }}
                   />
                 </div>
@@ -128,7 +131,7 @@ export function MessageRenderer({
 
     // Assistant message
     return (
-      <div className={cn("group relative mb-6 message-item", className)}>
+      <div className={cn('group relative mb-6 message-item', className)}>
         <div className="flex items-start gap-3">
           <Avatar type="assistant" />
           <div className="flex-1 min-w-0">
@@ -155,11 +158,12 @@ export function MessageRenderer({
                 <MarkdownPreview
                   source={content}
                   className="text-gray-700 dark:text-gray-300"
-                  style={{ 
-                    fontFamily: 'Geist, -apple-system, BlinkMacSystemFont, sans-serif', 
-                    fontSize: "14px",
+                  style={{
+                    fontFamily:
+                      'Geist, -apple-system, BlinkMacSystemFont, sans-serif',
+                    fontSize: '14px',
                     background: 'transparent',
-                    lineHeight: '1.6'
+                    lineHeight: '1.6',
                   }}
                 />
               </div>
