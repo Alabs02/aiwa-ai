@@ -10,7 +10,8 @@ import {
   PreviewLoadingAnimation,
   CodeGenerationAnimation,
 } from '@/components/ai-elements/preview-loading-animations'
-import { RefreshCw, Maximize, Minimize } from 'lucide-react'
+import { GitHubExportDialog } from '@/components/chat/github-export-dialog'
+import { RefreshCw, Maximize, Minimize, Github } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 
@@ -18,6 +19,7 @@ interface Chat {
   id: string
   demo?: string
   url?: string
+  title?: string
 }
 
 interface PreviewPanelProps {
@@ -44,18 +46,7 @@ export function PreviewPanel({
   consoleLogs = [],
 }: PreviewPanelProps) {
   const hasContent = !!currentChat?.demo
-
-  // const handleDownload = () => {
-  //   if (!currentChat?.demo) return
-
-  //   // Create a temporary anchor element to trigger download
-  //   const link = document.createElement('a')
-  //   link.href = `${currentChat.demo}/download`
-  //   link.download = `app-${currentChat.id}.zip`
-  //   document.body.appendChild(link)
-  //   link.click()
-  //   document.body.removeChild(link)
-  // }
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false)
 
   const handleDownload = async () => {
     if (!currentChat?.id) return
@@ -80,7 +71,7 @@ export function PreviewPanel({
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `app-${currentChat.id}.zip`
+      link.download = `app-${currentChat?.title || currentChat?.id}.zip`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -96,6 +87,10 @@ export function PreviewPanel({
   const handleOpenExternal = () => {
     if (!currentChat?.demo) return
     window.open(currentChat.demo, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleGitHubExport = () => {
+    setGithubDialogOpen(true)
   }
 
   const getEmptyState = () => (
@@ -130,73 +125,92 @@ export function PreviewPanel({
   )
 
   return (
-    <div
-      className={cn(
-        'flex flex-col h-full transition-all duration-300',
-        isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-black' : 'flex-1',
-      )}
-    >
-      <WebPreview
-        defaultUrl={currentChat?.demo || ''}
-        onUrlChange={(url) => {
-          console.log('Preview URL changed:', url)
-        }}
-        onDownload={handleDownload}
-        onOpenExternal={handleOpenExternal}
+    <>
+      <div
+        className={cn(
+          'flex flex-col h-full transition-all duration-300',
+          isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-black' : 'flex-1',
+        )}
       >
-        <WebPreviewNavigation
+        <WebPreview
+          defaultUrl={currentChat?.demo || ''}
+          onUrlChange={(url) => {
+            console.log('Preview URL changed:', url)
+          }}
           onDownload={handleDownload}
           onOpenExternal={handleOpenExternal}
-          hasContent={hasContent}
         >
-          <WebPreviewNavigationButton
-            onClick={() => {
-              setRefreshKey((prev) => prev + 1)
-            }}
-            tooltip="Refresh preview"
-            disabled={!hasContent}
+          <WebPreviewNavigation
+            onDownload={handleDownload}
+            onOpenExternal={handleOpenExternal}
+            hasContent={hasContent}
           >
-            <RefreshCw className="h-4 w-4" />
-          </WebPreviewNavigationButton>
+            <WebPreviewNavigationButton
+              onClick={() => {
+                setRefreshKey((prev) => prev + 1)
+              }}
+              tooltip="Refresh preview"
+              disabled={!hasContent}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </WebPreviewNavigationButton>
 
-          <WebPreviewUrl
-            readOnly
-            placeholder="Your app will appear here..."
-            value={currentChat?.demo || ''}
-          />
+            <WebPreviewUrl
+              readOnly
+              placeholder="Your app will appear here..."
+              value={currentChat?.demo || ''}
+            />
 
-          <WebPreviewNavigationButton
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            tooltip={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            disabled={!hasContent && !isGenerating}
+            {/* GitHub Export Button */}
+            <WebPreviewNavigationButton
+              onClick={handleGitHubExport}
+              tooltip="Export to GitHub"
+              disabled={!hasContent}
+            >
+              <Github className="h-4 w-4" />
+            </WebPreviewNavigationButton>
+
+            <WebPreviewNavigationButton
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              tooltip={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              disabled={!hasContent && !isGenerating}
+            >
+              {isFullscreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </WebPreviewNavigationButton>
+          </WebPreviewNavigation>
+
+          <WebPreviewBody
+            key={refreshKey}
+            iframeSrc={currentChat?.demo}
+            loading={isGenerating ? <PreviewLoadingAnimation /> : undefined}
+            codeContent={
+              isGenerating ? (
+                <CodeGenerationAnimation />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                  Code view will be available soon
+                </div>
+              )
+            }
           >
-            {isFullscreen ? (
-              <Minimize className="h-4 w-4" />
-            ) : (
-              <Maximize className="h-4 w-4" />
-            )}
-          </WebPreviewNavigationButton>
-        </WebPreviewNavigation>
+            {!hasContent && !isGenerating ? getEmptyState() : null}
+          </WebPreviewBody>
 
-        <WebPreviewBody
-          key={refreshKey}
-          iframeSrc={currentChat?.demo}
-          loading={isGenerating ? <PreviewLoadingAnimation /> : undefined}
-          codeContent={
-            isGenerating ? (
-              <CodeGenerationAnimation />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                Code view will be available soon
-              </div>
-            )
-          }
-        >
-          {!hasContent && !isGenerating ? getEmptyState() : null}
-        </WebPreviewBody>
+          {hasContent && <WebPreviewConsole logs={consoleLogs} />}
+        </WebPreview>
+      </div>
 
-        {hasContent && <WebPreviewConsole logs={consoleLogs} />}
-      </WebPreview>
-    </div>
+      {/* GitHub Export Dialog */}
+      <GitHubExportDialog
+        open={githubDialogOpen}
+        onOpenChange={setGithubDialogOpen}
+        chatId={currentChat?.id || null}
+        chatTitle={currentChat?.title}
+      />
+    </>
   )
 }
