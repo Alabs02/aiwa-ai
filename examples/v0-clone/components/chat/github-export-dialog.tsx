@@ -122,7 +122,7 @@ export function GitHubExportDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] glass border-white/10 bg-black/15 backdrop-blur-sm">
+      <DialogContent className="sm:max-w-[500px] glass border-white/10 bg-black/20 backdrop-blur-sm">
         {exportSuccess ? (
           <>
             <DialogHeader>
@@ -144,7 +144,7 @@ export function GitHubExportDialog({
             <div className="space-y-4 py-4">
               <div className="glass-subtle rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Github className="h-4 w-4 text-muted-foreground" />
+                  <Github className="h-4 w-4 text-neutral-400" />
                   <span className="text-sm font-medium">Repository</span>
                 </div>
                 <a
@@ -158,7 +158,7 @@ export function GitHubExportDialog({
                 </a>
               </div>
 
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-neutral-400">
                 <p>✓ All files have been committed</p>
                 <p>✓ Repository is {isPrivate ? 'private' : 'public'}</p>
               </div>
@@ -193,7 +193,7 @@ export function GitHubExportDialog({
                   You'll be redirected to GitHub to authorize this app. We'll
                   only request access to create and manage repositories.
                 </p>
-                <div className="text-xs text-muted-foreground space-y-1 mt-3">
+                <div className="text-xs text-neutral-400 space-y-1 mt-3">
                   <p>• Create repositories</p>
                   <p>• Commit code</p>
                   <p>• Manage your repositories</p>
@@ -240,7 +240,7 @@ export function GitHubExportDialog({
                   <DialogTitle className="text-xl">
                     Export to GitHub
                   </DialogTitle>
-                  <DialogDescription className="text-sm">
+                  <DialogDescription className="text-sm text-neutral-300">
                     Create a new repository with your code
                   </DialogDescription>
                 </div>
@@ -266,7 +266,7 @@ export function GitHubExportDialog({
                   disabled={isExporting}
                   className="glass-subtle border-white/10"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-neutral-400">
                   Use lowercase letters, numbers, and hyphens
                 </p>
               </div>
@@ -290,7 +290,7 @@ export function GitHubExportDialog({
                   <Label htmlFor="private" className="text-sm font-medium">
                     Private Repository
                   </Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-neutral-400">
                     Only you can see this repository
                   </p>
                 </div>
