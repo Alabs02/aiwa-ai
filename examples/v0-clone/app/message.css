@@ -1,34 +1,55 @@
-/* Add these styles to your global CSS or tailwind config for better message rendering */
-
-/* Markdown Preview Enhancements */
+/* Markdown Preview - Dark Glassmorphic Theme */
 .wmde-markdown {
   font-size: 14px !important;
   line-height: 1.6 !important;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .wmde-markdown p {
   margin-bottom: 0.875rem;
+  color: rgba(255, 255, 255, 0.75);
 }
 
+/* Inline Code - Glassmorphic */
 .wmde-markdown code {
   font-size: 13px;
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
-  background-color: rgba(107, 114, 128, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
 }
 
+/* Code Blocks - Enhanced Glassmorphic */
 .wmde-markdown pre {
   margin: 0.875rem 0;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   overflow-x: auto;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease-out;
+}
+
+.wmde-markdown pre:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 40px 0 rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }
 
 .wmde-markdown pre code {
   padding: 1rem;
   display: block;
   background-color: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.87);
 }
 
+/* Headings */
 .wmde-markdown h1,
 .wmde-markdown h2,
 .wmde-markdown h3,
@@ -38,79 +59,97 @@
   margin-top: 1.5rem;
   margin-bottom: 0.875rem;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.01em;
 }
 
 .wmde-markdown h1 { font-size: 1.5rem; }
 .wmde-markdown h2 { font-size: 1.25rem; }
 .wmde-markdown h3 { font-size: 1.125rem; }
 
+/* Lists */
 .wmde-markdown ul,
 .wmde-markdown ol {
   margin-bottom: 0.875rem;
   padding-left: 1.5rem;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .wmde-markdown li {
   margin-bottom: 0.25rem;
 }
 
+/* Links - Subtle Accent */
 .wmde-markdown a {
-  color: rgb(59, 130, 246);
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
   text-underline-offset: 2px;
+  transition: all 0.2s ease-out;
 }
 
 .wmde-markdown a:hover {
-  color: rgb(37, 99, 235);
+  color: rgba(255, 255, 255, 1);
+  text-decoration-color: rgba(255, 255, 255, 0.6);
 }
 
-.dark .wmde-markdown a {
-  color: rgb(96, 165, 250);
-}
-
-.dark .wmde-markdown a:hover {
-  color: rgb(147, 197, 253);
-}
-
+/* Blockquotes - Glassmorphic */
 .wmde-markdown blockquote {
-  border-left: 3px solid rgb(209, 213, 219);
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
   padding-left: 1rem;
   margin: 0.875rem 0;
   font-style: italic;
-  color: rgb(107, 114, 128);
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  border-radius: 0 0.375rem 0.375rem 0;
+  padding: 0.75rem 1rem;
 }
 
-.dark .wmde-markdown blockquote {
-  border-left-color: rgb(55, 65, 81);
-  color: rgb(156, 163, 175);
-}
-
+/* Tables - Glassmorphic */
 .wmde-markdown table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 0.875rem 0;
   font-size: 13px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .wmde-markdown th,
 .wmde-markdown td {
-  border: 1px solid rgb(229, 231, 235);
-  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.75rem;
   text-align: left;
-}
-
-.dark .wmde-markdown th,
-.dark .wmde-markdown td {
-  border-color: rgb(55, 65, 81);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .wmde-markdown th {
-  background-color: rgb(249, 250, 251);
+  background-color: rgba(255, 255, 255, 0.05);
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.dark .wmde-markdown th {
-  background-color: rgb(31, 41, 55);
+.wmde-markdown tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Horizontal Rule */
+.wmde-markdown hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  margin: 1.5rem 0;
 }
 
 /* Message Container Enhancements */
@@ -136,31 +175,36 @@
   }
 }
 
-/* Copy Button Hover Effect */
+/* Copy Button - Glassmorphic */
 .copy-button {
   transition: all 0.2s ease-in-out;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .copy-button:hover {
   transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.3);
 }
 
-/* Avatar Gradient Enhancements */
+/* Avatar Gradients - Neutral Dark Theme */
 .avatar-user {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .avatar-assistant {
-  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-}
-
-/* Message Card Hover Effect */
-.message-card {
-  transition: all 0.2s ease-in-out;
-}
-
-.message-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Loading Indicator */
@@ -174,7 +218,7 @@
   width: 0.375rem;
   height: 0.375rem;
   border-radius: 50%;
-  background-color: currentColor;
+  background-color: rgba(255, 255, 255, 0.6);
   animation: pulse 1.4s infinite ease-in-out;
 }
 
@@ -197,7 +241,7 @@
   }
 }
 
-/* Scrollbar Styling */
+/* Scrollbar - Glassmorphic */
 .chat-container::-webkit-scrollbar {
   width: 6px;
 }
@@ -207,18 +251,17 @@
 }
 
 .chat-container::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.3);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
+  backdrop-filter: blur(8px);
 }
 
 .chat-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.5);
+  background: rgba(255, 255, 255, 0.2);
 }
 
-.dark .chat-container::-webkit-scrollbar-thumb {
-  background: rgba(75, 85, 99, 0.3);
-}
-
-.dark .chat-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.5);
+/* Selection Highlight */
+.wmde-markdown ::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 1);
 }
