@@ -158,7 +158,7 @@ export function GitHubExportDialog({
                 </a>
               </div>
 
-              <div className="text-sm !text-neutral-200">
+              <div className="text-sm !text-neutral-200 font-body">
                 <p>✓ All files have been committed</p>
                 <p>✓ Repository is {isPrivate ? 'private' : 'public'}</p>
               </div>
@@ -189,7 +189,7 @@ export function GitHubExportDialog({
               </div>
             </DialogHeader>
 
-            <div className="space-y-4 py-4 font-body">
+            <div className="space-y-4 py-4 !font-body">
               <div className="glass-subtle rounded-lg p-4 space-y-2">
                 <p className="text-sm">
                   You'll be redirected to GitHub to authorize this app. We'll
@@ -268,7 +268,7 @@ export function GitHubExportDialog({
                   disabled={isExporting}
                   className="glass-subtle border-white/10"
                 />
-                <p className="text-xs !text-neutral-200">
+                <p className="text-xs !text-neutral-200 font-body">
                   Use lowercase letters, numbers, and hyphens
                 </p>
               </div>
@@ -292,7 +292,7 @@ export function GitHubExportDialog({
                   <Label htmlFor="private" className="text-sm font-medium">
                     Private Repository
                   </Label>
-                  <p className="text-xs !text-neutral-200">
+                  <p className="text-xs !text-neutral-200 font-body">
                     Only you can see this repository
                   </p>
                 </div>
