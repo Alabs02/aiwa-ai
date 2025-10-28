@@ -98,7 +98,7 @@ export function PreviewPanel({
       <div className="text-center max-w-md px-8">
         <div className="mb-4 relative">
           <div className="absolute inset-0 bg-transparent blur-3xl" />
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg">
+          <div className="relative bg-transparent rounded-2xl p-8 shadow-lg">
             <svg
               className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-600"
               fill="none"
