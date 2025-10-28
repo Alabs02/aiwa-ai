@@ -82,9 +82,9 @@ export function MessageRenderer({
           <div className="flex items-start gap-3">
             <Avatar type="user" initials={userInitials} />
             <div className="flex-1 min-w-0">
-              <div className="relative rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 shadow-sm hover:shadow-md transition-all duration-200 message-card">
+              <div className="relative rounded-lg border bg-white/5 p-4 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                  <span className="text-xs font-medium text-neutral-200">
                     You
                   </span>
                   <Button
@@ -104,7 +104,7 @@ export function MessageRenderer({
                 <div className="prose prose-sm dark:prose-invert max-w-none">
                   <MarkdownPreview
                     source={displayContent}
-                    className="text-gray-700 dark:text-gray-300"
+                    className="text-neutral-300"
                     style={{
                       fontFamily:
                         'Geist, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -117,7 +117,7 @@ export function MessageRenderer({
                 {isLongMessage && (
                   <button
                     onClick={toggleExpanded}
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-neutral-100 hover:text-neutral-400 transition-colors"
                   >
                     {expanded ? 'Show less' : 'Show full message'}
                   </button>

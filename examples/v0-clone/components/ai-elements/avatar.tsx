@@ -9,9 +9,9 @@ interface AvatarProps {
 }
 
 const sizeClasses = {
-  sm: 'w-6 h-6 text-[10px]',
-  md: 'w-8 h-8 text-xs',
-  lg: 'w-10 h-10 text-sm',
+  sm: 'size-6 text-[10px]',
+  md: 'size-8 text-xs',
+  lg: 'size-10 text-sm',
 }
 
 export function Avatar({
@@ -24,12 +24,14 @@ export function Avatar({
     return (
       <div
         className={cn(
-          'flex-shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold shadow-sm',
+          'p-0.5 relative grid place-items-center md:hidden shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu',
           sizeClasses[size],
           className,
         )}
       >
-        AI
+        <div className="size-full grid grid-cols-1 relative bg-black rounded-full shadow-md skew-2 !font-button">
+          AI
+        </div>
       </div>
     )
   }
@@ -37,12 +39,14 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-sm',
+        'p-0.5 relative grid place-items-center md:hidden shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu',
         sizeClasses[size],
         className,
       )}
     >
-      {initials}
+      <div className="size-full grid grid-cols-1 relative bg-black rounded-full shadow-md skew-2 !font-button">
+        {initials}
+      </div>
     </div>
   )
 }
