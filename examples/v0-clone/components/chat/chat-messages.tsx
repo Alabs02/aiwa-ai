@@ -68,9 +68,9 @@ export function ChatMessages({
         <ConversationContent>
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-nuetral-200 via-neutral-500 to-neutral-800 flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-white"
+                  className="w-8 h-8 text-black"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
