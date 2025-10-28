@@ -54,6 +54,12 @@
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-glow: glow 3s ease-in-out infinite alternate;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-gradient: gradient 8s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.5s ease-out;
+  --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
+  --animate-fade-in-line: fade-in-line 0.3s ease-out forwards;
+  --animate-blink: blink 1s step-end infinite;
 
   @keyframes rippling {
     0% {
@@ -91,6 +97,64 @@
     }
     50% {
       transform: translateY(-10px);
+    }
+  }
+
+  @keyframes gradient {
+    0%, 100% {
+      transform: translateX(-50%) translateY(-50%) rotate(0deg);
+    }
+    50% {
+      transform: translateX(-30%) translateY(-30%) rotate(180deg);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes fade-in-line {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes blink {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
     }
   }
 }
