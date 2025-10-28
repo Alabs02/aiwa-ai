@@ -23,6 +23,11 @@ export function ChatDetailClient() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [attachments, setAttachments] = useState<ImageAttachment[]>([])
   const [activePanel, setActivePanel] = useState<'chat' | 'preview'>('chat')
+  const [consoleLogs, setConsoleLogs] = useState<Array<{
+    level: 'log' | 'warn' | 'error'
+    message: string
+    timestamp: Date
+  }>>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { handoff } = useStreaming()
@@ -39,6 +44,9 @@ export function ChatDetailClient() {
     handleStreamingComplete,
     handleChatData,
   } = useChat(chatId)
+
+  // Determine if generation is happening (loading or streaming)
+  const isGenerating = isLoading || isStreaming
 
   // Wrapper function to handle attachments
   const handleSubmitWithAttachments = (
@@ -70,6 +78,25 @@ export function ChatDetailClient() {
       textareaRef.current.focus()
     }
   }, [isLoadingChat])
+
+  // Simulate console logs (in a real app, these would come from the iframe)
+  useEffect(() => {
+    if (currentChat?.demo && consoleLogs.length === 0) {
+      // Add some sample console logs
+      setConsoleLogs([
+        {
+          level: 'log',
+          message: 'Application initialized successfully',
+          timestamp: new Date(),
+        },
+        {
+          level: 'log',
+          message: 'React components mounted',
+          timestamp: new Date(),
+        },
+      ])
+    }
+  }, [currentChat?.demo, consoleLogs.length])
 
   return (
     <div
@@ -117,6 +144,8 @@ export function ChatDetailClient() {
               setIsFullscreen={setIsFullscreen}
               refreshKey={refreshKey}
               setRefreshKey={setRefreshKey}
+              isGenerating={isGenerating}
+              consoleLogs={consoleLogs}
             />
           }
         />
