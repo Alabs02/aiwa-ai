@@ -94,10 +94,10 @@ export function PreviewPanel({
   }
 
   const getEmptyState = () => (
-    <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-black">
+    <div className="flex-1 flex items-center justify-center h-full bg-gray-50 dark:bg-black">
       <div className="text-center max-w-md px-8">
         <div className="mb-4 relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl" />
+          <div className="absolute inset-0 bg-transparent blur-3xl" />
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg">
             <svg
               className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-600"
