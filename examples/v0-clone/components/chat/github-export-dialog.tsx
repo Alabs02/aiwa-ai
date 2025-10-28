@@ -122,7 +122,7 @@ export function GitHubExportDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] glass border-white/10">
+      <DialogContent className="sm:max-w-[500px] glass border-white/10 bg-black/15 backdrop-blur-sm">
         {exportSuccess ? (
           <>
             <DialogHeader>
