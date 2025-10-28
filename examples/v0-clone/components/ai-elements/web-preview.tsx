@@ -124,7 +124,11 @@ export const WebPreviewNavigation = ({
   const { deviceMode, setDeviceMode, activeTab, setActiveTab, url } =
     useWebPreview()
 
-  const deviceModes: Array<{ mode: DeviceMode; icon: typeof Monitor; label: string }> = [
+  const deviceModes: Array<{
+    mode: DeviceMode
+    icon: typeof Monitor
+    label: string
+  }> = [
     { mode: 'desktop', icon: Monitor, label: 'Desktop' },
     { mode: 'tablet', icon: Tablet, label: 'Tablet' },
     { mode: 'phone', icon: Smartphone, label: 'Phone' },
@@ -132,16 +136,17 @@ export const WebPreviewNavigation = ({
 
   return (
     <div
-      className={cn(
-        'flex flex-col border-b bg-background',
-        className,
-      )}
+      className={cn('flex flex-col border-b bg-background', className)}
       {...props}
     >
       {/* Top bar with tabs and actions */}
       <div className="flex items-center justify-between px-2 py-2 border-b">
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'preview' | 'code')} className="w-auto">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as 'preview' | 'code')}
+          className="w-auto"
+        >
           <TabsList className="h-8 bg-muted/50">
             <TabsTrigger value="preview" className="text-xs gap-1.5 h-7 px-3">
               <Eye className="h-3.5 w-3.5" />
@@ -206,9 +211,15 @@ export const WebPreviewNavigation = ({
                       className="h-8 w-8 p-0"
                       disabled={!hasContent}
                     >
-                      {deviceMode === 'desktop' && <Monitor className="h-4 w-4" />}
-                      {deviceMode === 'tablet' && <Tablet className="h-4 w-4" />}
-                      {deviceMode === 'phone' && <Smartphone className="h-4 w-4" />}
+                      {deviceMode === 'desktop' && (
+                        <Monitor className="h-4 w-4" />
+                      )}
+                      {deviceMode === 'tablet' && (
+                        <Tablet className="h-4 w-4" />
+                      )}
+                      {deviceMode === 'phone' && (
+                        <Smartphone className="h-4 w-4" />
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
@@ -329,9 +340,20 @@ export const WebPreviewBody = ({
   const src = iframeSrc ?? url
 
   return (
-    <div className={cn('flex-1 flex items-start justify-center overflow-auto bg-muted/30', className)} {...props}>
+    <div
+      className={cn(
+        'flex-1 flex items-start justify-center overflow-auto bg-muted/30',
+        className,
+      )}
+      {...props}
+    >
       {activeTab === 'preview' ? (
-        <div className={cn('h-full transition-all duration-300', deviceDimensions[deviceMode])}>
+        <div
+          className={cn(
+            'h-full transition-all duration-300',
+            deviceDimensions[deviceMode],
+          )}
+        >
           {src ? (
             <>
               <iframe
@@ -347,9 +369,7 @@ export const WebPreviewBody = ({
           )}
         </div>
       ) : (
-        <div className="w-full h-full">
-          {codeContent || children}
-        </div>
+        <div className="w-full h-full">{codeContent || children}</div>
       )}
     </div>
   )
@@ -415,7 +435,8 @@ export const WebPreviewConsole = ({
                 className={cn(
                   'text-xs leading-relaxed',
                   log.level === 'error' && 'text-destructive',
-                  log.level === 'warn' && 'text-yellow-600 dark:text-yellow-500',
+                  log.level === 'warn' &&
+                    'text-yellow-600 dark:text-yellow-500',
                   log.level === 'log' && 'text-foreground',
                 )}
                 key={`${log.timestamp.getTime()}-${index}`}

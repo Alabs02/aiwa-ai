@@ -6,7 +6,10 @@ import {
   WebPreviewBody,
   WebPreviewConsole,
 } from '@/components/ai-elements/web-preview'
-import { PreviewLoadingAnimation, CodeGenerationAnimation } from '@/components/ai-elements/preview-loading-animations'
+import {
+  PreviewLoadingAnimation,
+  CodeGenerationAnimation,
+} from '@/components/ai-elements/preview-loading-animations'
 import { RefreshCw, Maximize, Minimize } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
@@ -56,23 +59,23 @@ export function PreviewPanel({
 
   const handleDownload = async () => {
     if (!currentChat?.id) return
-  
+
     try {
       const params = new URLSearchParams({
         chatId: currentChat.id,
         format: 'zip',
         includeDefaultFiles: 'true',
       })
-  
+
       const response = await fetch(`/api/chat/download?${params}`)
-      
+
       if (!response.ok) {
         throw new Error('Download failed')
       }
-  
+
       // Get the blob from the response
       const blob = await response.blob()
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -81,7 +84,7 @@ export function PreviewPanel({
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
+
       // Clean up the URL object
       window.URL.revokeObjectURL(url)
     } catch (error) {
@@ -180,7 +183,9 @@ export function PreviewPanel({
           iframeSrc={currentChat?.demo}
           loading={isGenerating ? <PreviewLoadingAnimation /> : undefined}
           codeContent={
-            isGenerating ? <CodeGenerationAnimation /> : (
+            isGenerating ? (
+              <CodeGenerationAnimation />
+            ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                 Code view will be available soon
               </div>
@@ -190,9 +195,7 @@ export function PreviewPanel({
           {!hasContent && !isGenerating ? getEmptyState() : null}
         </WebPreviewBody>
 
-        {hasContent && (
-          <WebPreviewConsole logs={consoleLogs} />
-        )}
+        {hasContent && <WebPreviewConsole logs={consoleLogs} />}
       </WebPreview>
     </div>
   )

@@ -6,9 +6,21 @@ import { FileCode, FileText, Folder, Sparkles } from 'lucide-react'
 
 const generationStages = [
   { icon: Sparkles, text: 'Analyzing your request...', file: '' },
-  { icon: Folder, text: 'Setting up project structure...', file: 'Creating workspace' },
-  { icon: FileCode, text: 'Generating components...', file: 'app/components/ui' },
-  { icon: FileCode, text: 'Writing application logic...', file: 'app/page.tsx' },
+  {
+    icon: Folder,
+    text: 'Setting up project structure...',
+    file: 'Creating workspace',
+  },
+  {
+    icon: FileCode,
+    text: 'Generating components...',
+    file: 'app/components/ui',
+  },
+  {
+    icon: FileCode,
+    text: 'Writing application logic...',
+    file: 'app/page.tsx',
+  },
   { icon: FileText, text: 'Applying styles...', file: 'styles/globals.css' },
   { icon: FileCode, text: 'Configuring dependencies...', file: 'package.json' },
   { icon: Sparkles, text: 'Building your app...', file: '' },
@@ -18,7 +30,9 @@ interface PreviewLoadingAnimationProps {
   className?: string
 }
 
-export function PreviewLoadingAnimation({ className }: PreviewLoadingAnimationProps) {
+export function PreviewLoadingAnimation({
+  className,
+}: PreviewLoadingAnimationProps) {
   const [currentStage, setCurrentStage] = useState(0)
 
   useEffect(() => {
@@ -91,20 +105,40 @@ export function PreviewLoadingAnimation({ className }: PreviewLoadingAnimationPr
 
       <style jsx>{`
         @keyframes gradient {
-          0%, 100% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
-          50% { transform: translateX(-30%) translateY(-30%) rotate(180deg); }
+          0%,
+          100% {
+            transform: translateX(-50%) translateY(-50%) rotate(0deg);
+          }
+          50% {
+            transform: translateX(-30%) translateY(-30%) rotate(180deg);
+          }
         }
         @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         @keyframes slide-up {
-          from { transform: translateY(10px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+          from {
+            transform: translateY(10px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
         @keyframes pulse-slow {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
         }
         .animate-gradient {
           animation: gradient 8s ease-in-out infinite;
@@ -133,7 +167,9 @@ interface CodeGenerationAnimationProps {
   className?: string
 }
 
-export function CodeGenerationAnimation({ className }: CodeGenerationAnimationProps) {
+export function CodeGenerationAnimation({
+  className,
+}: CodeGenerationAnimationProps) {
   const [lines, setLines] = useState<string[]>([])
 
   const codeLines = [
@@ -205,7 +241,9 @@ export function CodeGenerationAnimation({ className }: CodeGenerationAnimationPr
             <span className="text-gray-400 dark:text-gray-600 select-none mr-4">
               {(index + 1).toString().padStart(2, ' ')}
             </span>
-            <span className="text-gray-800 dark:text-gray-200">{line || ' '}</span>
+            <span className="text-gray-800 dark:text-gray-200">
+              {line || ' '}
+            </span>
           </div>
         ))}
         <div className="inline-block w-2 h-4 bg-blue-600 dark:bg-blue-400 animate-blink" />
@@ -223,8 +261,13 @@ export function CodeGenerationAnimation({ className }: CodeGenerationAnimationPr
           }
         }
         @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0;
+          }
         }
         .animate-fade-in-line {
           animation: fade-in-line 0.3s ease-out forwards;

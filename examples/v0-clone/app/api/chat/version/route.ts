@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
     const version = await v0.chats.getVersion({
       chatId,
       versionId,
-      ...(includeDefaultFiles && { includeDefaultFiles: includeDefaultFiles === 'true' }),
+      ...(includeDefaultFiles && {
+        includeDefaultFiles: includeDefaultFiles === 'true',
+      }),
     })
 
     return NextResponse.json(version)

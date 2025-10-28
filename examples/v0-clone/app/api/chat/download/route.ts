@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     // If no versionId provided, get the latest version
     if (!targetVersionId) {
       const versions = await v0.chats.findVersions({ chatId })
-      
+
       if (!versions.data || versions.data.length === 0) {
         return NextResponse.json(
           { error: 'No versions found for this chat' },
@@ -42,13 +42,14 @@ export async function GET(request: NextRequest) {
       chatId,
       versionId: targetVersionId,
       ...(format && { format }),
-      ...(includeDefaultFiles && { includeDefaultFiles: includeDefaultFiles === 'true' }),
+      ...(includeDefaultFiles && {
+        includeDefaultFiles: includeDefaultFiles === 'true',
+      }),
     })
 
     // Determine content type and filename
-    const contentType = format === 'tarball' 
-      ? 'application/x-tar' 
-      : 'application/zip'
+    const contentType =
+      format === 'tarball' ? 'application/x-tar' : 'application/zip'
     const extension = format === 'tarball' ? 'tar.gz' : 'zip'
     const filename = `app-${chatId}-${targetVersionId}.${extension}`
 

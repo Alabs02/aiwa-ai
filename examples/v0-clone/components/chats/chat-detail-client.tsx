@@ -23,11 +23,13 @@ export function ChatDetailClient() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [attachments, setAttachments] = useState<ImageAttachment[]>([])
   const [activePanel, setActivePanel] = useState<'chat' | 'preview'>('chat')
-  const [consoleLogs, setConsoleLogs] = useState<Array<{
-    level: 'log' | 'warn' | 'error'
-    message: string
-    timestamp: Date
-  }>>([])
+  const [consoleLogs, setConsoleLogs] = useState<
+    Array<{
+      level: 'log' | 'warn' | 'error'
+      message: string
+      timestamp: Date
+    }>
+  >([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { handoff } = useStreaming()
