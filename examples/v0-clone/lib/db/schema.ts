@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
+  github_access_token: varchar('github_access_token', { length: 255 }),
   created_at: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -46,3 +47,18 @@ export const anonymous_chat_logs = pgTable('anonymous_chat_logs', {
 })
 
 export type AnonymousChatLog = InferSelectModel<typeof anonymous_chat_logs>
+
+// Track GitHub exports for chats
+export const github_exports = pgTable('github_exports', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  v0_chat_id: varchar('v0_chat_id', { length: 255 }).notNull(),
+  user_id: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  repo_name: varchar('repo_name', { length: 255 }).notNull(),
+  repo_url: varchar('repo_url', { length: 512 }).notNull(),
+  is_private: varchar('is_private', { length: 10 }).notNull().default('true'), // 'true' or 'false' as string
+  created_at: timestamp('created_at').notNull().defaultNow(),
+})
+
+export type GitHubExport = InferSelectModel<typeof github_exports>

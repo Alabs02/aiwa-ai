@@ -17,9 +17,11 @@ import {
   users,
   chat_ownerships,
   anonymous_chat_logs,
+  github_exports,
   type User,
   type ChatOwnership,
   type AnonymousChatLog,
+  type GitHubExport,
 } from './schema'
 import { generateUUID } from '../utils'
 import { generateHashedPassword } from './utils'
@@ -205,6 +207,102 @@ export async function createAnonymousChatLog({
     })
   } catch (error) {
     console.error('Failed to create anonymous chat log in database')
+    throw error
+  }
+}
+
+// GitHub integration functions
+export async function saveGitHubToken({
+  userId,
+  accessToken,
+}: {
+  userId: string
+  accessToken: string
+}) {
+  try {
+    return await db
+      .update(users)
+      .set({ github_access_token: accessToken })
+      .where(eq(users.id, userId))
+      .returning()
+  } catch (error) {
+    console.error('Failed to save GitHub token to database')
+    throw error
+  }
+}
+
+export async function getUserWithGitHubToken(
+  userId: string,
+): Promise<User | undefined> {
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, userId))
+    return user
+  } catch (error) {
+    console.error('Failed to get user with GitHub token from database')
+    throw error
+  }
+}
+
+export async function createGitHubExport({
+  v0ChatId,
+  userId,
+  repoName,
+  repoUrl,
+  isPrivate,
+}: {
+  v0ChatId: string
+  userId: string
+  repoName: string
+  repoUrl: string
+  isPrivate: boolean
+}) {
+  try {
+    return await db
+      .insert(github_exports)
+      .values({
+        v0_chat_id: v0ChatId,
+        user_id: userId,
+        repo_name: repoName,
+        repo_url: repoUrl,
+        is_private: isPrivate ? 'true' : 'false',
+      })
+      .returning()
+  } catch (error) {
+    console.error('Failed to create GitHub export record in database')
+    throw error
+  }
+}
+
+export async function getGitHubExportsByChatId({
+  v0ChatId,
+}: {
+  v0ChatId: string
+}): Promise<GitHubExport[]> {
+  try {
+    return await db
+      .select()
+      .from(github_exports)
+      .where(eq(github_exports.v0_chat_id, v0ChatId))
+      .orderBy(desc(github_exports.created_at))
+  } catch (error) {
+    console.error('Failed to get GitHub exports from database')
+    throw error
+  }
+}
+
+export async function getGitHubExportsByUserId({
+  userId,
+}: {
+  userId: string
+}): Promise<GitHubExport[]> {
+  try {
+    return await db
+      .select()
+      .from(github_exports)
+      .where(eq(github_exports.user_id, userId))
+      .orderBy(desc(github_exports.created_at))
+  } catch (error) {
+    console.error('Failed to get user GitHub exports from database')
     throw error
   }
 }
