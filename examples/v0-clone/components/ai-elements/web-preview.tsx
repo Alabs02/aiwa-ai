@@ -148,11 +148,17 @@ export const WebPreviewNavigation = ({
           className="w-auto"
         >
           <TabsList className="h-8 bg-muted/50">
-            <TabsTrigger value="preview" className="text-xs gap-1.5 h-7 px-3">
+            <TabsTrigger
+              value="preview"
+              className="text-xs gap-1.5 h-7 px-3 !font-button"
+            >
               <Eye className="h-3.5 w-3.5" />
               Preview
             </TabsTrigger>
-            <TabsTrigger value="code" className="text-xs gap-1.5 h-7 px-3">
+            <TabsTrigger
+              value="code"
+              className="text-xs gap-1.5 h-7 px-3 !font-button"
+            >
               <Code2 className="h-3.5 w-3.5" />
               Code
             </TabsTrigger>
