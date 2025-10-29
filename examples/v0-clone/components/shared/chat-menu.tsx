@@ -100,7 +100,7 @@ export function ChatMenu({ chatId }: ChatMenuProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
+          {/* <DropdownMenuItem asChild>
             <a
               href={`https://v0.app/chat/${chatId}`}
               target="_blank"
@@ -111,7 +111,7 @@ export function ChatMenu({ chatId }: ChatMenuProps) {
               View on v0.dev
             </a>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator /> */}
           <DropdownMenuItem
             onClick={() => setIsDuplicateDialogOpen(true)}
             disabled={isLoading}

@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,7 @@ import {
   Eye,
   Terminal,
 } from 'lucide-react'
+import { IconCopy, IconCopyCheck } from '@tabler/icons-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
 
@@ -300,6 +301,7 @@ export const WebPreviewUrl = ({
   ...props
 }: WebPreviewUrlProps) => {
   const { url, setUrl } = useWebPreview()
+  const [copied, setCopied] = useState(false)
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -309,15 +311,56 @@ export const WebPreviewUrl = ({
     onKeyDown?.(event)
   }
 
+  const handleCopy = async () => {
+    const raw = (value ?? url) as string | number | readonly string[]
+    const textToCopy = Array.isArray(raw) ? (raw[0] ?? '') : String(raw)
+    if (!textToCopy) return
+
+    try {
+      await navigator.clipboard.writeText(textToCopy)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy URL:', err)
+    }
+  }
+
   return (
-    <Input
-      className="h-8 flex-1 text-sm min-w-"
-      onChange={onChange}
-      onKeyDown={handleKeyDown}
-      placeholder="Enter URL..."
-      value={value ?? url}
-      {...props}
-    />
+    <div className="relative border-none flex-1">
+      <Input
+        className="h-8 flex-1 text-sm pr-8"
+        onChange={onChange}
+        onKeyDown={handleKeyDown}
+        placeholder="Enter URL..."
+        value={value ?? url}
+        {...props}
+      />
+
+      <div className="absolute z-10 right-0 top-1/2 -translate-y-1/2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={'ghost'}
+                size={'icon'}
+                className="!size-8"
+                onClick={handleCopy}
+                disabled={!url && !value}
+              >
+                {copied ? (
+                  <IconCopyCheck className="text-green-400" />
+                ) : (
+                  <IconCopy />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{copied ? 'Copied!' : 'Copy'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    </div>
   )
 }
 
