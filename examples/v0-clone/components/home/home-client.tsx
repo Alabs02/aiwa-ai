@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import {
   PromptInput,
   PromptInputImageButton,
@@ -30,6 +29,7 @@ import { NavBar, Toolbar } from '@/components/shared'
 import { GL } from '@/components/gl'
 import { Leva } from 'leva'
 import { suggestions } from '../constants/suggestions'
+import { FeaturedProjects } from '@/components/projects/featured'
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -51,7 +51,11 @@ function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   return null
 }
 
-export function HomeClient() {
+interface HomeClientProps {
+  isAuthenticated?: boolean
+}
+
+export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showChatInterface, setShowChatInterface] = useState(false)
@@ -251,98 +255,22 @@ export function HomeClient() {
     }
   }
 
-  const handleChatData = async (chatData: any) => {
-    if (chatData.id) {
-      // Only set currentChat if it's not already set or if this is the main chat object
-      if (!currentChatId || chatData.object === 'chat') {
-        setCurrentChatId(chatData.id)
-        setCurrentChat({ id: chatData.id })
-
-        // Update URL without triggering Next.js routing
-        window.history.pushState(null, '', `/chats/${chatData.id}`)
-      }
-
-      // Create ownership record for new chat (only if this is a new chat)
-      if (!currentChatId) {
-        try {
-          await fetch('/api/chat/ownership', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              chatId: chatData.id,
-            }),
-          })
-        } catch (error) {
-          console.error('Failed to create chat ownership:', error)
-          // Don't fail the UI if ownership creation fails
-        }
-      }
-    }
+  const handleStreamingComplete = () => {
+    setIsLoading(false)
   }
 
-  const handleStreamingComplete = async (finalContent: any) => {
+  const handleChatData = (data: { id: string; demo?: string }) => {
+    setCurrentChatId(data.id)
+    setCurrentChat(data)
+  }
+
+  const handleStreamingStarted = () => {
     setIsLoading(false)
-
-    // Update chat history with final content
-    setChatHistory((prev) => {
-      const updated = [...prev]
-      const lastIndex = updated.length - 1
-      if (lastIndex >= 0 && updated[lastIndex].isStreaming) {
-        updated[lastIndex] = {
-          ...updated[lastIndex],
-          content: finalContent,
-          isStreaming: false,
-          stream: undefined,
-        }
-      }
-      return updated
-    })
-
-    // Fetch demo URL after streaming completes
-    // Use the current state by accessing it in the state updater
-    setCurrentChat((prevCurrentChat) => {
-      if (prevCurrentChat?.id) {
-        // Fetch demo URL asynchronously
-        fetch(`/api/chats/${prevCurrentChat.id}`)
-          .then((response) => {
-            if (response.ok) {
-              return response.json()
-            } else {
-              console.warn('Failed to fetch chat details:', response.status)
-              return null
-            }
-          })
-          .then((chatDetails) => {
-            if (chatDetails) {
-              const demoUrl =
-                chatDetails?.latestVersion?.demoUrl || chatDetails?.demo
-
-              // Update the current chat with demo URL
-              if (demoUrl) {
-                setCurrentChat((prev) =>
-                  prev ? { ...prev, demo: demoUrl } : null,
-                )
-                if (window.innerWidth < 768) {
-                  setActivePanel('preview')
-                }
-              }
-            }
-          })
-          .catch((error) => {
-            console.error('Error fetching demo URL:', error)
-          })
-      }
-
-      // Return the current state unchanged for now
-      return prevCurrentChat
-    })
   }
 
   const handleChatSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!message.trim() || isLoading || !currentChatId) return
+    if (!message.trim() || isLoading) return
 
     const userMessage = message.trim()
     setMessage('')
@@ -497,95 +425,103 @@ export function HomeClient() {
         <Toolbar />
 
         {/* Main Content */}
-        <main className="relative flex-1 z-10 border-none border-white w-full min-h-[calc(100vh-60px)] flex flex-col gap-y-12 md:gap-y-24 justify-center-safe items-center-safe px-5 md:px-4">
-          <div className="max-w-3xl w-full flex flex-col items-center-safe border-none">
-            <h2 className="text-center font-heading text-2xl sm:text-3xl md:text-5xl 2xl:text-6xl font-bold text-white">
-              Vibe. Build. Deploy.
-            </h2>
+        <main className="relative flex-1 z-10 border-none border-white w-full flex flex-col">
+          {/* Hero Section */}
+          <div className="min-h-[calc(100vh-60px)] flex flex-col gap-y-12 md:gap-y-24 justify-center-safe items-center-safe px-5 md:px-4">
+            <div className="max-w-3xl w-full flex flex-col items-center-safe border-none">
+              <h2 className="text-center font-heading text-2xl sm:text-3xl md:text-5xl 2xl:text-6xl font-bold text-white">
+                Vibe. Build. Deploy.
+              </h2>
 
-            <p className="font-body text-center text-base sm:text-lg md:text-xl text-neutral-300/95 bg-black/50 inline-block w-auto rounded-full px-4 py-2 mt-4 border">
-              Vibe-code your imagination. Bring it to life with Aiwa.
-            </p>
+              <p className="font-body text-center text-base sm:text-lg md:text-xl text-neutral-300/95 bg-black/50 inline-block w-auto rounded-full px-4 py-2 mt-4 border">
+                Vibe-code your imagination. Bring it to life with Aiwa.
+              </p>
 
-            {/* Prompt Input */}
-            <div
-              className="w-full mt-8"
-              onMouseEnter={() => setHovering(true)}
-              onMouseLeave={() => setHovering(false)}
-            >
-              <PromptInput
-                onSubmit={handleSendMessage}
-                className="w-full relative"
-                onImageDrop={handleImageFiles}
-                isDragOver={isDragOver}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+              {/* Prompt Input */}
+              <div
+                className="w-full mt-8"
+                onMouseEnter={() => setHovering(true)}
+                onMouseLeave={() => setHovering(false)}
               >
-                <PromptInputImagePreview
-                  attachments={attachments}
-                  onRemove={handleRemoveAttachment}
-                />
-                <PromptInputTextarea
-                  ref={textareaRef}
-                  onChange={(e) => setMessage(e.target.value)}
-                  value={message}
-                  placeholder="Describe what you want to build..."
-                  className="min-h-[80px] text-base"
-                  disabled={isLoading}
-                />
-                <PromptInputToolbar>
-                  <PromptInputTools>
-                    <PromptInputImageButton
-                      onImageSelect={handleImageFiles}
-                      disabled={isLoading}
-                    />
-                  </PromptInputTools>
-                  <PromptInputTools>
-                    <PromptInputMicButton
-                      onTranscript={(transcript) => {
-                        setMessage(
-                          (prev) => prev + (prev ? ' ' : '') + transcript,
-                        )
-                      }}
-                      onError={(error) => {
-                        console.error('Speech recognition error:', error)
-                      }}
-                      disabled={isLoading}
-                    />
-                    <PromptInputSubmit
-                      disabled={!message.trim() || isLoading}
-                      status={isLoading ? 'streaming' : 'ready'}
-                    />
-                  </PromptInputTools>
-                </PromptInputToolbar>
-              </PromptInput>
-            </div>
+                <PromptInput
+                  onSubmit={handleSendMessage}
+                  className="w-full relative"
+                  onImageDrop={handleImageFiles}
+                  isDragOver={isDragOver}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <PromptInputImagePreview
+                    attachments={attachments}
+                    onRemove={handleRemoveAttachment}
+                  />
+                  <PromptInputTextarea
+                    ref={textareaRef}
+                    onChange={(e) => setMessage(e.target.value)}
+                    value={message}
+                    placeholder="Describe what you want to build..."
+                    className="min-h-[80px] text-base"
+                    disabled={isLoading}
+                  />
+                  <PromptInputToolbar>
+                    <PromptInputTools>
+                      <PromptInputImageButton
+                        onImageSelect={handleImageFiles}
+                        disabled={isLoading}
+                      />
+                    </PromptInputTools>
+                    <PromptInputTools>
+                      <PromptInputMicButton
+                        onTranscript={(transcript) => {
+                          setMessage(
+                            (prev) => prev + (prev ? ' ' : '') + transcript,
+                          )
+                        }}
+                        onError={(error) => {
+                          console.error('Speech recognition error:', error)
+                        }}
+                        disabled={isLoading}
+                      />
+                      <PromptInputSubmit
+                        disabled={!message.trim() || isLoading}
+                        status={isLoading ? 'streaming' : 'ready'}
+                      />
+                    </PromptInputTools>
+                  </PromptInputToolbar>
+                </PromptInput>
+              </div>
 
-            {/* Suggestions */}
-            <div className="w-full mt-4">
-              <Suggestions>
-                {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
-                  <Suggestion
-                    key={`${Copy}-${idx}`}
-                    onClick={() => {
-                      setMessage(Prompt)
-                      // Submit after setting message
-                      setTimeout(() => {
-                        const form = textareaRef.current?.form
-                        if (form) {
-                          form.requestSubmit()
-                        }
-                      }, 0)
-                    }}
-                    suggestion={Copy}
-                  >
-                    {Icon}
-                    <span>{Copy}</span>
-                  </Suggestion>
-                ))}
-              </Suggestions>
+              {/* Suggestions */}
+              <div className="w-full mt-4">
+                <Suggestions>
+                  {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
+                    <Suggestion
+                      key={`${Copy}-${idx}`}
+                      onClick={() => {
+                        setMessage(Prompt)
+                        // Submit after setting message
+                        setTimeout(() => {
+                          const form = textareaRef.current?.form
+                          if (form) {
+                            form.requestSubmit()
+                          }
+                        }, 0)
+                      }}
+                      suggestion={Copy}
+                    >
+                      {Icon}
+                      <span>{Copy}</span>
+                    </Suggestion>
+                  ))}
+                </Suggestions>
+              </div>
             </div>
+          </div>
+
+          {/* Featured Projects Section */}
+          <div className="w-full bg-black/30 backdrop-blur-sm border-t border-neutral-800">
+            <FeaturedProjects isAuthenticated={isAuthenticated} />
           </div>
         </main>
       </div>
