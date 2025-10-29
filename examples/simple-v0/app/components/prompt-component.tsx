@@ -814,7 +814,7 @@ export default function PromptComponent({
                               <SettingsDialog />
 
                               {/* View on v0.dev - available on both mobile and desktop */}
-                              <DropdownMenuItem asChild>
+                              {/* <DropdownMenuItem asChild>
                                 <a
                                   href={chatData?.url || 'https://v0.dev'}
                                   target="_blank"
@@ -836,7 +836,7 @@ export default function PromptComponent({
                                   </svg>
                                   View on v0.dev
                                 </a>
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
 
                               {/* Deploy - Only show when we have project context, chat is loaded, and there's a completed version */}
                               {showDropdowns &&

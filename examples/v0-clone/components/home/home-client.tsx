@@ -26,7 +26,7 @@ import { ChatInput } from '@/components/chat/chat-input'
 import { PreviewPanel } from '@/components/chat/preview-panel'
 import { ResizableLayout } from '@/components/shared/resizable-layout'
 import { BottomToolbar } from '@/components/shared/bottom-toolbar'
-import { Toolbar } from '@/components/shared'
+import { NavBar, Toolbar } from '@/components/shared'
 import { GL } from '@/components/gl'
 import { Leva } from 'leva'
 import { suggestions } from '../constants/suggestions'
@@ -430,9 +430,10 @@ export function HomeClient() {
           <SearchParamsHandler onReset={handleReset} />
         </Suspense>
 
-        <AppHeader />
+        {/* Navbar */}
+        <NavBar />
 
-        <div className="flex flex-col h-[calc(100vh-64px-40px)] md:h-[calc(100vh-64px)]">
+        <div className="flex flex-col h-[calc(100vh-60px-40px)] md:h-[calc(100vh-60px)]">
           <ResizableLayout
             className="flex-1 min-h-0"
             singlePanelMode={false}

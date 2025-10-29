@@ -330,7 +330,7 @@ export function ChatSelector() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <a
                   href={`https://v0.app/chat/${currentChatId}`}
                   target="_blank"
@@ -341,7 +341,7 @@ export function ChatSelector() {
                   View on v0.dev
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator /> */}
               <DropdownMenuItem
                 onClick={() => setIsDuplicateDialogOpen(true)}
                 disabled={
@@ -553,29 +553,39 @@ export function ChatSelector() {
                     </div>
                   </div>
                 </SelectItem>
-                <SelectItem value="team">
+                <SelectItem value="team" disabled>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     <div>
-                      <div>Team</div>
+                      <div>
+                        Team{' '}
+                        <span className="inline-flex items-center-safe justify-center-safe border bg-white/35 text-xs rounded-full !h-auto px-1.5 py-0.5">
+                          coming soon
+                        </span>
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         Team members can see this chat
                       </div>
                     </div>
                   </div>
                 </SelectItem>
-                <SelectItem value="team-edit">
+                <SelectItem value="team-edit" disabled>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     <div>
-                      <div>Team Edit</div>
+                      <div>
+                        Team Edit{' '}
+                        <span className="inline-flex items-center-safe justify-center-safe border bg-white/35 text-xs rounded-full !h-auto px-1.5 py-0.5">
+                          coming soon
+                        </span>
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         Team members can see and edit this chat
                       </div>
                     </div>
                   </div>
                 </SelectItem>
-                <SelectItem value="unlisted">
+                {/* <SelectItem value="unlisted">
                   <div className="flex items-center gap-2">
                     <Lock className="h-4 w-4" />
                     <div>
@@ -585,7 +595,7 @@ export function ChatSelector() {
                       </div>
                     </div>
                   </div>
-                </SelectItem>
+                </SelectItem> */}
               </SelectContent>
             </Select>
           </div>

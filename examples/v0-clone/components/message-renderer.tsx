@@ -157,7 +157,7 @@ export function MessageRenderer({
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <MarkdownPreview
                   source={content}
-                  className="text-gray-700 dark:text-gray-300"
+                  className="text-neutral-300"
                   style={{
                     fontFamily:
                       'Geist, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -166,6 +166,17 @@ export function MessageRenderer({
                     lineHeight: '1.6',
                   }}
                 />
+                {/* <MarkdownPreview
+                  source={content}
+                  className="text-gray-700 dark:text-gray-300"
+                  style={{
+                    fontFamily:
+                      'Geist, -apple-system, BlinkMacSystemFont, sans-serif',
+                    fontSize: '14px',
+                    background: 'transparent',
+                    lineHeight: '1.6',
+                  }}
+                /> */}
               </div>
             </div>
           </div>
