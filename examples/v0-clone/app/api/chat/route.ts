@@ -13,10 +13,16 @@ import {
 } from '@/lib/entitlements'
 import { ChatSDKError } from '@/lib/errors'
 
-// Create v0 client with custom baseUrl if V0_API_URL is set
-const v0 = createClient(
-  process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {},
-)
+// Validate V0_API_KEY is present
+if (!process.env.V0_API_KEY) {
+  throw new Error('V0_API_KEY environment variable is not set')
+}
+
+// Create v0 client with API key and optional custom baseUrl
+const v0 = createClient({
+  apiKey: process.env.V0_API_KEY,
+  ...(process.env.V0_API_URL && { baseUrl: process.env.V0_API_URL }),
+})
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
