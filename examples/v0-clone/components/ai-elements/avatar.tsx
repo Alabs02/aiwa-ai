@@ -29,7 +29,7 @@ export function Avatar({
           className,
         )}
       >
-        <div className="size-full grid grid-cols-1 relative bg-black rounded-full shadow-md skew-2 !font-button">
+        <div className="size-full grid grid-cols-1 place-items-center-safe relative bg-black rounded-full shadow-md skew-2 !font-button">
           AI
         </div>
       </div>
@@ -44,7 +44,7 @@ export function Avatar({
         className,
       )}
     >
-      <div className="size-full grid grid-cols-1 relative bg-black rounded-full shadow-md skew-2 !font-button">
+      <div className="size-full grid grid-cols-1 place-items-center-safe relative bg-black rounded-full shadow-md skew-2 !font-button">
         {initials}
       </div>
     </div>
