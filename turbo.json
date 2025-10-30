@@ -12,7 +12,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": [
         "V0_API_KEY",
         "AUTH_SECRET",
