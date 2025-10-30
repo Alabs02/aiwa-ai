@@ -1,10 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "V0_API_KEY",
+    "AUTH_SECRET",
+    "POSTGRES_URL",
+    "GITHUB_EXPORTER_CLIENT_ID",
+    "GITHUB_EXPORTER_CLIENT_SECRET",
+    "V0_API_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": [
+        "V0_API_KEY",
+        "AUTH_SECRET",
+        "POSTGRES_URL",
+        "GITHUB_EXPORTER_CLIENT_ID",
+        "GITHUB_EXPORTER_CLIENT_SECRET",
+        "V0_API_URL"
+      ]
     },
     "test": {
       "dependsOn": ["^build", "build"]
