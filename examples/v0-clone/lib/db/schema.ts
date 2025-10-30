@@ -6,6 +6,7 @@ import {
   uuid,
   primaryKey,
   unique,
+  text,
 } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
@@ -28,6 +29,13 @@ export const chat_ownerships = pgTable(
     user_id: uuid('user_id')
       .notNull()
       .references(() => users.id),
+    visibility: varchar('visibility', { length: 20 })
+      .notNull()
+      .default('private'), // 'public', 'private', 'team'
+    title: varchar('title', { length: 255 }), // Custom user-defined title
+    description: text('description'), // Custom description
+    preview_url: varchar('preview_url', { length: 512 }), // Screenshot or preview URL
+    demo_url: varchar('demo_url', { length: 512 }), // Live demo URL for iframe fallback
     created_at: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({

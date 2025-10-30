@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/app/(auth)/auth'
-import { getChatOwnership, updateChatVisibility } from '@/lib/db/queries'
+import { getChatOwnership } from '@/lib/db/queries'
+import db from '@/lib/db/connection'
+import { chat_ownerships } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function POST(
   request: NextRequest,
@@ -9,7 +12,7 @@ export async function POST(
   try {
     const session = await auth()
 
-    // Must be authenticated to update visibility
+    // Must be authenticated to update metadata
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required' },
@@ -19,14 +22,12 @@ export async function POST(
 
     const chatId = params.chatId
     const body = await request.json()
-    const { visibility, previewUrl, demoUrl } = body
+    const { title, description } = body
 
-    // Validate visibility value
-    if (!['public', 'private', 'team'].includes(visibility)) {
+    // Validate inputs
+    if (title && title.length > 255) {
       return NextResponse.json(
-        {
-          error: 'Invalid visibility value. Must be: public, private, or team',
-        },
+        { error: 'Title must be 255 characters or less' },
         { status: 400 },
       )
     }
@@ -46,30 +47,33 @@ export async function POST(
       )
     }
 
-    // Update visibility
-    const updated = await updateChatVisibility({
-      v0ChatId: chatId,
-      visibility,
-      previewUrl,
-      demoUrl,
-    })
+    // Update title and/or description
+    const updateData: { title?: string; description?: string } = {}
+    if (title !== undefined) updateData.title = title
+    if (description !== undefined) updateData.description = description
 
-    console.log('Chat visibility updated:', {
+    const [updated] = await db
+      .update(chat_ownerships)
+      .set(updateData)
+      .where(eq(chat_ownerships.v0_chat_id, chatId))
+      .returning()
+
+    console.log('Chat metadata updated:', {
       chatId,
-      visibility,
+      title,
       userId: session.user.id,
     })
 
     return NextResponse.json({
       success: true,
-      data: updated[0],
+      data: updated,
     })
   } catch (error) {
-    console.error('Error updating chat visibility:', error)
+    console.error('Error updating chat metadata:', error)
 
     return NextResponse.json(
       {
-        error: 'Failed to update chat visibility',
+        error: 'Failed to update chat metadata',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
@@ -77,13 +81,12 @@ export async function POST(
   }
 }
 
-// GET endpoint to fetch visibility settings for a specific chat
+// GET endpoint to fetch metadata for a specific chat
 export async function GET(
   request: NextRequest,
   { params }: { params: { chatId: string } },
 ) {
   try {
-    const session = await auth()
     const chatId = params.chatId
 
     // Get chat ownership
@@ -93,29 +96,19 @@ export async function GET(
       return NextResponse.json({ error: 'Chat not found' }, { status: 404 })
     }
 
-    // For private chats, only owner can see visibility settings
-    if (
-      ownership.visibility === 'private' &&
-      ownership.user_id !== session?.user?.id
-    ) {
-      return NextResponse.json(
-        { error: 'You do not have permission to view this chat' },
-        { status: 403 },
-      )
-    }
-
     return NextResponse.json({
+      title: ownership.title,
+      description: ownership.description,
       visibility: ownership.visibility,
       previewUrl: ownership.preview_url,
       demoUrl: ownership.demo_url,
-      ownerId: ownership.user_id,
     })
   } catch (error) {
-    console.error('Error fetching chat visibility:', error)
+    console.error('Error fetching chat metadata:', error)
 
     return NextResponse.json(
       {
-        error: 'Failed to fetch chat visibility',
+        error: 'Failed to fetch chat metadata',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },

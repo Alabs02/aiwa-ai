@@ -1,5 +1,5 @@
-import { HomeClient } from '@/components/home/home-client'
 import { EnvSetup } from '@/components/env-setup'
+import { HomeClient } from '@/components/home/home-client'
 import { hasEnvVars, checkRequiredEnvVars } from '@/lib/env-check'
 
 export default function Home() {

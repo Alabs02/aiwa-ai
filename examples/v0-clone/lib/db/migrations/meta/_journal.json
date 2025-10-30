@@ -29,6 +29,20 @@
       "when": 1761621259058,
       "tag": "0003_github_integration",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1761737805127,
+      "tag": "0004_add-visibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1761757094323,
+      "tag": "0005_add-title",
+      "breakpoints": true
     }
   ]
 }

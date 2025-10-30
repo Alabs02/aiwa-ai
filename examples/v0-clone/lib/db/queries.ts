@@ -11,6 +11,7 @@ import {
   inArray,
   lt,
   type SQL,
+  or,
 } from 'drizzle-orm'
 
 import {
@@ -27,6 +28,161 @@ import { generateUUID } from '../utils'
 import { generateHashedPassword } from './utils'
 import db from './connection'
 
+// Extended type for chat ownership with user info
+export type ChatOwnershipWithUser = ChatOwnership & {
+  owner_email?: string
+  owner_name?: string
+}
+
+// Featured chats queries with user information
+export async function getFeaturedChats({
+  visibility = 'all',
+  userId,
+  limit = 12,
+  offset = 0,
+}: {
+  visibility?: 'all' | 'public' | 'private' | 'team'
+  userId?: string
+  limit?: number
+  offset?: number
+}): Promise<ChatOwnershipWithUser[]> {
+  try {
+    let conditions: SQL[] = []
+
+    if (visibility === 'public') {
+      conditions.push(eq(chat_ownerships.visibility, 'public'))
+    } else if (visibility === 'private' && userId) {
+      conditions.push(
+        and(
+          eq(chat_ownerships.visibility, 'private'),
+          eq(chat_ownerships.user_id, userId),
+        )!,
+      )
+    } else if (visibility === 'team') {
+      conditions.push(eq(chat_ownerships.visibility, 'team'))
+    } else if (visibility === 'all' && userId) {
+      conditions.push(
+        or(
+          eq(chat_ownerships.visibility, 'public'),
+          eq(chat_ownerships.visibility, 'team'),
+          and(
+            eq(chat_ownerships.visibility, 'private'),
+            eq(chat_ownerships.user_id, userId),
+          )!,
+        )!,
+      )
+    } else {
+      conditions.push(eq(chat_ownerships.visibility, 'public'))
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+    // Join with users table to get owner information
+    const chatsWithUsers = await db
+      .select({
+        id: chat_ownerships.id,
+        v0_chat_id: chat_ownerships.v0_chat_id,
+        user_id: chat_ownerships.user_id,
+        visibility: chat_ownerships.visibility,
+        title: chat_ownerships.title,
+        description: chat_ownerships.description,
+        preview_url: chat_ownerships.preview_url,
+        demo_url: chat_ownerships.demo_url,
+        created_at: chat_ownerships.created_at,
+        owner_email: users.email,
+      })
+      .from(chat_ownerships)
+      .leftJoin(users, eq(chat_ownerships.user_id, users.id))
+      .where(whereClause)
+      .orderBy(desc(chat_ownerships.created_at))
+      .limit(limit)
+      .offset(offset)
+
+    return chatsWithUsers as ChatOwnershipWithUser[]
+  } catch (error) {
+    console.error('Failed to get featured chats from database')
+    throw error
+  }
+}
+
+export async function getFeaturedChatsCount({
+  visibility = 'all',
+  userId,
+}: {
+  visibility?: 'all' | 'public' | 'private' | 'team'
+  userId?: string
+}): Promise<number> {
+  try {
+    let conditions: SQL[] = []
+
+    if (visibility === 'public') {
+      conditions.push(eq(chat_ownerships.visibility, 'public'))
+    } else if (visibility === 'private' && userId) {
+      conditions.push(
+        and(
+          eq(chat_ownerships.visibility, 'private'),
+          eq(chat_ownerships.user_id, userId),
+        )!,
+      )
+    } else if (visibility === 'team') {
+      conditions.push(eq(chat_ownerships.visibility, 'team'))
+    } else if (visibility === 'all' && userId) {
+      conditions.push(
+        or(
+          eq(chat_ownerships.visibility, 'public'),
+          eq(chat_ownerships.visibility, 'team'),
+          and(
+            eq(chat_ownerships.visibility, 'private'),
+            eq(chat_ownerships.user_id, userId),
+          )!,
+        )!,
+      )
+    } else {
+      conditions.push(eq(chat_ownerships.visibility, 'public'))
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+    const [result] = await db
+      .select({ count: count(chat_ownerships.id) })
+      .from(chat_ownerships)
+      .where(whereClause)
+
+    return result?.count || 0
+  } catch (error) {
+    console.error('Failed to get featured chats count from database')
+    throw error
+  }
+}
+
+export async function updateChatVisibility({
+  v0ChatId,
+  visibility,
+  previewUrl,
+  demoUrl,
+}: {
+  v0ChatId: string
+  visibility: 'public' | 'private' | 'team'
+  previewUrl?: string
+  demoUrl?: string
+}) {
+  try {
+    return await db
+      .update(chat_ownerships)
+      .set({
+        visibility,
+        preview_url: previewUrl,
+        demo_url: demoUrl,
+      })
+      .where(eq(chat_ownerships.v0_chat_id, v0ChatId))
+      .returning()
+  } catch (error) {
+    console.error('Failed to update chat visibility in database')
+    throw error
+  }
+}
+
+// Original queries below (keeping them all)...
 export async function getUser(email: string): Promise<Array<User>> {
   try {
     return await db.select().from(users).where(eq(users.email, email))
