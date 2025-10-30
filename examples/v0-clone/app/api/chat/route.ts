@@ -14,10 +14,14 @@ import {
 import { ChatSDKError } from '@/lib/errors'
 
 // Create v0 client - will validate API key at runtime
-const v0 = createClient({
-  apiKey: process.env.V0_API_KEY || '',
-  ...(process.env.V0_API_URL && { baseUrl: process.env.V0_API_URL }),
-})
+// const v0 = createClient({
+//   apiKey: process.env.V0_API_KEY || '',
+//   ...(process.env.V0_API_URL && { baseUrl: process.env.V0_API_URL }),
+// })
+
+const v0 = createClient(
+  process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {},
+)
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
