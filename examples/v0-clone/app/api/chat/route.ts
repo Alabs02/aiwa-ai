@@ -13,14 +13,9 @@ import {
 } from '@/lib/entitlements'
 import { ChatSDKError } from '@/lib/errors'
 
-// Validate V0_API_KEY is present
-if (!process.env.V0_API_KEY) {
-  throw new Error('V0_API_KEY environment variable is not set')
-}
-
-// Create v0 client with API key and optional custom baseUrl
+// Create v0 client - will validate API key at runtime
 const v0 = createClient({
-  apiKey: process.env.V0_API_KEY,
+  apiKey: process.env.V0_API_KEY || '',
   ...(process.env.V0_API_URL && { baseUrl: process.env.V0_API_URL }),
 })
 
@@ -42,6 +37,14 @@ function getClientIP(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate V0_API_KEY at runtime
+    if (!process.env.V0_API_KEY) {
+      return NextResponse.json(
+        { error: 'V0_API_KEY environment variable is not configured' },
+        { status: 500 },
+      )
+    }
+
     const session = await auth()
     const { message, chatId, streaming, attachments, projectId } =
       await request.json()
