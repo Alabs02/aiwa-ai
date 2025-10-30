@@ -238,7 +238,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
 
   return (
     <Link
-      href={`/chatsS/${chat.id}`}
+      href={`/chats/${chat.id}`}
       className="group block bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800 hover:border-neutral-600 transition-all hover:shadow-xl hover:shadow-neutral-900/50"
     >
       {/* Preview/Thumbnail */}
