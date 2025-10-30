@@ -147,6 +147,10 @@ export async function POST(request: NextRequest) {
         chat = await v0.chats.create({
           message,
           responseMode: 'experimental_stream',
+          modelConfiguration: {
+            thinking: true,
+            imageGenerations: true,
+          },
           ...(attachments && attachments.length > 0 && { attachments }),
         })
         console.log('Streaming chat created successfully')
@@ -168,6 +172,10 @@ export async function POST(request: NextRequest) {
         chat = await v0.chats.create({
           message,
           responseMode: 'sync',
+          modelConfiguration: {
+            thinking: true,
+            imageGenerations: true,
+          },
           ...(attachments && attachments.length > 0 && { attachments }),
         })
         console.log('Sync chat created successfully')
