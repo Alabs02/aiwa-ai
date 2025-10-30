@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { chatId: string } },
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await auth()
@@ -20,7 +20,7 @@ export async function POST(
       )
     }
 
-    const chatId = params.chatId
+    const { chatId } = await params // 👈 Await params here
     const body = await request.json()
     const { title, description } = body
 
@@ -84,10 +84,10 @@ export async function POST(
 // GET endpoint to fetch metadata for a specific chat
 export async function GET(
   request: NextRequest,
-  { params }: { params: { chatId: string } },
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
-    const chatId = params.chatId
+    const { chatId } = await params // 👈 Await params here
 
     // Get chat ownership
     const ownership = await getChatOwnership({ v0ChatId: chatId })

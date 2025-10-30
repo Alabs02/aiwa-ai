@@ -24,7 +24,7 @@ export function Avatar({
     return (
       <div
         className={cn(
-          'p-0.5 relative grid place-items-center md:hidden shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu',
+          'p-0.5 relative grid place-items-center shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu',
           sizeClasses[size],
           className,
         )}
@@ -39,7 +39,7 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'p-0.5 relative grid place-items-center md:hidden shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu',
+        'p-0.5 relative grid place-items-center shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu',
         sizeClasses[size],
         className,
       )}

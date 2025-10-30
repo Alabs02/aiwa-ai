@@ -4,7 +4,7 @@ import { getChatOwnership, updateChatVisibility } from '@/lib/db/queries'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { chatId: string } },
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,7 @@ export async function POST(
       )
     }
 
-    const chatId = params.chatId
+    const { chatId } = await params // 👈 Await params here
     const body = await request.json()
     const { visibility, previewUrl, demoUrl } = body
 
@@ -80,11 +80,11 @@ export async function POST(
 // GET endpoint to fetch visibility settings for a specific chat
 export async function GET(
   request: NextRequest,
-  { params }: { params: { chatId: string } },
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await auth()
-    const chatId = params.chatId
+    const { chatId } = await params // 👈 Await params here
 
     // Get chat ownership
     const ownership = await getChatOwnership({ v0ChatId: chatId })
