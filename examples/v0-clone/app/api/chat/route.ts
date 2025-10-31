@@ -15,7 +15,6 @@ import { ChatSDKError } from '@/lib/errors'
 
 // Create v0 client - will validate API key at runtime
 // const v0 = createClient({
-//   apiKey: process.env.V0_API_KEY || '',
 //   ...(process.env.V0_API_URL && { baseUrl: process.env.V0_API_URL }),
 // })
 

@@ -260,8 +260,27 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
   }
 
   const handleChatData = (data: { id: string; demo?: string }) => {
-    setCurrentChatId(data.id)
-    setCurrentChat(data)
+    if (!currentChatId && data.id) {
+      // First time receiving chat ID - set it and navigate
+      setCurrentChatId(data.id)
+      setCurrentChat(data)
+
+      // Update URL to /chats/{chatId}
+      window.history.pushState(null, '', `/chats/${data.id}`)
+
+      console.log('Chat created with ID:', data.id)
+    } else if (
+      data.demo &&
+      (!currentChat?.demo || currentChat.demo !== data.demo)
+    ) {
+      // Demo URL came through - update it
+      setCurrentChat((prev) => (prev ? { ...prev, demo: data.demo } : null))
+
+      // Auto-switch to preview on mobile when demo is ready
+      if (window.innerWidth < 768) {
+        setActivePanel('preview')
+      }
+    }
   }
 
   const handleStreamingStarted = () => {
