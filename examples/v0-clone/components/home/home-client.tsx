@@ -259,7 +259,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setIsLoading(false)
   }
 
-  const handleChatData = (data: { id: string; demo?: string }) => {
+  const handleChatData = async (data: { id: string; demo?: string }) => {
     if (!currentChatId && data.id) {
       // First time receiving chat ID - set it and navigate
       setCurrentChatId(data.id)
@@ -269,6 +269,23 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       window.history.pushState(null, '', `/chats/${data.id}`)
 
       console.log('Chat created with ID:', data.id)
+
+      // Create ownership record for the new chat
+      try {
+        await fetch('/api/chat/ownership', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chatId: data.id,
+          }),
+        })
+        console.log('Chat ownership created:', data.id)
+      } catch (error) {
+        console.error('Failed to create chat ownership:', error)
+        // Don't fail the UI if ownership creation fails
+      }
     } else if (
       data.demo &&
       (!currentChat?.demo || currentChat.demo !== data.demo)
