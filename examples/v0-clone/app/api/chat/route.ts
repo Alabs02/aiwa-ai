@@ -114,6 +114,10 @@ export async function POST(request: NextRequest) {
         chat = await v0.chats.sendMessage({
           chatId: chatId,
           message,
+          modelConfiguration: {
+            thinking: true,
+            imageGenerations: true,
+          },
           responseMode: 'experimental_stream',
           ...(attachments && attachments.length > 0 && { attachments }),
         })
@@ -132,6 +136,10 @@ export async function POST(request: NextRequest) {
         chat = await v0.chats.sendMessage({
           chatId: chatId,
           message,
+          modelConfiguration: {
+            thinking: true,
+            imageGenerations: true,
+          },
           ...(attachments && attachments.length > 0 && { attachments }),
         })
       }
