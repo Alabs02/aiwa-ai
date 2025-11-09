@@ -1,56 +1,57 @@
-'use client'
+"use client";
 
-import { useState, useEffect, Suspense, FC } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState, useEffect, Suspense, FC } from "react";
+import { useSession } from "next-auth/react";
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { ChatSelector } from './chat-selector'
-import { MobileMenu } from './mobile-menu'
-import { UserNav } from '@/components/user-nav'
-import { RippleButton } from '@/components/ui/ripple-button'
-import { usePathname, useSearchParams } from 'next/navigation'
+import Link from "next/link";
+import Image from "next/image";
+import { ChatSelector } from "./chat-selector";
+import { UserNav } from "@/components/user-nav";
+import { RippleButton } from "@/components/ui/ripple-button";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Button } from "../ui/button";
+import { Menu } from "lucide-react";
 
 interface NavbarProps {
-  className?: string
+  className?: string;
 }
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler() {
-  const searchParams = useSearchParams()
-  const { update } = useSession()
+  const searchParams = useSearchParams();
+  const { update } = useSession();
 
   // Force session refresh when redirected after auth
   useEffect(() => {
-    const shouldRefresh = searchParams.get('refresh') === 'session'
+    const shouldRefresh = searchParams.get("refresh") === "session";
 
     if (shouldRefresh) {
       // Force session update
-      update()
+      update();
 
       // Clean up URL without causing navigation
-      const url = new URL(window.location.href)
-      url.searchParams.delete('refresh')
-      window.history.replaceState({}, '', url.pathname)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("refresh");
+      window.history.replaceState({}, "", url.pathname);
     }
-  }, [searchParams, update])
+  }, [searchParams, update]);
 
-  return null
+  return null;
 }
 
-export function NavBar({ className = '' }: NavbarProps) {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-  const isHomepage = pathname === '/'
+export function NavBar({ className = "" }: NavbarProps) {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const isHomepage = pathname === "/";
 
   const handleLogoClick = (e: React.MouseEvent) => {
     if (isHomepage) {
-      e.preventDefault()
+      e.preventDefault();
       // Add reset parameter to trigger UI reset
-      window.location.href = '/?reset=true'
+      window.location.href = "/?reset=true";
     }
     // If not on homepage, let the Link component handle navigation normally
-  }
+  };
 
   return (
     <>
@@ -58,13 +59,13 @@ export function NavBar({ className = '' }: NavbarProps) {
         <SearchParamsHandler />
       </Suspense>
 
-      <nav className="sticky top-0 z-50 border-b border-border dark:border-input flex items-center justify-between h-[60px] w-full px-5 md:px-4">
+      <nav className="border-border dark:border-input sticky top-0 z-50 flex h-[60px] w-full items-center justify-between border-b px-5 md:px-4">
         <div className="flex items-center md:gap-4">
-          <Link href={'/'} onClick={handleLogoClick} passHref>
-            <div className="relative grid grid-cols-1 h-9 w-20 border-none overflow-hidden cursor-pointer">
+          <Link href={"/"} onClick={handleLogoClick} passHref>
+            <div className="relative grid h-9 w-20 cursor-pointer grid-cols-1 overflow-hidden border-none">
               <Image
-                src={'/aiwa.webp'}
-                alt={'Aiwa Brand Logo'}
+                src={"/aiwa.webp"}
+                alt={"Aiwa Brand Logo"}
                 fill
                 priority
                 draggable={false}
@@ -79,23 +80,23 @@ export function NavBar({ className = '' }: NavbarProps) {
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-2 transition-all duration-300 will-change-auto transform-gpu">
+        <div className="hidden transform-gpu items-center gap-2 transition-all duration-300 will-change-auto md:flex">
           {session ? (
-            <div className="size-9 p-[3px] relative grid place-items-center shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer">
-              <div className="size-full grid grid-cols-1 relative bg-black rounded-full shadow-md skew-2">
+            <div className="relative grid size-9 cursor-pointer place-items-center rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 p-[3px] shadow-inner brightness-100 transition-all duration-300 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 hover:brightness-110">
+              <div className="relative grid size-full skew-2 grid-cols-1 rounded-full bg-black shadow-md">
                 <UserNav session={session} />
               </div>
             </div>
           ) : (
             <>
               <Link href="/login" passHref>
-                <RippleButton className="font-medium hover:bg-neutral-800/90 transition-all duration-300">
+                <RippleButton className="font-medium transition-all duration-300 hover:bg-neutral-800/90">
                   Sign In
                 </RippleButton>
               </Link>
 
               <Link href="/register" passHref>
-                <RippleButton className="bg-neutral-100 text-background font-medium hover:bg-neutral-200 transition-all duration-300">
+                <RippleButton className="text-background bg-neutral-100 font-medium transition-all duration-300 hover:bg-neutral-200">
                   Sign Up
                 </RippleButton>
               </Link>
@@ -103,12 +104,26 @@ export function NavBar({ className = '' }: NavbarProps) {
           )}
         </div>
 
-        <div className="size-9 p-[3px] relative grid place-items-center md:hidden shadow-inner rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 brightness-100 hover:brightness-110 transition-all duration-300 cursor-pointer will-change-auto transform-gpu">
-          <div className="size-full grid grid-cols-1 relative bg-black rounded-full shadow-md skew-2">
-            <UserNav session={session} />
+        <div className="flex items-center gap-4 md:hidden">
+          <div className="relative grid size-9 transform-gpu cursor-pointer place-items-center rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 p-[3px] shadow-inner brightness-100 transition-all duration-300 will-change-auto hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 hover:brightness-110 md:hidden">
+            <div className="relative grid size-full skew-2 grid-cols-1 rounded-full bg-black shadow-md">
+              <UserNav session={session} />
+            </div>
           </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const event = new CustomEvent("toggle-mobile-sidebar");
+              window.dispatchEvent(event);
+            }}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </nav>
     </>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   MessageSquare,
   MoreHorizontal,
@@ -13,272 +13,272 @@ import {
   Eye,
   EyeOff,
   Users,
-  Lock,
-} from 'lucide-react'
+  Lock
+} from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  SelectValue
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+  DialogTitle
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Chat {
-  id: string
-  name?: string
-  privacy?: 'public' | 'private' | 'team' | 'team-edit' | 'unlisted'
-  createdAt: string
-  url?: string
+  id: string;
+  name?: string;
+  privacy?: "public" | "private" | "team" | "team-edit" | "unlisted";
+  createdAt: string;
+  url?: string;
 }
 
 // Helper function to get display name for a chat
 const getChatDisplayName = (chat: Chat): string => {
-  return chat.name || `Chat ${chat.id.slice(0, 8)}...`
-}
+  return chat.name || `Chat ${chat.id.slice(0, 8)}...`;
+};
 
 // Helper function to get privacy icon
 const getPrivacyIcon = (privacy: string) => {
   switch (privacy) {
-    case 'public':
-      return <Eye className="h-4 w-4" />
-    case 'private':
-      return <EyeOff className="h-4 w-4" />
-    case 'team':
-    case 'team-edit':
-      return <Users className="h-4 w-4" />
-    case 'unlisted':
-      return <Lock className="h-4 w-4" />
+    case "public":
+      return <Eye className="h-4 w-4" />;
+    case "private":
+      return <EyeOff className="h-4 w-4" />;
+    case "team":
+    case "team-edit":
+      return <Users className="h-4 w-4" />;
+    case "unlisted":
+      return <Lock className="h-4 w-4" />;
     default:
-      return <EyeOff className="h-4 w-4" />
+      return <EyeOff className="h-4 w-4" />;
   }
-}
+};
 
 // Helper function to get privacy display name
 const getPrivacyDisplayName = (privacy: string) => {
   switch (privacy) {
-    case 'public':
-      return 'Public'
-    case 'private':
-      return 'Private'
-    case 'team':
-      return 'Team'
-    case 'team-edit':
-      return 'Team Edit'
-    case 'unlisted':
-      return 'Unlisted'
+    case "public":
+      return "Public";
+    case "private":
+      return "Private";
+    case "team":
+      return "Team";
+    case "team-edit":
+      return "Team Edit";
+    case "unlisted":
+      return "Unlisted";
     default:
-      return 'Private'
+      return "Private";
   }
-}
+};
 
 export function ChatSelector() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { data: session } = useSession()
-  const [chats, setChats] = useState<Chat[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false)
-  const [isVisibilityDialogOpen, setIsVisibilityDialogOpen] = useState(false)
-  const [renameChatName, setRenameChatName] = useState('')
+  const router = useRouter();
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [isVisibilityDialogOpen, setIsVisibilityDialogOpen] = useState(false);
+  const [renameChatName, setRenameChatName] = useState("");
   const [selectedVisibility, setSelectedVisibility] = useState<
-    'public' | 'private' | 'team' | 'team-edit' | 'unlisted'
-  >('private')
-  const [isRenamingChat, setIsRenamingChat] = useState(false)
-  const [isDeletingChat, setIsDeletingChat] = useState(false)
-  const [isDuplicatingChat, setIsDuplicatingChat] = useState(false)
-  const [isChangingVisibility, setIsChangingVisibility] = useState(false)
+    "public" | "private" | "team" | "team-edit" | "unlisted"
+  >("private");
+  const [isRenamingChat, setIsRenamingChat] = useState(false);
+  const [isDeletingChat, setIsDeletingChat] = useState(false);
+  const [isDuplicatingChat, setIsDuplicatingChat] = useState(false);
+  const [isChangingVisibility, setIsChangingVisibility] = useState(false);
 
   // Get current chat ID if on a chat page
-  const currentChatId = pathname?.startsWith('/chats/')
-    ? pathname.split('/')[2]
-    : null
+  const currentChatId = pathname?.startsWith("/chats/")
+    ? pathname.split("/")[2]
+    : null;
 
   // Fetch user's chats
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) return;
 
     const fetchChats = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const response = await fetch('/api/chats')
+        const response = await fetch("/api/chats");
         if (response.ok) {
-          const data = await response.json()
-          setChats(data.data || [])
+          const data = await response.json();
+          setChats(data.data || []);
         }
       } catch (error) {
-        console.error('Failed to fetch chats:', error)
+        console.error("Failed to fetch chats:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchChats()
-  }, [session?.user?.id])
+    fetchChats();
+  }, [session?.user?.id]);
 
   const handleValueChange = (chatId: string) => {
-    router.push(`/chats/${chatId}`)
-  }
+    router.push(`/chats/${chatId}`);
+  };
 
   const handleRenameChat = async () => {
-    if (!renameChatName.trim() || !currentChatId) return
+    if (!renameChatName.trim() || !currentChatId) return;
 
-    setIsRenamingChat(true)
+    setIsRenamingChat(true);
     try {
       const response = await fetch(`/api/chats/${currentChatId}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          name: renameChatName.trim(),
-        }),
-      })
+          name: renameChatName.trim()
+        })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to rename chat')
+        throw new Error("Failed to rename chat");
       }
 
-      const updatedChat = await response.json()
+      const updatedChat = await response.json();
 
       // Update the chat in the list
       setChats((prev) =>
         prev.map((c) =>
-          c.id === currentChatId ? { ...c, name: updatedChat.name } : c,
-        ),
-      )
+          c.id === currentChatId ? { ...c, name: updatedChat.name } : c
+        )
+      );
 
       // Close dialog and reset form
-      setIsRenameDialogOpen(false)
-      setRenameChatName('')
+      setIsRenameDialogOpen(false);
+      setRenameChatName("");
     } catch (error) {
-      console.error('Error renaming chat:', error)
+      console.error("Error renaming chat:", error);
     } finally {
-      setIsRenamingChat(false)
+      setIsRenamingChat(false);
     }
-  }
+  };
 
   const handleDeleteChat = async () => {
-    if (!currentChatId) return
+    if (!currentChatId) return;
 
-    setIsDeletingChat(true)
+    setIsDeletingChat(true);
     try {
       const response = await fetch(`/api/chats/${currentChatId}`, {
-        method: 'DELETE',
-      })
+        method: "DELETE"
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to delete chat')
+        throw new Error("Failed to delete chat");
       }
 
       // Remove the chat from the list
-      setChats((prev) => prev.filter((c) => c.id !== currentChatId))
+      setChats((prev) => prev.filter((c) => c.id !== currentChatId));
 
       // Close dialog and navigate to home
-      setIsDeleteDialogOpen(false)
-      router.push('/')
+      setIsDeleteDialogOpen(false);
+      router.push("/");
     } catch (error) {
-      console.error('Error deleting chat:', error)
+      console.error("Error deleting chat:", error);
     } finally {
-      setIsDeletingChat(false)
+      setIsDeletingChat(false);
     }
-  }
+  };
 
   const handleDuplicateChat = async () => {
-    if (!currentChatId) return
+    if (!currentChatId) return;
 
-    setIsDuplicatingChat(true)
+    setIsDuplicatingChat(true);
     try {
-      const response = await fetch('/api/chat/fork', {
-        method: 'POST',
+      const response = await fetch("/api/chat/fork", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ chatId: currentChatId }),
-      })
+        body: JSON.stringify({ chatId: currentChatId })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to duplicate chat')
+        throw new Error("Failed to duplicate chat");
       }
 
-      const result = await response.json()
+      const result = await response.json();
 
       // Close dialog and navigate to the new forked chat
-      setIsDuplicateDialogOpen(false)
-      router.push(`/chats/${result.id}`)
+      setIsDuplicateDialogOpen(false);
+      router.push(`/chats/${result.id}`);
     } catch (error) {
-      console.error('Error duplicating chat:', error)
+      console.error("Error duplicating chat:", error);
     } finally {
-      setIsDuplicatingChat(false)
+      setIsDuplicatingChat(false);
     }
-  }
+  };
 
   const handleChangeVisibility = async () => {
-    if (!currentChatId) return
+    if (!currentChatId) return;
 
-    setIsChangingVisibility(true)
+    setIsChangingVisibility(true);
     try {
       const response = await fetch(`/api/chats/${currentChatId}/visibility`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ privacy: selectedVisibility }),
-      })
+        body: JSON.stringify({ privacy: selectedVisibility })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to change chat visibility')
+        throw new Error("Failed to change chat visibility");
       }
 
-      const updatedChat = await response.json()
+      const updatedChat = await response.json();
 
       // Update the chat in the list
       setChats((prev) =>
         prev.map((c) =>
-          c.id === currentChatId ? { ...c, privacy: updatedChat.privacy } : c,
-        ),
-      )
+          c.id === currentChatId ? { ...c, privacy: updatedChat.privacy } : c
+        )
+      );
 
       // Close dialog
-      setIsVisibilityDialogOpen(false)
+      setIsVisibilityDialogOpen(false);
     } catch (error) {
-      console.error('Error changing chat visibility:', error)
+      console.error("Error changing chat visibility:", error);
     } finally {
-      setIsChangingVisibility(false)
+      setIsChangingVisibility(false);
     }
-  }
+  };
 
   // Don't show if user is not authenticated
-  if (!session?.user?.id) return null
+  if (!session?.user?.id) return null;
 
   const currentChat = currentChatId
     ? chats.find((c) => c.id === currentChatId)
-    : null
+    : null;
 
   return (
     <>
       <div className="flex items-center gap-1">
-        <Select value={currentChatId || ''} onValueChange={handleValueChange}>
+        <Select value={currentChatId || ""} onValueChange={handleValueChange}>
           <SelectTrigger
-            className="w-fit min-w-[150px] max-w-[250px]"
+            className="w-fit max-w-[250px] min-w-[150px]"
             size="sm"
           >
             <SelectValue placeholder="Select chat">
@@ -287,7 +287,7 @@ export function ChatSelector() {
                 <span className="truncate">
                   {currentChat
                     ? getChatDisplayName(currentChat)
-                    : 'Select chat'}
+                    : "Select chat"}
                 </span>
               </div>
             </SelectValue>
@@ -303,7 +303,7 @@ export function ChatSelector() {
                 </SelectItem>
               ))
             ) : (
-              <div className="px-2 py-1.5 text-sm text-muted-foreground">
+              <div className="text-muted-foreground px-2 py-1.5 text-sm">
                 No chats yet
               </div>
             )}
@@ -356,8 +356,8 @@ export function ChatSelector() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedVisibility(currentChat.privacy || 'private')
-                  setIsVisibilityDialogOpen(true)
+                  setSelectedVisibility(currentChat.privacy || "private");
+                  setIsVisibilityDialogOpen(true);
                 }}
                 disabled={
                   isRenamingChat ||
@@ -366,13 +366,13 @@ export function ChatSelector() {
                   isChangingVisibility
                 }
               >
-                {getPrivacyIcon(currentChat.privacy || 'private')}
+                {getPrivacyIcon(currentChat.privacy || "private")}
                 <span className="ml-2">Change Visibility</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  setRenameChatName(currentChat.name || '')
-                  setIsRenameDialogOpen(true)
+                  setRenameChatName(currentChat.name || "");
+                  setIsRenameDialogOpen(true);
                 }}
                 disabled={
                   isRenamingChat ||
@@ -418,8 +418,8 @@ export function ChatSelector() {
               value={renameChatName}
               onChange={(e) => setRenameChatName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !isRenamingChat) {
-                  handleRenameChat()
+                if (e.key === "Enter" && !isRenamingChat) {
+                  handleRenameChat();
                 }
               }}
               disabled={isRenamingChat}
@@ -429,8 +429,8 @@ export function ChatSelector() {
             <Button
               variant="outline"
               onClick={() => {
-                setIsRenameDialogOpen(false)
-                setRenameChatName('')
+                setIsRenameDialogOpen(false);
+                setRenameChatName("");
               }}
               disabled={isRenamingChat}
             >
@@ -440,7 +440,7 @@ export function ChatSelector() {
               onClick={handleRenameChat}
               disabled={isRenamingChat || !renameChatName.trim()}
             >
-              {isRenamingChat ? 'Renaming...' : 'Rename Chat'}
+              {isRenamingChat ? "Renaming..." : "Rename Chat"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -469,7 +469,7 @@ export function ChatSelector() {
               onClick={handleDeleteChat}
               disabled={isDeletingChat}
             >
-              {isDeletingChat ? 'Deleting...' : 'Delete Chat'}
+              {isDeletingChat ? "Deleting..." : "Delete Chat"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -497,7 +497,7 @@ export function ChatSelector() {
               Cancel
             </Button>
             <Button onClick={handleDuplicateChat} disabled={isDuplicatingChat}>
-              {isDuplicatingChat ? 'Duplicating...' : 'Duplicate Chat'}
+              {isDuplicatingChat ? "Duplicating..." : "Duplicate Chat"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -519,7 +519,7 @@ export function ChatSelector() {
             <Select
               value={selectedVisibility}
               onValueChange={(
-                value: 'public' | 'private' | 'team' | 'team-edit' | 'unlisted',
+                value: "public" | "private" | "team" | "team-edit" | "unlisted"
               ) => setSelectedVisibility(value)}
             >
               <SelectTrigger>
@@ -536,7 +536,7 @@ export function ChatSelector() {
                     <EyeOff className="h-4 w-4" />
                     <div>
                       <div>Private</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         Only you can see this chat
                       </div>
                     </div>
@@ -547,7 +547,7 @@ export function ChatSelector() {
                     <Eye className="h-4 w-4" />
                     <div>
                       <div>Public</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         Anyone can see this chat
                       </div>
                     </div>
@@ -558,12 +558,12 @@ export function ChatSelector() {
                     <Users className="h-4 w-4" />
                     <div>
                       <div>
-                        Team{' '}
-                        <span className="inline-flex items-center-safe justify-center-safe border bg-white/35 text-xs rounded-full !h-auto px-1.5 py-0.5">
+                        Team{" "}
+                        <span className="inline-flex !h-auto items-center-safe justify-center-safe rounded-full border bg-white/35 px-1.5 py-0.5 text-xs">
                           coming soon
                         </span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         Team members can see this chat
                       </div>
                     </div>
@@ -574,12 +574,12 @@ export function ChatSelector() {
                     <Users className="h-4 w-4" />
                     <div>
                       <div>
-                        Team Edit{' '}
-                        <span className="inline-flex items-center-safe justify-center-safe border bg-white/35 text-xs rounded-full !h-auto px-1.5 py-0.5">
+                        Team Edit{" "}
+                        <span className="inline-flex !h-auto items-center-safe justify-center-safe rounded-full border bg-white/35 px-1.5 py-0.5 text-xs">
                           coming soon
                         </span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         Team members can see and edit this chat
                       </div>
                     </div>
@@ -611,11 +611,11 @@ export function ChatSelector() {
               onClick={handleChangeVisibility}
               disabled={isChangingVisibility}
             >
-              {isChangingVisibility ? 'Changing...' : 'Change Visibility'}
+              {isChangingVisibility ? "Changing..." : "Change Visibility"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

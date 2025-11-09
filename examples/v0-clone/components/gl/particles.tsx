@@ -1,10 +1,10 @@
-import * as THREE from 'three'
-import { useMemo, useState, useRef, useEffect } from 'react'
-import { createPortal, useFrame } from '@react-three/fiber'
-import { useFBO } from '@react-three/drei'
+import * as THREE from "three";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal, useFrame } from "@react-three/fiber";
+import { useFBO } from "@react-three/drei";
 
-import { DofPointsMaterial, SimulationMaterial } from './shaders'
-import * as easing from 'maath/easing'
+import { DofPointsMaterial, SimulationMaterial } from "./shaders";
+import * as easing from "maath/easing";
 
 export function Particles({
   speed,
@@ -22,126 +22,126 @@ export function Particles({
   introspect = false,
   ...props
 }: {
-  speed: number
+  speed: number;
   // fov: number
-  aperture: number
-  focus: number
-  size: number
-  noiseScale?: number
-  noiseIntensity?: number
-  timeScale?: number
-  pointSize?: number
-  opacity?: number
-  planeScale?: number
-  useManualTime?: boolean
-  manualTime?: number
-  introspect?: boolean
+  aperture: number;
+  focus: number;
+  size: number;
+  noiseScale?: number;
+  noiseIntensity?: number;
+  timeScale?: number;
+  pointSize?: number;
+  opacity?: number;
+  planeScale?: number;
+  useManualTime?: boolean;
+  manualTime?: number;
+  introspect?: boolean;
 }) {
   // Reveal animation state
-  const revealStartTime = useRef<number | null>(null)
-  const [isRevealing, setIsRevealing] = useState(true)
-  const revealDuration = 3.5 // seconds
+  const revealStartTime = useRef<number | null>(null);
+  const [isRevealing, setIsRevealing] = useState(true);
+  const revealDuration = 3.5; // seconds
   // Create simulation material with scale parameter
   const simulationMaterial = useMemo(() => {
-    return new SimulationMaterial(planeScale)
-  }, [planeScale])
+    return new SimulationMaterial(planeScale);
+  }, [planeScale]);
 
   const target = useFBO(size, size, {
     minFilter: THREE.NearestFilter,
     magFilter: THREE.NearestFilter,
     format: THREE.RGBAFormat,
-    type: THREE.FloatType,
-  })
+    type: THREE.FloatType
+  });
 
   const dofPointsMaterial = useMemo(() => {
-    const m = new DofPointsMaterial()
-    m.uniforms.positions.value = target.texture
+    const m = new DofPointsMaterial();
+    m.uniforms.positions.value = target.texture;
     m.uniforms.initialPositions.value =
-      simulationMaterial.uniforms.positions.value
-    return m
-  }, [simulationMaterial])
+      simulationMaterial.uniforms.positions.value;
+    return m;
+  }, [simulationMaterial]);
 
-  const [scene] = useState(() => new THREE.Scene())
+  const [scene] = useState(() => new THREE.Scene());
   const [camera] = useState(
-    () => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1),
-  )
+    () => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1)
+  );
   const [positions] = useState(
     () =>
       new Float32Array([
-        -1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0,
-      ]),
-  )
+        -1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0
+      ])
+  );
   const [uvs] = useState(
-    () => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]),
-  )
+    () => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0])
+  );
 
   const particles = useMemo(() => {
-    const length = size * size
-    const particles = new Float32Array(length * 3)
+    const length = size * size;
+    const particles = new Float32Array(length * 3);
     for (let i = 0; i < length; i++) {
-      const i3 = i * 3
-      particles[i3 + 0] = (i % size) / size
-      particles[i3 + 1] = i / size / size
+      const i3 = i * 3;
+      particles[i3 + 0] = (i % size) / size;
+      particles[i3 + 1] = i / size / size;
     }
-    return particles
-  }, [size])
+    return particles;
+  }, [size]);
 
   useFrame((state, delta) => {
-    if (!dofPointsMaterial || !simulationMaterial) return
+    if (!dofPointsMaterial || !simulationMaterial) return;
 
-    state.gl.setRenderTarget(target)
-    state.gl.clear()
+    state.gl.setRenderTarget(target);
+    state.gl.clear();
     // @ts-ignore
-    state.gl.render(scene, camera)
-    state.gl.setRenderTarget(null)
+    state.gl.render(scene, camera);
+    state.gl.setRenderTarget(null);
 
     // Use manual time if enabled, otherwise use elapsed time
-    const currentTime = useManualTime ? manualTime : state.clock.elapsedTime
+    const currentTime = useManualTime ? manualTime : state.clock.elapsedTime;
 
     // Initialize reveal start time on first frame
     if (revealStartTime.current === null) {
-      revealStartTime.current = currentTime
+      revealStartTime.current = currentTime;
     }
 
     // Calculate reveal progress
-    const revealElapsed = currentTime - revealStartTime.current
-    const revealProgress = Math.min(revealElapsed / revealDuration, 1.0)
+    const revealElapsed = currentTime - revealStartTime.current;
+    const revealProgress = Math.min(revealElapsed / revealDuration, 1.0);
 
     // Ease out the reveal animation
-    const easedProgress = 1 - Math.pow(1 - revealProgress, 3)
+    const easedProgress = 1 - Math.pow(1 - revealProgress, 3);
 
     // Map progress to reveal factor (0 = fully hidden, higher values = more revealed)
     // We want to start from center (0) and expand outward (higher values)
-    const revealFactor = easedProgress * 4.0 // Doubled the radius for larger coverage
+    const revealFactor = easedProgress * 4.0; // Doubled the radius for larger coverage
 
     if (revealProgress >= 1.0 && isRevealing) {
-      setIsRevealing(false)
+      setIsRevealing(false);
     }
 
-    dofPointsMaterial.uniforms.uTime.value = currentTime
+    dofPointsMaterial.uniforms.uTime.value = currentTime;
 
-    dofPointsMaterial.uniforms.uFocus.value = focus
-    dofPointsMaterial.uniforms.uBlur.value = aperture
+    dofPointsMaterial.uniforms.uFocus.value = focus;
+    dofPointsMaterial.uniforms.uBlur.value = aperture;
 
     easing.damp(
       dofPointsMaterial.uniforms.uTransition,
-      'value',
+      "value",
       introspect ? 1.0 : 0.0,
       introspect ? 0.35 : 0.2,
-      delta,
-    )
+      delta
+    );
 
-    simulationMaterial.uniforms.uTime.value = currentTime
-    simulationMaterial.uniforms.uNoiseScale.value = noiseScale
-    simulationMaterial.uniforms.uNoiseIntensity.value = noiseIntensity
-    simulationMaterial.uniforms.uTimeScale.value = timeScale * speed
+    simulationMaterial.uniforms.uTime.value = currentTime;
+    simulationMaterial.uniforms.uNoiseScale.value = noiseScale;
+    simulationMaterial.uniforms.uNoiseIntensity.value = noiseIntensity;
+    simulationMaterial.uniforms.uTimeScale.value = timeScale * speed;
 
     // Update point material uniforms
-    dofPointsMaterial.uniforms.uPointSize.value = pointSize
-    dofPointsMaterial.uniforms.uOpacity.value = opacity
-    dofPointsMaterial.uniforms.uRevealFactor.value = revealFactor
-    dofPointsMaterial.uniforms.uRevealProgress.value = easedProgress
-  })
+    dofPointsMaterial.uniforms.uPointSize.value = pointSize;
+    dofPointsMaterial.uniforms.uOpacity.value = opacity;
+    dofPointsMaterial.uniforms.uRevealFactor.value = revealFactor;
+    dofPointsMaterial.uniforms.uRevealProgress.value = easedProgress;
+  });
 
   return (
     <>
@@ -157,7 +157,7 @@ export function Particles({
           </bufferGeometry>
         </mesh>,
         // @ts-ignore
-        scene,
+        scene
       )}
       {/* @ts-ignore */}
       <points material={dofPointsMaterial} {...props}>
@@ -172,5 +172,5 @@ export function Particles({
         <meshBasicMaterial map={target.texture} />
       </mesh> */}
     </>
-  )
+  );
 }

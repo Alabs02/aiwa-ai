@@ -1,5 +1,5 @@
-import * as THREE from 'three'
-import { periodicNoiseGLSL } from './utils'
+import * as THREE from "three";
+import { periodicNoiseGLSL } from "./utils";
 
 export class DofPointsMaterial extends THREE.ShaderMaterial {
   constructor() {
@@ -128,11 +128,11 @@ export class DofPointsMaterial extends THREE.ShaderMaterial {
         uPointSize: { value: 2.0 },
         uOpacity: { value: 1.0 },
         uRevealFactor: { value: 0.0 },
-        uRevealProgress: { value: 0.0 },
+        uRevealProgress: { value: 0.0 }
       },
       transparent: true,
       // blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    })
+      depthWrite: false
+    });
   }
 }

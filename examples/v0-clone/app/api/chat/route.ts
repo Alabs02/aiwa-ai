@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient, ChatDetail } from 'v0-sdk'
-import { auth } from '@/app/(auth)/auth'
+import { NextRequest, NextResponse } from "next/server";
+import { createClient, ChatDetail } from "v0-sdk";
+import { auth } from "@/app/(auth)/auth";
 import {
   createChatOwnership,
   createAnonymousChatLog,
   getChatCountByUserId,
-  getChatCountByIP,
-} from '@/lib/db/queries'
+  getChatCountByIP
+} from "@/lib/db/queries";
 import {
   entitlementsByUserType,
-  anonymousEntitlements,
-} from '@/lib/entitlements'
-import { ChatSDKError } from '@/lib/errors'
+  anonymousEntitlements
+} from "@/lib/entitlements";
+import { ChatSDKError } from "@/lib/errors";
 
 // Create v0 client - will validate API key at runtime
 // const v0 = createClient({
@@ -19,23 +19,23 @@ import { ChatSDKError } from '@/lib/errors'
 // })
 
 const v0 = createClient(
-  process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {},
-)
+  process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
+);
 
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const realIP = request.headers.get('x-real-ip')
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIP = request.headers.get("x-real-ip");
 
   if (forwarded) {
-    return forwarded.split(',')[0].trim()
+    return forwarded.split(",")[0].trim();
   }
 
   if (realIP) {
-    return realIP
+    return realIP;
   }
 
   // Fallback to connection remote address or unknown
-  return 'unknown'
+  return "unknown";
 }
 
 export async function POST(request: NextRequest) {
@@ -43,20 +43,20 @@ export async function POST(request: NextRequest) {
     // Validate V0_API_KEY at runtime
     if (!process.env.V0_API_KEY) {
       return NextResponse.json(
-        { error: 'V0_API_KEY environment variable is not configured' },
-        { status: 500 },
-      )
+        { error: "V0_API_KEY environment variable is not configured" },
+        { status: 500 }
+      );
     }
 
-    const session = await auth()
+    const session = await auth();
     const { message, chatId, streaming, attachments, projectId } =
-      await request.json()
+      await request.json();
 
     if (!message) {
       return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 },
-      )
+        { error: "Message is required" },
+        { status: 400 }
+      );
     }
 
     // Rate limiting
@@ -64,73 +64,73 @@ export async function POST(request: NextRequest) {
       // Authenticated user rate limiting
       const chatCount = await getChatCountByUserId({
         userId: session.user.id,
-        differenceInHours: 24,
-      })
+        differenceInHours: 24
+      });
 
-      const userType = session.user.type
+      const userType = session.user.type;
       if (chatCount >= entitlementsByUserType[userType].maxMessagesPerDay) {
-        return new ChatSDKError('rate_limit:chat').toResponse()
+        return new ChatSDKError("rate_limit:chat").toResponse();
       }
 
-      console.log('API request:', {
+      console.log("API request:", {
         message,
         chatId,
         streaming,
-        userId: session.user.id,
-      })
+        userId: session.user.id
+      });
     } else {
       // Anonymous user rate limiting
-      const clientIP = getClientIP(request)
+      const clientIP = getClientIP(request);
       const chatCount = await getChatCountByIP({
         ipAddress: clientIP,
-        differenceInHours: 24,
-      })
+        differenceInHours: 24
+      });
 
       if (chatCount >= anonymousEntitlements.maxMessagesPerDay) {
-        return new ChatSDKError('rate_limit:chat').toResponse()
+        return new ChatSDKError("rate_limit:chat").toResponse();
       }
 
-      console.log('API request (anonymous):', {
+      console.log("API request (anonymous):", {
         message,
         chatId,
         streaming,
-        ip: clientIP,
-      })
+        ip: clientIP
+      });
     }
 
-    console.log('Using baseUrl:', process.env.V0_API_URL || 'default')
+    console.log("Using baseUrl:", process.env.V0_API_URL || "default");
 
-    let chat
+    let chat;
 
     if (chatId) {
       // continue existing chat
       if (streaming) {
         // Return streaming response for existing chat
-        console.log('Sending streaming message to existing chat:', {
+        console.log("Sending streaming message to existing chat:", {
           chatId,
           message,
-          responseMode: 'experimental_stream',
-        })
+          responseMode: "experimental_stream"
+        });
         chat = await v0.chats.sendMessage({
           chatId: chatId,
           message,
           modelConfiguration: {
             thinking: true,
-            imageGenerations: true,
+            imageGenerations: true
           },
-          responseMode: 'experimental_stream',
-          ...(attachments && attachments.length > 0 && { attachments }),
-        })
-        console.log('Streaming message sent to existing chat successfully')
+          responseMode: "experimental_stream",
+          ...(attachments && attachments.length > 0 && { attachments })
+        });
+        console.log("Streaming message sent to existing chat successfully");
 
         // Return the stream directly
         return new Response(chat as ReadableStream<Uint8Array>, {
           headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-          },
-        })
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive"
+          }
+        });
       } else {
         // Non-streaming response for existing chat
         chat = await v0.chats.sendMessage({
@@ -138,63 +138,63 @@ export async function POST(request: NextRequest) {
           message,
           modelConfiguration: {
             thinking: true,
-            imageGenerations: true,
+            imageGenerations: true
           },
-          ...(attachments && attachments.length > 0 && { attachments }),
-        })
+          ...(attachments && attachments.length > 0 && { attachments })
+        });
       }
     } else {
       // create new chat
       if (streaming) {
         // Return streaming response
-        console.log('Creating streaming chat with params:', {
+        console.log("Creating streaming chat with params:", {
           message,
-          responseMode: 'experimental_stream',
-        })
+          responseMode: "experimental_stream"
+        });
         chat = await v0.chats.create({
           message,
-          responseMode: 'experimental_stream',
+          responseMode: "experimental_stream",
           modelConfiguration: {
             thinking: true,
-            imageGenerations: true,
+            imageGenerations: true
           },
-          ...(attachments && attachments.length > 0 && { attachments }),
-        })
-        console.log('Streaming chat created successfully')
+          ...(attachments && attachments.length > 0 && { attachments })
+        });
+        console.log("Streaming chat created successfully");
 
         // Return the stream directly
         return new Response(chat as ReadableStream<Uint8Array>, {
           headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-          },
-        })
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive"
+          }
+        });
       } else {
         // Use sync mode
-        console.log('Creating sync chat with params:', {
+        console.log("Creating sync chat with params:", {
           message,
-          responseMode: 'sync',
-        })
+          responseMode: "sync"
+        });
         chat = await v0.chats.create({
           message,
-          responseMode: 'sync',
+          responseMode: "sync",
           modelConfiguration: {
             thinking: true,
-            imageGenerations: true,
+            imageGenerations: true
           },
-          ...(attachments && attachments.length > 0 && { attachments }),
-        })
-        console.log('Sync chat created successfully')
+          ...(attachments && attachments.length > 0 && { attachments })
+        });
+        console.log("Sync chat created successfully");
       }
     }
 
     // Type guard to ensure we have a ChatDetail and not a stream
     if (chat instanceof ReadableStream) {
-      throw new Error('Unexpected streaming response')
+      throw new Error("Unexpected streaming response");
     }
 
-    const chatDetail = chat as ChatDetail
+    const chatDetail = chat as ChatDetail;
 
     // Create ownership mapping or anonymous log for new chat
     if (!chatId && chatDetail.id) {
@@ -203,20 +203,20 @@ export async function POST(request: NextRequest) {
           // Authenticated user - create ownership mapping
           await createChatOwnership({
             v0ChatId: chatDetail.id,
-            userId: session.user.id,
-          })
-          console.log('Chat ownership created:', chatDetail.id)
+            userId: session.user.id
+          });
+          console.log("Chat ownership created:", chatDetail.id);
         } else {
           // Anonymous user - log for rate limiting
-          const clientIP = getClientIP(request)
+          const clientIP = getClientIP(request);
           await createAnonymousChatLog({
             ipAddress: clientIP,
-            v0ChatId: chatDetail.id,
-          })
-          console.log('Anonymous chat logged:', chatDetail.id, 'IP:', clientIP)
+            v0ChatId: chatDetail.id
+          });
+          console.log("Anonymous chat logged:", chatDetail.id, "IP:", clientIP);
         }
       } catch (error) {
-        console.error('Failed to create chat ownership/log:', error)
+        console.error("Failed to create chat ownership/log:", error);
         // Don't fail the request if database save fails
       }
     }
@@ -226,24 +226,24 @@ export async function POST(request: NextRequest) {
       demo: chatDetail.demo,
       messages: chatDetail.messages?.map((msg) => ({
         ...msg,
-        experimental_content: (msg as any).experimental_content,
-      })),
-    })
+        experimental_content: (msg as any).experimental_content
+      }))
+    });
   } catch (error) {
-    console.error('V0 API Error:', error)
+    console.error("V0 API Error:", error);
 
     // Log more detailed error information
     if (error instanceof Error) {
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
     }
 
     return NextResponse.json(
       {
-        error: 'Failed to process request',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to process request",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
-    )
+      { status: 500 }
+    );
   }
 }

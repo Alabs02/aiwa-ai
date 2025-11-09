@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Copy, Trash2, ExternalLink } from 'lucide-react'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { MoreHorizontal, Copy, Trash2, ExternalLink } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -17,73 +17,73 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ChatMenuProps {
-  chatId: string
+  chatId: string;
 }
 
 export function ChatMenu({ chatId }: ChatMenuProps) {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDuplicateChat = async () => {
     try {
-      setIsLoading(true)
-      const response = await fetch('/api/chat/fork', {
-        method: 'POST',
+      setIsLoading(true);
+      const response = await fetch("/api/chat/fork", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ chatId }),
-      })
+        body: JSON.stringify({ chatId })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to duplicate chat')
+        throw new Error("Failed to duplicate chat");
       }
 
-      const result = await response.json()
+      const result = await response.json();
 
       // Close dialog and navigate to the new forked chat
-      setIsDuplicateDialogOpen(false)
-      router.push(`/chats/${result.id}`)
+      setIsDuplicateDialogOpen(false);
+      router.push(`/chats/${result.id}`);
     } catch (error) {
-      console.error('Error duplicating chat:', error)
+      console.error("Error duplicating chat:", error);
       // You could add a toast notification here
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleDeleteChat = async () => {
     try {
-      setIsLoading(true)
-      const response = await fetch('/api/chat/delete', {
-        method: 'POST',
+      setIsLoading(true);
+      const response = await fetch("/api/chat/delete", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ chatId }),
-      })
+        body: JSON.stringify({ chatId })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to delete chat')
+        throw new Error("Failed to delete chat");
       }
 
       // Close dialog and navigate back to homepage
-      setIsDeleteDialogOpen(false)
-      router.push('/')
+      setIsDeleteDialogOpen(false);
+      router.push("/");
     } catch (error) {
-      console.error('Error deleting chat:', error)
+      console.error("Error deleting chat:", error);
       // You could add a toast notification here
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -152,7 +152,7 @@ export function ChatMenu({ chatId }: ChatMenuProps) {
               Cancel
             </Button>
             <Button onClick={handleDuplicateChat} disabled={isLoading}>
-              {isLoading ? 'Duplicating...' : 'Duplicate Chat'}
+              {isLoading ? "Duplicating..." : "Duplicate Chat"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -181,11 +181,11 @@ export function ChatMenu({ chatId }: ChatMenuProps) {
               onClick={handleDeleteChat}
               disabled={isLoading}
             >
-              {isLoading ? 'Deleting...' : 'Delete Chat'}
+              {isLoading ? "Deleting..." : "Delete Chat"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

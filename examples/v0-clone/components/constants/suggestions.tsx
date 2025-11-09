@@ -3,12 +3,12 @@ import {
   BarChart3,
   Briefcase,
   ShoppingBag,
-  ListChecks,
-} from 'lucide-react'
+  ListChecks
+} from "lucide-react";
 
 export const suggestions = [
   {
-    Copy: 'SaaS Landing Page',
+    Copy: "SaaS Landing Page",
     Icon: <Rocket className="size-4" />,
     Prompt: `
     Create a modern, conversion-focused landing page for a fictional SaaS productivity tool called "StreamFlow". The landing page should include:
@@ -50,10 +50,10 @@ export const suggestions = [
 - Copyright information
 
 Use a modern color scheme with gradients, ensure mobile responsiveness, and include smooth scroll animations. Style with Tailwind CSS and use shadcn/ui components.
-    `,
+    `
   },
   {
-    Copy: 'Analytics Dashboard',
+    Copy: "Analytics Dashboard",
     Icon: <BarChart3 className="size-4" />,
     Prompt: `
       Create a comprehensive analytics dashboard for a fictional project management SaaS application. The dashboard should include:
@@ -94,10 +94,10 @@ Use a modern color scheme with gradients, ensure mobile responsiveness, and incl
 - Upcoming deadlines list
 
 Use a clean, professional design with a light/dark mode toggle. Implement with React, Tailwind CSS, and use Recharts for data visualization. Include responsive design for mobile and tablet views. Use realistic mock data.
-    `,
+    `
   },
   {
-    Copy: 'Portfolio Website',
+    Copy: "Portfolio Website",
     Icon: <Briefcase className="size-4" />,
     Prompt: `
       Create a modern, minimalist portfolio website for a fictional UX/UI designer named "Alex Rivera". The portfolio should include:
@@ -143,10 +143,10 @@ Use a clean, professional design with a light/dark mode toggle. Implement with R
 - Minimal design
 
 Use a sophisticated color palette (black, white, and one accent color). Implement smooth scroll animations, hover effects, and micro-interactions. Ensure the design is fully responsive and accessible. Use Next.js and Tailwind CSS with Framer Motion for animations.
-    `,
+    `
   },
   {
-    Copy: 'E-commerce Store',
+    Copy: "E-commerce Store",
     Icon: <ShoppingBag className="size-4" />,
     Prompt: `
       Create a fully functional e-commerce product page for a fictional online sneaker store called "KickFlow". The page should include:
@@ -191,10 +191,10 @@ Use a sophisticated color palette (black, white, and one accent color). Implemen
 - Section showing 4 recently viewed products
 
 Include a mini shopping cart slide-out panel, toast notifications for cart actions, and loading states. Use React with Tailwind CSS and shadcn/ui components. Implement responsive design optimized for mobile shopping. Add realistic product data and reviews.
-    `,
+    `
   },
   {
-    Copy: 'Task Manager App',
+    Copy: "Task Manager App",
     Icon: <ListChecks className="size-4" />,
     Prompt: `
 Create an intuitive task management application similar to Todoist or Things. The app should include:
@@ -258,6 +258,6 @@ Appears when clicking "Add Task":
 - Responsive design (mobile-first)
 
 Use React with Tailwind CSS, implement smooth animations with Framer Motion, and use shadcn/ui components. Include realistic sample tasks across different categories. Add empty states with helpful illustrations when lists are empty.
-    `,
-  },
-]
+    `
+  }
+];

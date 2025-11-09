@@ -1,35 +1,35 @@
-import React, { useRef, useEffect } from 'react'
-import { Message, MessageContent } from '@/components/ai-elements/message'
+import React, { useRef, useEffect } from "react";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   Conversation,
-  ConversationContent,
-} from '@/components/ai-elements/conversation'
-import { Loader } from '@/components/ai-elements/loader'
-import { MessageRenderer } from '@/components/message-renderer'
-import { sharedComponents } from '@/components/shared-components'
-import { StreamingMessage } from '@v0-sdk/react'
-import { useSession } from 'next-auth/react'
+  ConversationContent
+} from "@/components/ai-elements/conversation";
+import { Loader } from "@/components/ai-elements/loader";
+import { MessageRenderer } from "@/components/message-renderer";
+import { sharedComponents } from "@/components/shared-components";
+import { StreamingMessage } from "@v0-sdk/react";
+import { useSession } from "next-auth/react";
 
 interface ChatMessage {
-  type: 'user' | 'assistant'
-  content: string | any
-  isStreaming?: boolean
-  stream?: ReadableStream<Uint8Array> | null
+  type: "user" | "assistant";
+  content: string | any;
+  isStreaming?: boolean;
+  stream?: ReadableStream<Uint8Array> | null;
 }
 
 interface Chat {
-  id: string
-  demo?: string
-  url?: string
+  id: string;
+  demo?: string;
+  url?: string;
 }
 
 interface ChatMessagesProps {
-  chatHistory: ChatMessage[]
-  isLoading: boolean
-  currentChat: Chat | null
-  onStreamingComplete: (finalContent: any) => void
-  onChatData: (chatData: any) => void
-  onStreamingStarted?: () => void
+  chatHistory: ChatMessage[];
+  isLoading: boolean;
+  currentChat: Chat | null;
+  onStreamingComplete: (finalContent: any) => void;
+  onChatData: (chatData: any) => void;
+  onStreamingStarted?: () => void;
 }
 
 export function ChatMessages({
@@ -38,39 +38,39 @@ export function ChatMessages({
   currentChat,
   onStreamingComplete,
   onChatData,
-  onStreamingStarted,
+  onStreamingStarted
 }: ChatMessagesProps) {
-  const streamingStartedRef = useRef(false)
-  const { data: session } = useSession()
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const streamingStartedRef = useRef(false);
+  const { data: session } = useSession();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Get user initials from session
   const initials =
-    session?.user?.email?.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'U'
+    session?.user?.email?.split("@")[0]?.slice(0, 2)?.toUpperCase() || "U";
 
   // Reset the streaming started flag when a new message starts loading
   useEffect(() => {
     if (isLoading) {
-      streamingStartedRef.current = false
+      streamingStartedRef.current = false;
     }
-  }, [isLoading])
+  }, [isLoading]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [chatHistory])
+  }, [chatHistory]);
 
   if (chatHistory.length === 0) {
     return (
       <Conversation>
         <ConversationContent>
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-nuetral-200 via-neutral-500 to-neutral-800 flex items-center justify-center">
+          <div className="flex min-h-[400px] items-center justify-center">
+            <div className="space-y-3 text-center">
+              <div className="from-nuetral-200 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br via-neutral-500 to-neutral-800">
                 <svg
-                  className="w-8 h-8 text-black"
+                  className="h-8 w-8 text-black"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -90,13 +90,13 @@ export function ChatMessages({
           </div>
         </ConversationContent>
       </Conversation>
-    )
+    );
   }
 
   return (
     <Conversation>
       <ConversationContent>
-        <div className="max-w-4xl mx-auto px-4 py-6 space-y-1">
+        <div className="mx-auto max-w-4xl space-y-1 px-4 py-6">
           {chatHistory.map((msg, index) => (
             <Message from={msg.type} key={index}>
               {msg.isStreaming && msg.stream ? (
@@ -109,11 +109,11 @@ export function ChatMessages({
                   onChunk={(chunk) => {
                     // Hide external loader once we start receiving content (only once)
                     if (onStreamingStarted && !streamingStartedRef.current) {
-                      streamingStartedRef.current = true
-                      onStreamingStarted()
+                      streamingStartedRef.current = true;
+                      onStreamingStarted();
                     }
                   }}
-                  onError={(error) => console.error('Streaming error:', error)}
+                  onError={(error) => console.error("Streaming error:", error)}
                   components={sharedComponents}
                   showLoadingIndicator={false}
                 />
@@ -128,7 +128,7 @@ export function ChatMessages({
             </Message>
           ))}
           {isLoading && (
-            <div className="flex items-center gap-2 py-4 px-3">
+            <div className="flex items-center gap-2 px-3 py-4">
               <Loader size={14} className="text-gray-500 dark:text-gray-400" />
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 Thinking...
@@ -138,5 +138,5 @@ export function ChatMessages({
         </div>
       </ConversationContent>
     </Conversation>
-  )
+  );
 }
