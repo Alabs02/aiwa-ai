@@ -1,6 +1,7 @@
 # v0 clone
 
-> **⚠️ Developer Preview**: This SDK is currently in beta and is subject to change. Use in production at your own risk.
+> **⚠️ Developer Preview**: This SDK is currently in beta and is subject to
+> change. Use in production at your own risk.
 
 <p align="center">
     <img src="./screenshot.png" alt="v0 Clone Screenshot" width="800" />
@@ -77,7 +78,8 @@ Then, run the development server:
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the
+result.
 
 ## Features
 
@@ -90,8 +92,10 @@ This v0 clone includes:
 - **Real-time Preview**: Split-screen interface with chat and preview panels
 - **Conversation History**: Maintains chat history throughout the session
 - **Suggestion System**: Provides helpful prompts to get users started
-- **Streaming Support**: Toggle between streaming and non-streaming AI responses for real-time updates
-- **Comprehensive Task Support**: Full support for all v0 Platform API task types including:
+- **Streaming Support**: Toggle between streaming and non-streaming AI responses
+  for real-time updates
+- **Comprehensive Task Support**: Full support for all v0 Platform API task
+  types including:
   - `task-thinking-v1` - AI reasoning and thought processes
   - `task-search-web-v1` - Web search operations with results
   - `task-search-repo-v1` - Repository/codebase search functionality
@@ -103,12 +107,16 @@ This v0 clone includes:
 
 ### Authentication & Multi-Tenant Features
 
-- **Anonymous Access**: Unauthenticated users can create chats directly (with rate limits)
+- **Anonymous Access**: Unauthenticated users can create chats directly (with
+  rate limits)
 - **Guest Access**: Users can register as guests for persistent sessions
-- **User Registration/Login**: Email/password authentication with secure password hashing
+- **User Registration/Login**: Email/password authentication with secure
+  password hashing
 - **Session Management**: Secure session handling with NextAuth.js
-- **Multi-Tenant Architecture**: Multiple users share the same v0 API organization
-- **Ownership Mapping**: Authenticated users only see their own chats and projects
+- **Multi-Tenant Architecture**: Multiple users share the same v0 API
+  organization
+- **Ownership Mapping**: Authenticated users only see their own chats and
+  projects
 - **Rate Limiting**: Different limits for anonymous, guest, and registered users
 - **User Navigation**: Header dropdown with user info and sign-out options
 
@@ -118,26 +126,33 @@ This v0 clone includes:
 
 1. Set up all environment variables in `.env`
 2. Run database migrations with `pnpm db:migrate`
-3. Start the development server with `pnpm dev` or production server with `pnpm start`
+3. Start the development server with `pnpm dev` or production server with
+   `pnpm start`
 
 ### Using the App
 
-4. **Anonymous Usage**: Visit the homepage and start creating chats immediately (3 chats/day limit)
-5. **Guest Access**: Register as a guest for persistent sessions (5 chats/day limit)
+4. **Anonymous Usage**: Visit the homepage and start creating chats immediately
+   (3 chats/day limit)
+5. **Guest Access**: Register as a guest for persistent sessions (5 chats/day
+   limit)
 6. **Full Account**: Create a permanent account for higher limits (50 chats/day)
-7. Use the "Streaming" toggle in the header to enable/disable real-time streaming responses
+7. Use the "Streaming" toggle in the header to enable/disable real-time
+   streaming responses
 8. Enter a prompt describing the app you want to build
 9. Watch as v0 generates your app in real-time in the preview panel
 10. Continue the conversation to iterate and improve your app
-11. Authenticated users' chats are automatically saved and associated with their account
+11. Authenticated users' chats are automatically saved and associated with their
+    account
 
 ## Architecture
 
 ### Frontend
 
-- `app/page.tsx` - Main UI with chat interface, streaming toggle, and preview panel
+- `app/page.tsx` - Main UI with chat interface, streaming toggle, and preview
+  panel
 - `components/ai-elements/` - AI Elements components for the UI
-- `components/shared/app-header.tsx` - Navigation header with user authentication
+- `components/shared/app-header.tsx` - Navigation header with user
+  authentication
 - Uses `@v0-sdk/react` components for rendering streaming AI responses
 
 ### Backend & API
@@ -151,8 +166,10 @@ This v0 clone includes:
 
 - **Users**: Store user accounts with email and hashed passwords
 - **ProjectOwnership**: Maps v0 API project IDs → user IDs (ownership only)
-- **ChatOwnership**: Maps v0 API chat IDs → user IDs with optional project association
-- **AnonymousChatLog**: Tracks anonymous chat creation by IP address for rate limiting
+- **ChatOwnership**: Maps v0 API chat IDs → user IDs with optional project
+  association
+- **AnonymousChatLog**: Tracks anonymous chat creation by IP address for rate
+  limiting
 
 ### Multi-Tenant Design
 
@@ -168,7 +185,8 @@ When streaming is enabled:
 - Frontend sends `streaming: true` to the API route
 - API route calls `v0.chats.create({ responseMode: 'experimental_stream' })`
 - Server returns a streaming response with `Content-Type: text/event-stream`
-- Frontend uses `StreamingMessage` component from `@v0-sdk/react` to render responses in real-time
+- Frontend uses `StreamingMessage` component from `@v0-sdk/react` to render
+  responses in real-time
 
 ## Database Commands
 
@@ -188,11 +206,15 @@ When streaming is enabled:
 ## User Types & Rate Limits
 
 - **Anonymous Users**: No account needed, 3 chats per day, no data persistence
-- **Guest Users**: Auto-created accounts, 5 chats per day, data persists during session
-- **Registered Users**: Permanent accounts, 50 chats per day, data persists across sessions and devices
+- **Guest Users**: Auto-created accounts, 5 chats per day, data persists during
+  session
+- **Registered Users**: Permanent accounts, 50 chats per day, data persists
+  across sessions and devices
 
 Rate limits are enforced per 24-hour period and reset daily.
 
 ---
 
-You now have a working multi-tenant v0 clone with authentication! Feel free to explore the [v0 Platform API](https://v0.dev/docs/api/platform) and extend your app with additional features.
+You now have a working multi-tenant v0 clone with authentication! Feel free to
+explore the [v0 Platform API](https://v0.dev/docs/api/platform) and extend your
+app with additional features.

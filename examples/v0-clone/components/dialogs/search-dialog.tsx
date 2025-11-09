@@ -13,7 +13,7 @@ import {
   Clock,
   Folder,
   MessageSquare,
-  Loader2,
+  Loader2
 } from "lucide-react";
 
 interface Chat {
@@ -63,7 +63,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       action: () => {
         onOpenChange(false);
         router.push("/");
-      },
+      }
     },
     {
       icon: Clock,
@@ -71,7 +71,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       action: () => {
         onOpenChange(false);
         router.push("/chats");
-      },
+      }
     },
     {
       icon: Folder,
@@ -79,8 +79,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       action: () => {
         onOpenChange(false);
         router.push("/projects");
-      },
-    },
+      }
+    }
   ];
 
   // Search function with debounce
@@ -105,7 +105,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/chats/search?q=${encodeURIComponent(query)}`,
+        `/api/chats/search?q=${encodeURIComponent(query)}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -187,30 +187,30 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       <DialogContent
         className={cn(
           "glass-strong border-white/[0.12]",
-          "p-0 gap-0 overflow-hidden",
+          "gap-0 overflow-hidden p-0",
           "max-w-2xl",
-          "shadow-[0_20px_60px_rgba(0,0,0,0.5)]",
+          "shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
         )}
       >
         {/* Search Input */}
         <div className="border-b border-white/[0.08] p-4 !pt-7">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+            <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-white/40" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Type a command or search..."
               className={cn(
-                "pl-11 h-12 text-base",
-                "bg-white/[0.03] border-white/[0.08]",
-                "focus:bg-white/[0.05] focus:border-white/[0.15]",
+                "h-12 pl-11 text-base",
+                "border-white/[0.08] bg-white/[0.03]",
+                "focus:border-white/[0.15] focus:bg-white/[0.05]",
                 "placeholder:text-white/40",
-                "transition-all duration-200",
+                "transition-all duration-200"
               )}
               autoFocus
             />
             {isLoading && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 animate-spin" />
+              <Loader2 className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin text-white/40" />
             )}
           </div>
         </div>
@@ -229,12 +229,12 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                       key={action.label}
                       onClick={action.action}
                       className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-md",
+                        "flex w-full items-center gap-3 rounded-md px-3 py-2.5",
                         "text-white/80 hover:text-white",
                         "transition-all duration-150",
                         isSelected
                           ? "bg-white/[0.12] text-white"
-                          : "hover:bg-white/[0.08]",
+                          : "hover:bg-white/[0.08]"
                       )}
                     >
                       <Icon className="h-5 w-5 shrink-0" />
@@ -248,7 +248,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             {/* Recent Chats Section */}
             {searchResults.length > 0 && (
               <div>
-                <h3 className="px-3 py-2 text-xs font-semibold text-white/50 uppercase tracking-wider">
+                <h3 className="px-3 py-2 text-xs font-semibold tracking-wider text-white/50 uppercase">
                   {searchQuery ? "Search Results" : "Recent Chats"}
                 </h3>
                 <div className="space-y-1">
@@ -263,30 +263,30 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                           router.push(`/chats/${chat.id}`);
                         }}
                         className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-md",
+                          "flex w-full items-center gap-3 rounded-md px-3 py-2.5",
                           "text-left transition-all duration-150",
                           isSelected
                             ? "bg-white/[0.12]"
-                            : "hover:bg-white/[0.08]",
+                            : "hover:bg-white/[0.08]"
                         )}
                       >
                         <MessageSquare
                           className={cn(
                             "h-4 w-4 shrink-0",
-                            isSelected ? "text-white" : "text-white/60",
+                            isSelected ? "text-white" : "text-white/60"
                           )}
                         />
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p
                             className={cn(
-                              "font-medium truncate",
-                              isSelected ? "text-white" : "text-white/80",
+                              "truncate font-medium",
+                              isSelected ? "text-white" : "text-white/80"
                             )}
                           >
                             {getChatDisplayName(chat)}
                           </p>
                         </div>
-                        <span className="text-xs text-white/40 shrink-0">
+                        <span className="shrink-0 text-xs text-white/40">
                           {formatRelativeTime(chat.updatedAt || chat.createdAt)}
                         </span>
                       </button>
@@ -299,9 +299,9 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             {/* Empty State */}
             {!isLoading && searchResults.length === 0 && searchQuery !== "" && (
               <div className="px-4 py-8 text-center">
-                <Search className="h-12 w-12 mx-auto mb-3 text-white/20" />
-                <p className="text-white/60 text-sm mb-1">No chats found</p>
-                <p className="text-white/40 text-xs">
+                <Search className="mx-auto mb-3 h-12 w-12 text-white/20" />
+                <p className="mb-1 text-sm text-white/60">No chats found</p>
+                <p className="text-xs text-white/40">
                   Try a different search term
                 </p>
               </div>
@@ -310,31 +310,31 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             {/* Loading State */}
             {isLoading && searchResults.length === 0 && (
               <div className="px-4 py-8 text-center">
-                <Loader2 className="h-8 w-8 mx-auto mb-3 text-white/40 animate-spin" />
-                <p className="text-white/60 text-sm">Searching...</p>
+                <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-white/40" />
+                <p className="text-sm text-white/60">Searching...</p>
               </div>
             )}
           </div>
         </ScrollArea>
 
         {/* Footer */}
-        <div className="border-t border-white/[0.08] px-4 py-2 flex items-center justify-between text-xs text-white/40">
+        <div className="flex items-center justify-between border-t border-white/[0.08] px-4 py-2 text-xs text-white/40">
           <div className="flex items-center gap-4">
             <span>
-              <kbd className="px-1.5 py-0.5 rounded bg-white/[0.08] text-white/60 font-mono">
+              <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-white/60">
                 ↑↓
               </kbd>{" "}
               Navigate
             </span>
             <span>
-              <kbd className="px-1.5 py-0.5 rounded bg-white/[0.08] text-white/60 font-mono">
+              <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-white/60">
                 ↵
               </kbd>{" "}
               Select
             </span>
           </div>
           <span>
-            <kbd className="px-1.5 py-0.5 rounded bg-white/[0.08] text-white/60 font-mono">
+            <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-white/60">
               Esc
             </kbd>{" "}
             Close

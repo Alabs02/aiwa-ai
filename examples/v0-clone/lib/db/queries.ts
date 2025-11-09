@@ -1,4 +1,4 @@
-import 'server-only'
+import "server-only";
 
 import {
   and,
@@ -11,8 +11,8 @@ import {
   inArray,
   lt,
   type SQL,
-  or,
-} from 'drizzle-orm'
+  or
+} from "drizzle-orm";
 
 import {
   users,
@@ -22,60 +22,60 @@ import {
   type User,
   type ChatOwnership,
   type AnonymousChatLog,
-  type GitHubExport,
-} from './schema'
-import { generateUUID } from '../utils'
-import { generateHashedPassword } from './utils'
-import db from './connection'
+  type GitHubExport
+} from "./schema";
+import { generateUUID } from "../utils";
+import { generateHashedPassword } from "./utils";
+import db from "./connection";
 
 // Extended type for chat ownership with user info
 export type ChatOwnershipWithUser = ChatOwnership & {
-  owner_email?: string
-  owner_name?: string
-}
+  owner_email?: string;
+  owner_name?: string;
+};
 
 // Featured chats queries with user information
 export async function getFeaturedChats({
-  visibility = 'all',
+  visibility = "all",
   userId,
   limit = 12,
-  offset = 0,
+  offset = 0
 }: {
-  visibility?: 'all' | 'public' | 'private' | 'team'
-  userId?: string
-  limit?: number
-  offset?: number
+  visibility?: "all" | "public" | "private" | "team";
+  userId?: string;
+  limit?: number;
+  offset?: number;
 }): Promise<ChatOwnershipWithUser[]> {
   try {
-    let conditions: SQL[] = []
+    let conditions: SQL[] = [];
 
-    if (visibility === 'public') {
-      conditions.push(eq(chat_ownerships.visibility, 'public'))
-    } else if (visibility === 'private' && userId) {
+    if (visibility === "public") {
+      conditions.push(eq(chat_ownerships.visibility, "public"));
+    } else if (visibility === "private" && userId) {
       conditions.push(
         and(
-          eq(chat_ownerships.visibility, 'private'),
-          eq(chat_ownerships.user_id, userId),
-        )!,
-      )
-    } else if (visibility === 'team') {
-      conditions.push(eq(chat_ownerships.visibility, 'team'))
-    } else if (visibility === 'all' && userId) {
+          eq(chat_ownerships.visibility, "private"),
+          eq(chat_ownerships.user_id, userId)
+        )!
+      );
+    } else if (visibility === "team") {
+      conditions.push(eq(chat_ownerships.visibility, "team"));
+    } else if (visibility === "all" && userId) {
       conditions.push(
         or(
-          eq(chat_ownerships.visibility, 'public'),
-          eq(chat_ownerships.visibility, 'team'),
+          eq(chat_ownerships.visibility, "public"),
+          eq(chat_ownerships.visibility, "team"),
           and(
-            eq(chat_ownerships.visibility, 'private'),
-            eq(chat_ownerships.user_id, userId),
-          )!,
-        )!,
-      )
+            eq(chat_ownerships.visibility, "private"),
+            eq(chat_ownerships.user_id, userId)
+          )!
+        )!
+      );
     } else {
-      conditions.push(eq(chat_ownerships.visibility, 'public'))
+      conditions.push(eq(chat_ownerships.visibility, "public"));
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     // Join with users table to get owner information
     const chatsWithUsers = await db
@@ -89,69 +89,69 @@ export async function getFeaturedChats({
         preview_url: chat_ownerships.preview_url,
         demo_url: chat_ownerships.demo_url,
         created_at: chat_ownerships.created_at,
-        owner_email: users.email,
+        owner_email: users.email
       })
       .from(chat_ownerships)
       .leftJoin(users, eq(chat_ownerships.user_id, users.id))
       .where(whereClause)
       .orderBy(desc(chat_ownerships.created_at))
       .limit(limit)
-      .offset(offset)
+      .offset(offset);
 
-    return chatsWithUsers as ChatOwnershipWithUser[]
+    return chatsWithUsers as ChatOwnershipWithUser[];
   } catch (error) {
-    console.error('Failed to get featured chats from database')
-    throw error
+    console.error("Failed to get featured chats from database");
+    throw error;
   }
 }
 
 export async function getFeaturedChatsCount({
-  visibility = 'all',
-  userId,
+  visibility = "all",
+  userId
 }: {
-  visibility?: 'all' | 'public' | 'private' | 'team'
-  userId?: string
+  visibility?: "all" | "public" | "private" | "team";
+  userId?: string;
 }): Promise<number> {
   try {
-    let conditions: SQL[] = []
+    let conditions: SQL[] = [];
 
-    if (visibility === 'public') {
-      conditions.push(eq(chat_ownerships.visibility, 'public'))
-    } else if (visibility === 'private' && userId) {
+    if (visibility === "public") {
+      conditions.push(eq(chat_ownerships.visibility, "public"));
+    } else if (visibility === "private" && userId) {
       conditions.push(
         and(
-          eq(chat_ownerships.visibility, 'private'),
-          eq(chat_ownerships.user_id, userId),
-        )!,
-      )
-    } else if (visibility === 'team') {
-      conditions.push(eq(chat_ownerships.visibility, 'team'))
-    } else if (visibility === 'all' && userId) {
+          eq(chat_ownerships.visibility, "private"),
+          eq(chat_ownerships.user_id, userId)
+        )!
+      );
+    } else if (visibility === "team") {
+      conditions.push(eq(chat_ownerships.visibility, "team"));
+    } else if (visibility === "all" && userId) {
       conditions.push(
         or(
-          eq(chat_ownerships.visibility, 'public'),
-          eq(chat_ownerships.visibility, 'team'),
+          eq(chat_ownerships.visibility, "public"),
+          eq(chat_ownerships.visibility, "team"),
           and(
-            eq(chat_ownerships.visibility, 'private'),
-            eq(chat_ownerships.user_id, userId),
-          )!,
-        )!,
-      )
+            eq(chat_ownerships.visibility, "private"),
+            eq(chat_ownerships.user_id, userId)
+          )!
+        )!
+      );
     } else {
-      conditions.push(eq(chat_ownerships.visibility, 'public'))
+      conditions.push(eq(chat_ownerships.visibility, "public"));
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [result] = await db
       .select({ count: count(chat_ownerships.id) })
       .from(chat_ownerships)
-      .where(whereClause)
+      .where(whereClause);
 
-    return result?.count || 0
+    return result?.count || 0;
   } catch (error) {
-    console.error('Failed to get featured chats count from database')
-    throw error
+    console.error("Failed to get featured chats count from database");
+    throw error;
   }
 }
 
@@ -159,12 +159,12 @@ export async function updateChatVisibility({
   v0ChatId,
   visibility,
   previewUrl,
-  demoUrl,
+  demoUrl
 }: {
-  v0ChatId: string
-  visibility: 'public' | 'private' | 'team'
-  previewUrl?: string
-  demoUrl?: string
+  v0ChatId: string;
+  visibility: "public" | "private" | "team";
+  previewUrl?: string;
+  demoUrl?: string;
 }) {
   try {
     return await db
@@ -172,82 +172,82 @@ export async function updateChatVisibility({
       .set({
         visibility,
         preview_url: previewUrl,
-        demo_url: demoUrl,
+        demo_url: demoUrl
       })
       .where(eq(chat_ownerships.v0_chat_id, v0ChatId))
-      .returning()
+      .returning();
   } catch (error) {
-    console.error('Failed to update chat visibility in database')
-    throw error
+    console.error("Failed to update chat visibility in database");
+    throw error;
   }
 }
 
 // Original queries below (keeping them all)...
 export async function getUser(email: string): Promise<Array<User>> {
   try {
-    return await db.select().from(users).where(eq(users.email, email))
+    return await db.select().from(users).where(eq(users.email, email));
   } catch (error) {
-    console.error('Failed to get user from database')
-    throw error
+    console.error("Failed to get user from database");
+    throw error;
   }
 }
 
 export async function createUser(
   email: string,
-  password: string,
+  password: string
 ): Promise<User[]> {
   try {
-    const hashedPassword = generateHashedPassword(password)
+    const hashedPassword = generateHashedPassword(password);
     return await db
       .insert(users)
       .values({
         email,
-        password: hashedPassword,
+        password: hashedPassword
       })
-      .returning()
+      .returning();
   } catch (error) {
-    console.error('Failed to create user in database')
-    throw error
+    console.error("Failed to create user in database");
+    throw error;
   }
 }
 
 export async function createGuestUser(): Promise<User[]> {
   try {
-    const guestId = generateUUID()
-    const guestEmail = `guest-${guestId}@example.com`
+    const guestId = generateUUID();
+    const guestEmail = `guest-${guestId}@example.com`;
 
     return await db
       .insert(users)
       .values({
         email: guestEmail,
-        password: null,
+        password: null
       })
-      .returning()
+      .returning();
   } catch (error) {
-    console.error('Failed to create guest user in database')
-    throw error
+    console.error("Failed to create guest user in database");
+    throw error;
   }
 }
 
 // Chat ownership functions
 export async function createChatOwnership({
   v0ChatId,
-  userId,
+  userId
 }: {
-  v0ChatId: string
-  userId: string
+  v0ChatId: string;
+  userId: string;
 }) {
   try {
     return await db
       .insert(chat_ownerships)
       .values({
         v0_chat_id: v0ChatId,
-        user_id: userId,
+        user_id: userId
       })
-      .onConflictDoNothing({ target: chat_ownerships.v0_chat_id })
+      .onConflictDoNothing({ target: chat_ownerships.v0_chat_id });
   } catch (error) {
-    console.error('Failed to create chat ownership in database')
-    throw error
+    console.error("Failed to create chat ownership in database");
+    throw error;
   }
 }
 
@@ -256,30 +256,30 @@ export async function getChatOwnership({ v0ChatId }: { v0ChatId: string }) {
     const [ownership] = await db
       .select()
       .from(chat_ownerships)
-      .where(eq(chat_ownerships.v0_chat_id, v0ChatId))
-    return ownership
+      .where(eq(chat_ownerships.v0_chat_id, v0ChatId));
+    return ownership;
   } catch (error) {
-    console.error('Failed to get chat ownership from database')
-    throw error
+    console.error("Failed to get chat ownership from database");
+    throw error;
   }
 }
 
 export async function getChatIdsByUserId({
-  userId,
+  userId
 }: {
-  userId: string
+  userId: string;
 }): Promise<string[]> {
   try {
     const ownerships = await db
       .select({ v0ChatId: chat_ownerships.v0_chat_id })
       .from(chat_ownerships)
       .where(eq(chat_ownerships.user_id, userId))
-      .orderBy(desc(chat_ownerships.created_at))
+      .orderBy(desc(chat_ownerships.created_at));
 
-    return ownerships.map((o: { v0ChatId: string }) => o.v0ChatId)
+    return ownerships.map((o: { v0ChatId: string }) => o.v0ChatId);
   } catch (error) {
-    console.error('Failed to get chat IDs by user from database')
-    throw error
+    console.error("Failed to get chat IDs by user from database");
+    throw error;
   }
 }
 
@@ -287,23 +287,23 @@ export async function deleteChatOwnership({ v0ChatId }: { v0ChatId: string }) {
   try {
     return await db
       .delete(chat_ownerships)
-      .where(eq(chat_ownerships.v0_chat_id, v0ChatId))
+      .where(eq(chat_ownerships.v0_chat_id, v0ChatId));
   } catch (error) {
-    console.error('Failed to delete chat ownership from database')
-    throw error
+    console.error("Failed to delete chat ownership from database");
+    throw error;
   }
 }
 
 // Rate limiting functions
 export async function getChatCountByUserId({
   userId,
-  differenceInHours,
+  differenceInHours
 }: {
-  userId: string
-  differenceInHours: number
+  userId: string;
+  differenceInHours: number;
 }): Promise<number> {
   try {
-    const hoursAgo = new Date(Date.now() - differenceInHours * 60 * 60 * 1000)
+    const hoursAgo = new Date(Date.now() - differenceInHours * 60 * 60 * 1000);
 
     const [stats] = await db
       .select({ count: count(chat_ownerships.id) })
@@ -311,26 +311,26 @@ export async function getChatCountByUserId({
       .where(
         and(
           eq(chat_ownerships.user_id, userId),
-          gte(chat_ownerships.created_at, hoursAgo),
-        ),
-      )
+          gte(chat_ownerships.created_at, hoursAgo)
+        )
+      );
 
-    return stats?.count || 0
+    return stats?.count || 0;
   } catch (error) {
-    console.error('Failed to get chat count by user from database')
-    throw error
+    console.error("Failed to get chat count by user from database");
+    throw error;
   }
 }
 
 export async function getChatCountByIP({
   ipAddress,
-  differenceInHours,
+  differenceInHours
 }: {
-  ipAddress: string
-  differenceInHours: number
+  ipAddress: string;
+  differenceInHours: number;
 }): Promise<number> {
   try {
-    const hoursAgo = new Date(Date.now() - differenceInHours * 60 * 60 * 1000)
+    const hoursAgo = new Date(Date.now() - differenceInHours * 60 * 60 * 1000);
 
     const [stats] = await db
       .select({ count: count(anonymous_chat_logs.id) })
@@ -338,64 +338,64 @@ export async function getChatCountByIP({
       .where(
         and(
           eq(anonymous_chat_logs.ip_address, ipAddress),
-          gte(anonymous_chat_logs.created_at, hoursAgo),
-        ),
-      )
+          gte(anonymous_chat_logs.created_at, hoursAgo)
+        )
+      );
 
-    return stats?.count || 0
+    return stats?.count || 0;
   } catch (error) {
-    console.error('Failed to get chat count by IP from database')
-    throw error
+    console.error("Failed to get chat count by IP from database");
+    throw error;
   }
 }
 
 export async function createAnonymousChatLog({
   ipAddress,
-  v0ChatId,
+  v0ChatId
 }: {
-  ipAddress: string
-  v0ChatId: string
+  ipAddress: string;
+  v0ChatId: string;
 }) {
   try {
     return await db.insert(anonymous_chat_logs).values({
       ip_address: ipAddress,
-      v0_chat_id: v0ChatId,
-    })
+      v0_chat_id: v0ChatId
+    });
   } catch (error) {
-    console.error('Failed to create anonymous chat log in database')
-    throw error
+    console.error("Failed to create anonymous chat log in database");
+    throw error;
   }
 }
 
 // GitHub integration functions
 export async function saveGitHubToken({
   userId,
-  accessToken,
+  accessToken
 }: {
-  userId: string
-  accessToken: string
+  userId: string;
+  accessToken: string;
 }) {
   try {
     return await db
       .update(users)
       .set({ github_access_token: accessToken })
       .where(eq(users.id, userId))
-      .returning()
+      .returning();
   } catch (error) {
-    console.error('Failed to save GitHub token to database')
-    throw error
+    console.error("Failed to save GitHub token to database");
+    throw error;
   }
 }
 
 export async function getUserWithGitHubToken(
-  userId: string,
+  userId: string
 ): Promise<User | undefined> {
   try {
-    const [user] = await db.select().from(users).where(eq(users.id, userId))
-    return user
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    return user;
   } catch (error) {
-    console.error('Failed to get user with GitHub token from database')
-    throw error
+    console.error("Failed to get user with GitHub token from database");
+    throw error;
   }
 }
 
@@ -404,13 +404,13 @@ export async function createGitHubExport({
   userId,
   repoName,
   repoUrl,
-  isPrivate,
+  isPrivate
 }: {
-  v0ChatId: string
-  userId: string
-  repoName: string
-  repoUrl: string
-  isPrivate: boolean
+  v0ChatId: string;
+  userId: string;
+  repoName: string;
+  repoUrl: string;
+  isPrivate: boolean;
 }) {
   try {
     return await db
@@ -420,45 +420,45 @@ export async function createGitHubExport({
         user_id: userId,
         repo_name: repoName,
         repo_url: repoUrl,
-        is_private: isPrivate ? 'true' : 'false',
+        is_private: isPrivate ? "true" : "false"
       })
-      .returning()
+      .returning();
   } catch (error) {
-    console.error('Failed to create GitHub export record in database')
-    throw error
+    console.error("Failed to create GitHub export record in database");
+    throw error;
   }
 }
 
 export async function getGitHubExportsByChatId({
-  v0ChatId,
+  v0ChatId
 }: {
-  v0ChatId: string
+  v0ChatId: string;
 }): Promise<GitHubExport[]> {
   try {
     return await db
       .select()
       .from(github_exports)
       .where(eq(github_exports.v0_chat_id, v0ChatId))
-      .orderBy(desc(github_exports.created_at))
+      .orderBy(desc(github_exports.created_at));
   } catch (error) {
-    console.error('Failed to get GitHub exports from database')
-    throw error
+    console.error("Failed to get GitHub exports from database");
+    throw error;
   }
 }
 
 export async function getGitHubExportsByUserId({
-  userId,
+  userId
 }: {
-  userId: string
+  userId: string;
 }): Promise<GitHubExport[]> {
   try {
     return await db
       .select()
       .from(github_exports)
       .where(eq(github_exports.user_id, userId))
-      .orderBy(desc(github_exports.created_at))
+      .orderBy(desc(github_exports.created_at));
   } catch (error) {
-    console.error('Failed to get user GitHub exports from database')
-    throw error
+    console.error("Failed to get user GitHub exports from database");
+    throw error;
   }
 }

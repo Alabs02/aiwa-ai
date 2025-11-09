@@ -1,32 +1,32 @@
-'use client'
+"use client";
 
-import { useActionState, useEffect, useState } from 'react'
-import { signInAction, signUpAction } from '@/app/(auth)/actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Link from 'next/link'
-import { toast } from 'sonner'
-import { Loader2, Eye, EyeOff } from 'lucide-react'
+import { useActionState, useEffect, useState } from "react";
+import { signInAction, signUpAction } from "@/app/(auth)/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { toast } from "sonner";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps {
-  type: 'signin' | 'signup'
+  type: "signin" | "signup";
 }
 
 export function AuthForm({ type }: AuthFormProps) {
   const [state, formAction, isPending] = useActionState(
-    type === 'signin' ? signInAction : signUpAction,
-    undefined,
-  )
-  const [showPassword, setShowPassword] = useState(false)
+    type === "signin" ? signInAction : signUpAction,
+    undefined
+  );
+  const [showPassword, setShowPassword] = useState(false);
 
   // Show toast notifications when state changes
   useEffect(() => {
-    if (state?.type === 'error') {
-      toast.error(state.message)
-    } else if (state?.type === 'success') {
-      toast.success(state.message)
+    if (state?.type === "error") {
+      toast.error(state.message);
+    } else if (state?.type === "success") {
+      toast.success(state.message);
     }
-  }, [state])
+  }, [state]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -38,7 +38,7 @@ export function AuthForm({ type }: AuthFormProps) {
           placeholder="Email"
           required
           autoFocus
-          className="w-full md:h-10 !font-body"
+          className="!font-body w-full md:h-10"
           disabled={isPending}
         />
       </div>
@@ -46,19 +46,19 @@ export function AuthForm({ type }: AuthFormProps) {
         <Input
           id="password"
           name="password"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           placeholder="Password"
           required
-          className="w-full md:h-10 !font-body pr-10"
-          minLength={type === 'signup' ? 6 : 1}
+          className="!font-body w-full pr-10 md:h-10"
+          minLength={type === "signup" ? 6 : 1}
           disabled={isPending}
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
           disabled={isPending}
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          aria-label={showPassword ? "Hide password" : "Show password"}
         >
           {showPassword ? (
             <EyeOff className="h-4 w-4" />
@@ -70,36 +70,36 @@ export function AuthForm({ type }: AuthFormProps) {
 
       <Button
         type="submit"
-        className="w-full md:h-10 !font-button"
+        className="!font-button w-full md:h-10"
         disabled={isPending}
       >
         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isPending
-          ? type === 'signin'
-            ? 'Signing in...'
-            : 'Creating account...'
-          : type === 'signin'
-            ? 'Sign In'
-            : 'Create Account'}
+          ? type === "signin"
+            ? "Signing in..."
+            : "Creating account..."
+          : type === "signin"
+            ? "Sign In"
+            : "Create Account"}
       </Button>
 
-      <div className="text-center text-sm text-muted-foreground font-body">
-        {type === 'signin' ? (
+      <div className="text-muted-foreground font-body text-center text-sm">
+        {type === "signin" ? (
           <>
-            Don&apos;t have an account?{' '}
+            Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="text-primary hover:underline !font-button"
+              className="text-primary !font-button hover:underline"
             >
               Sign up
             </Link>
           </>
         ) : (
           <>
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link
               href="/login"
-              className="text-primary hover:underline !font-button"
+              className="text-primary !font-button hover:underline"
             >
               Sign in
             </Link>
@@ -107,5 +107,5 @@ export function AuthForm({ type }: AuthFormProps) {
         )}
       </div>
     </form>
-  )
+  );
 }

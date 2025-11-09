@@ -9,7 +9,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
+  TooltipTrigger
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +19,7 @@ import {
   Folder,
   MessageSquare,
   ChevronLeft,
-  ChevronRight,
+  ChevronRight
 } from "lucide-react";
 import { SearchDialog } from "../dialogs/search-dialog";
 
@@ -103,7 +103,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
 
     // Dispatch custom event for same-tab synchronization
     window.dispatchEvent(
-      new CustomEvent("sidebar-toggle", { detail: { collapsed: newState } }),
+      new CustomEvent("sidebar-toggle", { detail: { collapsed: newState } })
     );
   };
 
@@ -150,27 +150,27 @@ export function AppSidebar({ className }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-[60px] bottom-0 z-40",
-        "bg-background/85 brightness-105 border-r border-l !border-r-white/[0.08]",
+        "fixed top-[60px] bottom-0 left-0 z-40",
+        "bg-background/85 border-r border-l !border-r-white/[0.08] brightness-105",
         "transition-all duration-300 ease-in-out",
         "flex flex-col",
         "backdrop-blur-2xl backdrop-saturate-150",
         // Hide on mobile by default
         "hidden md:flex",
         isCollapsed ? "w-16" : "w-64",
-        className,
+        className
       )}
     >
       {/* Sidebar Header with Toggle */}
-      <div className="flex items-center justify-end p-4 border-b border-white/[0.05]">
+      <div className="flex items-center justify-end border-b border-white/[0.05] p-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
           className={cn(
             "h-8 w-8 text-white/60 hover:text-white/90",
-            "hover:bg-white/[0.08] transition-colors",
-            isCollapsed && "mx-auto",
+            "transition-colors hover:bg-white/[0.08]",
+            isCollapsed && "mx-auto"
           )}
         >
           {isCollapsed ? (
@@ -197,10 +197,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "hover:bg-white/[0.08]",
                     "transition-all duration-200",
                     "group",
-                    isCollapsed && "justify-center px-0",
+                    isCollapsed && "justify-center px-0"
                   )}
                 >
-                  <Plus className="h-5 w-5 shrink-0 group-hover:rotate-90 transition-transform duration-200" />
+                  <Plus className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:rotate-90" />
                   {!isCollapsed && (
                     <span className="font-medium">New Chat</span>
                   )}
@@ -224,7 +224,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
                     "transition-all duration-200",
-                    isCollapsed && "justify-center px-0",
+                    isCollapsed && "justify-center px-0"
                   )}
                 >
                   <Search className="h-5 w-5 shrink-0" />
@@ -249,7 +249,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
                     "transition-all duration-200",
-                    isCollapsed && "justify-center px-0",
+                    isCollapsed && "justify-center px-0"
                   )}
                 >
                   <Folder className="h-5 w-5 shrink-0" />
@@ -273,7 +273,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
             {/* Recent Chats Section */}
             {session?.user?.id && !isCollapsed && (
               <div className="space-y-1">
-                <h3 className="px-2 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+                <h3 className="mb-2 px-2 text-xs font-semibold tracking-wider text-white/50 uppercase">
                   Recent Chats
                 </h3>
                 {isLoadingChats ? (
@@ -288,16 +288,16 @@ export function AppSidebar({ className }: AppSidebarProps) {
                         key={chat.id}
                         href={`/chats/${chat.id}`}
                         className={cn(
-                          "flex items-center gap-3 px-2 py-2 rounded-md",
+                          "flex items-center gap-3 rounded-md px-2 py-2",
                           "text-sm text-white/70 hover:text-white",
                           "hover:bg-white/[0.08]",
                           "transition-all duration-200",
                           "group",
-                          isActive && "bg-white/[0.12] text-white",
+                          isActive && "bg-white/[0.12] text-white"
                         )}
                       >
                         <MessageSquare className="h-4 w-4 shrink-0" />
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">
                             {getChatDisplayName(chat)}
                           </p>
@@ -309,7 +309,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     );
                   })
                 ) : (
-                  <p className="px-2 text-xs text-white/40 text-center py-4">
+                  <p className="px-2 py-4 text-center text-xs text-white/40">
                     No recent chats
                   </p>
                 )}
@@ -328,11 +328,11 @@ export function AppSidebar({ className }: AppSidebarProps) {
                           href={`/chats/${chat.id}`}
                           className={cn(
                             "flex items-center justify-center",
-                            "h-10 w-10 mx-auto rounded-md",
+                            "mx-auto h-10 w-10 rounded-md",
                             "text-white/70 hover:text-white",
                             "hover:bg-white/[0.08]",
                             "transition-all duration-200",
-                            isActive && "bg-white/[0.12] text-white",
+                            isActive && "bg-white/[0.12] text-white"
                           )}
                         >
                           <MessageSquare className="h-5 w-5" />
@@ -340,10 +340,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                       </TooltipTrigger>
                       <TooltipContent side="right" className="max-w-xs">
                         <div className="space-y-1">
-                          <p className="font-medium text-background">
+                          <p className="text-background font-medium">
                             {getChatDisplayName(chat)}
                           </p>
-                          <p className="text-xs text-background/70">
+                          <p className="text-background/70 text-xs">
                             {getRelativeTime(chat.updatedAt || chat.createdAt)}
                           </p>
                         </div>

@@ -2,7 +2,7 @@ export const VignetteShader = {
   uniforms: {
     tDiffuse: { value: null }, // provided by ShaderPass
     darkness: { value: 1.0 }, // strength of the vignette effect
-    offset: { value: 1.0 }, // vignette offset
+    offset: { value: 1.0 } // vignette offset
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -29,5 +29,5 @@ export const VignetteShader = {
       
       gl_FragColor = vec4(texel.rgb * vignette, texel.a);
     }
-  `,
-}
+  `
+};

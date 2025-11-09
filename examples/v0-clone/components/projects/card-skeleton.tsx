@@ -1,13 +1,13 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectCardSkeleton() {
   return (
-    <div className="block bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
+    <div className="block overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900">
       {/* Preview Skeleton */}
       <Skeleton className="aspect-video w-full bg-neutral-800" />
 
       {/* Content Skeleton */}
-      <div className="p-4 space-y-3">
+      <div className="space-y-3 p-4">
         {/* Title Skeleton */}
         <Skeleton className="h-6 w-3/4 bg-neutral-800" />
 
@@ -23,15 +23,15 @@ export function ProjectCardSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function FeaturedProjectsSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
         <ProjectCardSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }

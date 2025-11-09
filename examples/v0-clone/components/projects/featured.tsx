@@ -1,114 +1,114 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Loader2, User } from 'lucide-react'
-import { FeaturedProjectsSkeleton } from './card-skeleton'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Loader2, User } from "lucide-react";
+import { FeaturedProjectsSkeleton } from "./card-skeleton";
 
-type VisibilityFilter = 'all' | 'public' | 'private' | 'team'
+type VisibilityFilter = "all" | "public" | "private" | "team";
 
 interface FeaturedChat {
-  id: string
-  title?: string
-  demo?: string
-  visibility?: string
-  preview_url?: string
-  demo_url?: string
-  owner_id?: string
-  owner_email?: string
-  owner_name?: string
-  created_at?: string
-  messages?: any[]
+  id: string;
+  title?: string;
+  demo?: string;
+  visibility?: string;
+  preview_url?: string;
+  demo_url?: string;
+  owner_id?: string;
+  owner_email?: string;
+  owner_name?: string;
+  created_at?: string;
+  messages?: any[];
 }
 
 interface FeaturedProjectsProps {
-  isAuthenticated?: boolean
+  isAuthenticated?: boolean;
 }
 
 export function FeaturedProjects({
-  isAuthenticated = false,
+  isAuthenticated = false
 }: FeaturedProjectsProps) {
-  const [activeFilter, setActiveFilter] = useState<VisibilityFilter>('all')
-  const [chats, setChats] = useState<FeaturedChat[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasMore, setHasMore] = useState(false)
-  const [offset, setOffset] = useState(0)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const limit = 12
+  const [activeFilter, setActiveFilter] = useState<VisibilityFilter>("all");
+  const [chats, setChats] = useState<FeaturedChat[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const limit = 12;
 
   useEffect(() => {
     // Reset when filter changes
-    setOffset(0)
-    fetchChats(activeFilter, 0, true)
-  }, [activeFilter])
+    setOffset(0);
+    fetchChats(activeFilter, 0, true);
+  }, [activeFilter]);
 
   const fetchChats = async (
     visibility: VisibilityFilter,
     currentOffset: number,
-    reset = false,
+    reset = false
   ) => {
     try {
       if (reset) {
-        setIsLoading(true)
+        setIsLoading(true);
       } else {
-        setIsLoadingMore(true)
+        setIsLoadingMore(true);
       }
 
       const response = await fetch(
-        `/api/chats/featured?visibility=${visibility}&limit=${limit}&offset=${currentOffset}`,
-      )
+        `/api/chats/featured?visibility=${visibility}&limit=${limit}&offset=${currentOffset}`
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch featured chats')
+        throw new Error("Failed to fetch featured chats");
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (reset) {
-        setChats(data.data || [])
+        setChats(data.data || []);
       } else {
-        setChats((prev) => [...prev, ...(data.data || [])])
+        setChats((prev) => [...prev, ...(data.data || [])]);
       }
 
-      setHasMore(data.pagination?.hasMore || false)
+      setHasMore(data.pagination?.hasMore || false);
     } catch (error) {
-      console.error('Error fetching featured chats:', error)
+      console.error("Error fetching featured chats:", error);
     } finally {
-      setIsLoading(false)
-      setIsLoadingMore(false)
+      setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }
+  };
 
   const handleLoadMore = () => {
-    const newOffset = offset + limit
-    setOffset(newOffset)
-    fetchChats(activeFilter, newOffset, false)
-  }
+    const newOffset = offset + limit;
+    setOffset(newOffset);
+    fetchChats(activeFilter, newOffset, false);
+  };
 
   // Determine available filters based on authentication
   const filters: Array<{ value: VisibilityFilter; label: string }> =
     isAuthenticated
       ? [
-          { value: 'all', label: 'All' },
-          { value: 'public', label: 'Public' },
-          { value: 'private', label: 'Private' },
-          { value: 'team', label: 'Team' },
+          { value: "all", label: "All" },
+          { value: "public", label: "Public" },
+          { value: "private", label: "Private" },
+          { value: "team", label: "Team" }
         ]
-      : [{ value: 'public', label: 'Public' }]
+      : [{ value: "public", label: "Public" }];
 
   // Auto-switch to public for anonymous users
   useEffect(() => {
-    if (!isAuthenticated && activeFilter !== 'public') {
-      setActiveFilter('public')
+    if (!isAuthenticated && activeFilter !== "public") {
+      setActiveFilter("public");
     }
-  }, [isAuthenticated, activeFilter])
+  }, [isAuthenticated, activeFilter]);
 
   return (
-    <section className="w-full py-16 px-4 md:px-8 max-w-7xl mx-auto">
+    <section className="mx-auto w-full max-w-7xl px-4 py-16 md:px-8">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+        <h2 className="mb-2 text-3xl font-bold text-white md:text-4xl">
           Featured Projects
         </h2>
         <p className="text-neutral-400">
@@ -118,15 +118,15 @@ export function FeaturedProjects({
 
       {/* Filters */}
       {isAuthenticated && (
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+        <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
           {filters.map((filter) => (
             <button
               key={filter.value}
               onClick={() => setActiveFilter(filter.value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+              className={`rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-all ${
                 activeFilter === filter.value
-                  ? 'bg-white text-black'
-                  : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                  ? "bg-white text-black"
+                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
               }`}
             >
               {filter.label}
@@ -139,15 +139,15 @@ export function FeaturedProjects({
       {isLoading ? (
         <FeaturedProjectsSkeleton count={6} />
       ) : chats.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-neutral-400 text-lg">
+        <div className="py-20 text-center">
+          <p className="text-lg text-neutral-400">
             No projects found. Be the first to share!
           </p>
         </div>
       ) : (
         <>
           {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {chats.map((chat) => (
               <ProjectCard key={chat.id} chat={chat} />
             ))}
@@ -159,15 +159,15 @@ export function FeaturedProjects({
               <button
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
-                className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-black transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoadingMore ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Loading...
                   </>
                 ) : (
-                  'Load More'
+                  "Load More"
                 )}
               </button>
             </div>
@@ -175,105 +175,105 @@ export function FeaturedProjects({
         </>
       )}
     </section>
-  )
+  );
 }
 
 // Helper function to generate title from chat
 function generateTitle(chat: FeaturedChat): string {
-  if (chat.title) return chat.title
+  if (chat.title) return chat.title;
 
   if (chat.messages && chat.messages.length > 0) {
     const firstUserMessage = chat.messages.find(
-      (msg: any) => msg.role === 'user',
-    )
+      (msg: any) => msg.role === "user"
+    );
     if (firstUserMessage?.content) {
       const content =
-        typeof firstUserMessage.content === 'string'
+        typeof firstUserMessage.content === "string"
           ? firstUserMessage.content
-          : firstUserMessage.content[0]?.text || ''
+          : firstUserMessage.content[0]?.text || "";
 
       return content.length > 50
-        ? content.substring(0, 50).trim() + '...'
-        : content
+        ? content.substring(0, 50).trim() + "..."
+        : content;
     }
   }
 
-  return `Project ${chat.id.slice(0, 8)}`
+  return `Project ${chat.id.slice(0, 8)}`;
 }
 
 // Helper to get user display name
 function getUserDisplayName(chat: FeaturedChat): string {
-  if (chat.owner_name) return chat.owner_name
+  if (chat.owner_name) return chat.owner_name;
   if (chat.owner_email) {
     // Extract name from email (e.g., john.doe@example.com -> John Doe)
-    const username = chat.owner_email.split('@')[0]
+    const username = chat.owner_email.split("@")[0];
     return username
       .split(/[._-]/)
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ')
+      .join(" ");
   }
-  return 'Anonymous'
+  return "Anonymous";
 }
 
 // Helper to get initials for avatar
 function getUserInitials(chat: FeaturedChat): string {
-  const name = getUserDisplayName(chat)
+  const name = getUserDisplayName(chat);
   return name
-    .split(' ')
+    .split(" ")
     .map((word) => word[0])
-    .join('')
+    .join("")
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 2);
 }
 
 function ProjectCard({ chat }: { chat: FeaturedChat }) {
-  const [imageError, setImageError] = useState(false)
-  const [iframeLoaded, setIframeLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
-  const hasPreview = chat.preview_url && !imageError
-  const canShowIframe = chat.demo_url || chat.demo
-  const displayTitle = generateTitle(chat)
-  const displayName = getUserDisplayName(chat)
-  const initials = getUserInitials(chat)
+  const hasPreview = chat.preview_url && !imageError;
+  const canShowIframe = chat.demo_url || chat.demo;
+  const displayTitle = generateTitle(chat);
+  const displayName = getUserDisplayName(chat);
+  const initials = getUserInitials(chat);
 
   return (
     <Link
       href={`/chats/${chat.id}`}
-      className="group block bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800 hover:border-neutral-600 transition-all hover:shadow-xl hover:shadow-neutral-900/50"
+      className="group block overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600 hover:shadow-xl hover:shadow-neutral-900/50"
     >
       {/* Preview/Thumbnail */}
-      <div className="aspect-video bg-neutral-800 relative overflow-hidden">
+      <div className="relative aspect-video overflow-hidden bg-neutral-800">
         {hasPreview ? (
           <Image
             src={chat.preview_url!}
             alt={displayTitle}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
             onError={() => setImageError(true)}
           />
         ) : canShowIframe ? (
-          <div className="w-full h-full relative">
+          <div className="relative h-full w-full">
             {!iframeLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
-                <Loader2 className="w-6 h-6 text-neutral-600 animate-spin" />
+                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
               </div>
             )}
             <iframe
               src={chat.demo_url || chat.demo}
-              className="w-full h-full border-0 pointer-events-none"
+              className="pointer-events-none h-full w-full border-0"
               sandbox="allow-scripts allow-same-origin"
               onLoad={() => setIframeLoaded(true)}
               style={{
-                transform: 'scale(0.5)',
-                transformOrigin: 'top left',
-                width: '200%',
-                height: '200%',
+                transform: "scale(0.5)",
+                transformOrigin: "top left",
+                width: "200%",
+                height: "200%"
               }}
               title={displayTitle}
             />
           </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center">
             <div className="text-4xl font-bold text-neutral-700">
               {chat.id.slice(0, 2).toUpperCase()}
             </div>
@@ -281,9 +281,9 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
         )}
 
         {/* Visibility Badge */}
-        {chat.visibility && chat.visibility !== 'public' && (
+        {chat.visibility && chat.visibility !== "public" && (
           <div className="absolute top-2 right-2">
-            <span className="px-2 py-1 text-xs font-medium bg-black/80 text-white rounded-md backdrop-blur-sm border border-neutral-700 capitalize">
+            <span className="rounded-md border border-neutral-700 bg-black/80 px-2 py-1 text-xs font-medium text-white capitalize backdrop-blur-sm">
               {chat.visibility}
             </span>
           </div>
@@ -292,20 +292,20 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="text-white font-medium text-lg mb-1 group-hover:text-neutral-200 transition-colors line-clamp-2">
+        <h3 className="mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
           {displayTitle}
         </h3>
-        <p className="text-neutral-500 text-sm mb-3">
-          Created{' '}
+        <p className="mb-3 text-sm text-neutral-500">
+          Created{" "}
           {chat.created_at
             ? new Date(chat.created_at).toLocaleDateString()
-            : 'recently'}
+            : "recently"}
         </p>
 
         {/* Creator Attribution */}
-        <div className="flex items-center gap-2 pt-2 border-t border-neutral-800">
+        <div className="flex items-center gap-2 border-t border-neutral-800 pt-2">
           {/* Avatar */}
-          <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-xs font-medium text-neutral-400 border border-neutral-700">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400">
             {initials}
           </div>
 
@@ -316,5 +316,5 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
         </div>
       </div>
     </Link>
-  )
+  );
 }

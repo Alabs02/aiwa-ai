@@ -43,14 +43,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     };
     window.addEventListener(
       "sidebar-toggle" as any,
-      handleSidebarToggle as any,
+      handleSidebarToggle as any
     );
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener(
         "sidebar-toggle" as any,
-        handleSidebarToggle as any,
+        handleSidebarToggle as any
       );
     };
   }, []);
@@ -73,7 +73,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           // No margin on mobile
           "md:ml-16",
           // Desktop margins based on collapse state
-          !isCollapsed && "md:ml-64",
+          !isCollapsed && "md:ml-64"
         )}
       >
         {children}

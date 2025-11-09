@@ -4,36 +4,36 @@ import {
   WebPreviewNavigationButton,
   WebPreviewUrl,
   WebPreviewBody,
-  WebPreviewConsole,
-} from '@/components/ai-elements/web-preview'
+  WebPreviewConsole
+} from "@/components/ai-elements/web-preview";
 import {
   PreviewLoadingAnimation,
-  CodeGenerationAnimation,
-} from '@/components/ai-elements/preview-loading-animations'
-import { GitHubExportDialog } from '@/components/chat/github-export-dialog'
-import { RefreshCw, Maximize, Minimize, Github } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useState, useEffect } from 'react'
+  CodeGenerationAnimation
+} from "@/components/ai-elements/preview-loading-animations";
+import { GitHubExportDialog } from "@/components/chat/github-export-dialog";
+import { RefreshCw, Maximize, Minimize, Github } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 interface Chat {
-  id: string
-  demo?: string
-  url?: string
-  title?: string
+  id: string;
+  demo?: string;
+  url?: string;
+  title?: string;
 }
 
 interface PreviewPanelProps {
-  currentChat: Chat | null
-  isFullscreen: boolean
-  setIsFullscreen: (fullscreen: boolean) => void
-  refreshKey: number
-  setRefreshKey: (key: number | ((prev: number) => number)) => void
-  isGenerating?: boolean
+  currentChat: Chat | null;
+  isFullscreen: boolean;
+  setIsFullscreen: (fullscreen: boolean) => void;
+  refreshKey: number;
+  setRefreshKey: (key: number | ((prev: number) => number)) => void;
+  isGenerating?: boolean;
   consoleLogs?: Array<{
-    level: 'log' | 'warn' | 'error'
-    message: string
-    timestamp: Date
-  }>
+    level: "log" | "warn" | "error";
+    message: string;
+    timestamp: Date;
+  }>;
 }
 
 export function PreviewPanel({
@@ -43,64 +43,64 @@ export function PreviewPanel({
   refreshKey,
   setRefreshKey,
   isGenerating = false,
-  consoleLogs = [],
+  consoleLogs = []
 }: PreviewPanelProps) {
-  const hasContent = !!currentChat?.demo
-  const [githubDialogOpen, setGithubDialogOpen] = useState(false)
+  const hasContent = !!currentChat?.demo;
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
 
   const handleDownload = async () => {
-    if (!currentChat?.id) return
+    if (!currentChat?.id) return;
 
     try {
       const params = new URLSearchParams({
         chatId: currentChat.id,
-        format: 'zip',
-        includeDefaultFiles: 'true',
-      })
+        format: "zip",
+        includeDefaultFiles: "true"
+      });
 
-      const response = await fetch(`/api/chat/download?${params}`)
+      const response = await fetch(`/api/chat/download?${params}`);
 
       if (!response.ok) {
-        throw new Error('Download failed')
+        throw new Error("Download failed");
       }
 
       // Get the blob from the response
-      const blob = await response.blob()
+      const blob = await response.blob();
 
       // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `app-${currentChat?.title || currentChat?.id}.zip`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `app-${currentChat?.title || currentChat?.id}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       // Clean up the URL object
-      window.URL.revokeObjectURL(url)
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Download error:', error)
+      console.error("Download error:", error);
       // Optional: Add toast notification for user feedback
     }
-  }
+  };
 
   const handleOpenExternal = () => {
-    if (!currentChat?.demo) return
-    window.open(currentChat.demo, '_blank', 'noopener,noreferrer')
-  }
+    if (!currentChat?.demo) return;
+    window.open(currentChat.demo, "_blank", "noopener,noreferrer");
+  };
 
   const handleGitHubExport = () => {
-    setGithubDialogOpen(true)
-  }
+    setGithubDialogOpen(true);
+  };
 
   const getEmptyState = () => (
-    <div className="flex-1 flex items-center justify-center h-full bg-gray-50 dark:bg-black">
-      <div className="text-center max-w-md px-8">
-        <div className="mb-4 relative">
+    <div className="flex h-full flex-1 items-center justify-center bg-gray-50 dark:bg-black">
+      <div className="max-w-md px-8 text-center">
+        <div className="relative mb-4">
           <div className="absolute inset-0 bg-transparent blur-3xl" />
-          <div className="relative bg-transparent rounded-2xl p-8 shadow-lg">
+          <div className="relative rounded-2xl bg-transparent p-8 shadow-lg">
             <svg
-              className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-600"
+              className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -114,7 +114,7 @@ export function PreviewPanel({
             </svg>
           </div>
         </div>
-        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <p className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-100">
           No preview available
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -122,20 +122,20 @@ export function PreviewPanel({
         </p>
       </div>
     </div>
-  )
+  );
 
   return (
     <>
       <div
         className={cn(
-          'flex flex-col h-full transition-all duration-300',
-          isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-black' : 'flex-1',
+          "flex h-full flex-col transition-all duration-300",
+          isFullscreen ? "fixed inset-0 z-50 bg-white dark:bg-black" : "flex-1"
         )}
       >
         <WebPreview
-          defaultUrl={currentChat?.demo || ''}
+          defaultUrl={currentChat?.demo || ""}
           onUrlChange={(url) => {
-            console.log('Preview URL changed:', url)
+            console.log("Preview URL changed:", url);
           }}
           onDownload={handleDownload}
           onOpenExternal={handleOpenExternal}
@@ -147,7 +147,7 @@ export function PreviewPanel({
           >
             <WebPreviewNavigationButton
               onClick={() => {
-                setRefreshKey((prev) => prev + 1)
+                setRefreshKey((prev) => prev + 1);
               }}
               tooltip="Refresh preview"
               disabled={!hasContent}
@@ -158,7 +158,7 @@ export function PreviewPanel({
             <WebPreviewUrl
               readOnly
               placeholder="Your app will appear here..."
-              value={currentChat?.demo || ''}
+              value={currentChat?.demo || ""}
             />
 
             {/* GitHub Export Button */}
@@ -172,7 +172,7 @@ export function PreviewPanel({
 
             <WebPreviewNavigationButton
               onClick={() => setIsFullscreen(!isFullscreen)}
-              tooltip={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              tooltip={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
               disabled={!hasContent && !isGenerating}
             >
               {isFullscreen ? (
@@ -191,7 +191,7 @@ export function PreviewPanel({
               isGenerating ? (
                 <CodeGenerationAnimation />
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
                   Code view will be available soon
                 </div>
               )
@@ -212,5 +212,5 @@ export function PreviewPanel({
         chatTitle={currentChat?.title}
       />
     </>
-  )
+  );
 }

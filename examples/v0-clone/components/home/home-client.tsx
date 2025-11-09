@@ -16,7 +16,7 @@ import {
   savePromptToStorage,
   loadPromptFromStorage,
   clearPromptFromStorage,
-  type ImageAttachment,
+  type ImageAttachment
 } from "@/components/ai-elements/prompt-input";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { ChatMessages } from "@/components/chat/chat-messages";
@@ -115,7 +115,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       setMessage(storedData.message);
       if (storedData.attachments.length > 0) {
         const restoredAttachments = storedData.attachments.map(
-          createImageAttachmentFromStored,
+          createImageAttachmentFromStored
         );
         setAttachments(restoredAttachments);
       }
@@ -136,7 +136,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
   const handleImageFiles = async (files: File[]) => {
     try {
       const newAttachments = await Promise.all(
-        files.map((file) => createImageAttachment(file)),
+        files.map((file) => createImageAttachment(file))
       );
       setAttachments((prev) => [...prev, ...newAttachments]);
     } catch (error) {
@@ -178,8 +178,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setChatHistory([
       {
         type: "user",
-        content: userMessage,
-      },
+        content: userMessage
+      }
     ]);
     setIsLoading(true);
 
@@ -187,13 +187,13 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           message: userMessage,
           streaming: true,
-          attachments: currentAttachments.map((att) => ({ url: att.dataUrl })),
-        }),
+          attachments: currentAttachments.map((att) => ({ url: att.dataUrl }))
+        })
       });
 
       if (!response.ok) {
@@ -231,8 +231,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           type: "assistant",
           content: [],
           isStreaming: true,
-          stream: response.body,
-        },
+          stream: response.body
+        }
       ]);
     } catch (error) {
       console.error("Error creating chat:", error);
@@ -248,8 +248,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         ...prev,
         {
           type: "assistant",
-          content: errorMessage,
-        },
+          content: errorMessage
+        }
       ]);
     }
   };
@@ -274,11 +274,11 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         await fetch("/api/chat/ownership", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            chatId: data.id,
-          }),
+            chatId: data.id
+          })
         });
         console.log("Chat ownership created:", data.id);
       } catch (error) {
@@ -318,13 +318,13 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           message: userMessage,
           chatId: currentChatId,
-          streaming: true,
-        }),
+          streaming: true
+        })
       });
 
       if (!response.ok) {
@@ -362,8 +362,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           type: "assistant",
           content: [],
           isStreaming: true,
-          stream: response.body,
-        },
+          stream: response.body
+        }
       ]);
     } catch (error) {
       console.error("Error:", error);
@@ -378,8 +378,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         ...prev,
         {
           type: "assistant",
-          content: errorMessage,
-        },
+          content: errorMessage
+        }
       ]);
       setIsLoading(false);
     }
@@ -387,7 +387,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   if (showChatInterface) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col">
+      <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-black">
         {/* Handle search params with Suspense boundary */}
         <Suspense fallback={null}>
           <SearchParamsHandler onReset={handleReset} />
@@ -396,13 +396,13 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         {/* Navbar */}
         <NavBar />
 
-        <div className="flex flex-col h-[calc(100vh-60px-40px)] md:h-[calc(100vh-60px)]">
+        <div className="flex h-[calc(100vh-60px-40px)] flex-col md:h-[calc(100vh-60px)]">
           <ResizableLayout
-            className="flex-1 min-h-0"
+            className="min-h-0 flex-1"
             singlePanelMode={false}
             activePanel={activePanel === "chat" ? "left" : "right"}
             leftPanel={
-              <div className="flex flex-col h-full">
+              <div className="flex h-full flex-col">
                 <div className="flex-1 overflow-y-auto">
                   <ChatMessages
                     chatHistory={chatHistory}
@@ -448,7 +448,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   return (
     <>
-      <div className="min-h-svh bg-gray-50 dark:bg-black flex flex-col">
+      <div className="flex min-h-svh flex-col bg-gray-50 dark:bg-black">
         <GL hovering={hovering} />
 
         {/* Handle search params with Suspense boundary */}
@@ -460,27 +460,27 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         <Toolbar />
 
         {/* Main Content */}
-        <main className="relative flex-1 z-10 border-none border-white w-full flex flex-col">
+        <main className="relative z-10 flex w-full flex-1 flex-col border-none border-white">
           {/* Hero Section */}
-          <div className="min-h-[calc(100vh-60px)] flex flex-col gap-y-12 md:gap-y-24 justify-center-safe items-center-safe px-5 md:px-4">
-            <div className="max-w-3xl w-full flex flex-col items-center-safe border-none">
-              <h2 className="text-center font-heading text-2xl sm:text-3xl md:text-5xl 2xl:text-6xl font-bold text-white">
+          <div className="flex min-h-[calc(100vh-60px)] flex-col items-center-safe justify-center-safe gap-y-12 px-5 md:gap-y-24 md:px-4">
+            <div className="flex w-full max-w-3xl flex-col items-center-safe border-none">
+              <h2 className="font-heading text-center text-2xl font-bold text-white sm:text-3xl md:text-5xl 2xl:text-6xl">
                 Vibe. Build. Deploy.
               </h2>
 
-              <p className="font-body text-center text-base sm:text-lg md:text-xl text-neutral-300/95 bg-black/50 inline-block w-auto rounded-full px-4 py-2 mt-4 border">
+              <p className="font-body mt-4 inline-block w-auto rounded-full border bg-black/50 px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
                 Vibe-code your imagination. Bring it to life with Aiwa.
               </p>
 
               {/* Prompt Input */}
               <div
-                className="w-full mt-8"
+                className="mt-8 w-full"
                 onMouseEnter={() => setHovering(true)}
                 onMouseLeave={() => setHovering(false)}
               >
                 <PromptInput
                   onSubmit={handleSendMessage}
-                  className="w-full relative"
+                  className="relative w-full"
                   onImageDrop={handleImageFiles}
                   isDragOver={isDragOver}
                   onDragOver={handleDragOver}
@@ -510,7 +510,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                       <PromptInputMicButton
                         onTranscript={(transcript) => {
                           setMessage(
-                            (prev) => prev + (prev ? " " : "") + transcript,
+                            (prev) => prev + (prev ? " " : "") + transcript
                           );
                         }}
                         onError={(error) => {
@@ -528,7 +528,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
               </div>
 
               {/* Suggestions */}
-              <div className="w-full mt-4">
+              <div className="mt-4 w-full">
                 <Suggestions>
                   {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
                     <Suggestion
@@ -555,7 +555,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           </div>
 
           {/* Featured Projects Section */}
-          <div className="w-full bg-black/30 backdrop-blur-sm border-t border-neutral-800">
+          <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
             <FeaturedProjects isAuthenticated={isAuthenticated} />
           </div>
         </main>

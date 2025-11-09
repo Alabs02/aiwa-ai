@@ -21,4 +21,4 @@ export const periodicNoiseGLSL = /* glsl */ `
     
     return noise * 0.3; // Scale down the result
   }
-`
+`;

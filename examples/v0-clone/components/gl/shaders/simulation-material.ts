@@ -1,31 +1,31 @@
-import * as THREE from 'three'
-import { periodicNoiseGLSL } from './utils'
+import * as THREE from "three";
+import { periodicNoiseGLSL } from "./utils";
 
 // Function to generate equally distributed points on a plane
 function getPlane(
   count: number,
   components: number,
   size: number = 512,
-  scale: number = 1.0,
+  scale: number = 1.0
 ) {
-  const length = count * components
-  const data = new Float32Array(length)
+  const length = count * components;
+  const data = new Float32Array(length);
 
   for (let i = 0; i < count; i++) {
-    const i4 = i * components
+    const i4 = i * components;
 
     // Calculate grid position
-    const x = (i % size) / (size - 1) // Normalize to [0, 1]
-    const z = Math.floor(i / size) / (size - 1) // Normalize to [0, 1]
+    const x = (i % size) / (size - 1); // Normalize to [0, 1]
+    const z = Math.floor(i / size) / (size - 1); // Normalize to [0, 1]
 
     // Convert to centered coordinates [-0.5, 0.5] and apply scale
-    data[i4 + 0] = (x - 0.5) * 2 * scale // X position: scaled range
-    data[i4 + 1] = 0 // Y position: flat plane at y=0
-    data[i4 + 2] = (z - 0.5) * 2 * scale // Z position: scaled range
-    data[i4 + 3] = 1.0 // W component (for RGBA texture)
+    data[i4 + 0] = (x - 0.5) * 2 * scale; // X position: scaled range
+    data[i4 + 1] = 0; // Y position: flat plane at y=0
+    data[i4 + 2] = (z - 0.5) * 2 * scale; // Z position: scaled range
+    data[i4 + 3] = 1.0; // W component (for RGBA texture)
   }
 
-  return data
+  return data;
 }
 
 export class SimulationMaterial extends THREE.ShaderMaterial {
@@ -35,9 +35,9 @@ export class SimulationMaterial extends THREE.ShaderMaterial {
       512,
       512,
       THREE.RGBAFormat,
-      THREE.FloatType,
-    )
-    positionsTexture.needsUpdate = true
+      THREE.FloatType
+    );
+    positionsTexture.needsUpdate = true;
 
     super({
       vertexShader: /* glsl */ `varying vec2 vUv;
@@ -83,8 +83,8 @@ export class SimulationMaterial extends THREE.ShaderMaterial {
         uNoiseScale: { value: 1.0 },
         uNoiseIntensity: { value: 0.5 },
         uTimeScale: { value: 1 },
-        uLoopPeriod: { value: 24.0 },
-      },
-    })
+        uLoopPeriod: { value: 24.0 }
+      }
+    });
   }
 }
