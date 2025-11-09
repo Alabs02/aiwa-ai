@@ -1,44 +1,44 @@
-'use client'
+"use client";
 
-import { useState, useEffect, Suspense, FC } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState, useEffect, Suspense, FC } from "react";
+import { useSession } from "next-auth/react";
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { MobileMenu } from './mobile-menu'
-import { UserNav } from '@/components/user-nav'
-import { RippleButton } from '@/components/ui/ripple-button'
-import { usePathname, useSearchParams } from 'next/navigation'
+import Link from "next/link";
+import Image from "next/image";
+import { MobileMenu } from "./mobile-menu";
+import { UserNav } from "@/components/user-nav";
+import { RippleButton } from "@/components/ui/ripple-button";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface ToolbarProps {
-  className?: string
+  className?: string;
 }
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler() {
-  const searchParams = useSearchParams()
-  const { update } = useSession()
+  const searchParams = useSearchParams();
+  const { update } = useSession();
 
   // Force session refresh when redirected after auth
   useEffect(() => {
-    const shouldRefresh = searchParams.get('refresh') === 'session'
+    const shouldRefresh = searchParams.get("refresh") === "session";
 
     if (shouldRefresh) {
       // Force session update
-      update()
+      update();
 
       // Clean up URL without causing navigation
-      const url = new URL(window.location.href)
-      url.searchParams.delete('refresh')
-      window.history.replaceState({}, '', url.pathname)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("refresh");
+      window.history.replaceState({}, "", url.pathname);
     }
-  }, [searchParams, update])
+  }, [searchParams, update]);
 
-  return null
+  return null;
 }
 
-export function Toolbar({ className = '' }: ToolbarProps) {
-  const { data: session } = useSession()
+export function Toolbar({ className = "" }: ToolbarProps) {
+  const { data: session } = useSession();
 
   return (
     <>
@@ -47,18 +47,18 @@ export function Toolbar({ className = '' }: ToolbarProps) {
       </Suspense>
 
       <nav className="sticky top-0 z-50 border-none flex items-center justify-between h-[60px] w-full px-5 md:px-4">
-        <div>
+        <Link href="/" passHref>
           <div className="relative grid grid-cols-1 h-9 w-20 border-none overflow-hidden cursor-pointer">
             <Image
-              src={'/aiwa.webp'}
-              alt={'Aiwa Brand Logo'}
+              src={"/aiwa.webp"}
+              alt={"Aiwa Brand Logo"}
               fill
               priority
               draggable={false}
               className="size-full object-contain"
             />
           </div>
-        </div>
+        </Link>
 
         <div className="hidden md:flex items-center gap-2 transition-all duration-300 will-change-auto transform-gpu">
           {session ? (
@@ -91,5 +91,5 @@ export function Toolbar({ className = '' }: ToolbarProps) {
         </div>
       </nav>
     </>
-  )
+  );
 }

@@ -1,38 +1,38 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { useParams } from 'next/navigation'
-import { ChatMessages } from '@/components/chat/chat-messages'
-import { ChatInput } from '@/components/chat/chat-input'
-import { PreviewPanel } from '@/components/chat/preview-panel'
-import { ResizableLayout } from '@/components/shared/resizable-layout'
-import { NavBar } from '@/components/shared'
-import { BottomToolbar } from '@/components/shared/bottom-toolbar'
-import { useChat } from '@/hooks/use-chat'
-import { useStreaming } from '@/contexts/streaming-context'
-import { cn } from '@/lib/utils'
+import { useState, useEffect, useRef } from "react";
+import { useParams } from "next/navigation";
+import { ChatMessages } from "@/components/chat/chat-messages";
+import { ChatInput } from "@/components/chat/chat-input";
+import { PreviewPanel } from "@/components/chat/preview-panel";
+import { ResizableLayout } from "@/components/shared/resizable-layout";
+import { NavBar } from "@/components/shared";
+import { BottomToolbar } from "@/components/shared/bottom-toolbar";
+import { useChat } from "@/hooks/use-chat";
+import { useStreaming } from "@/contexts/streaming-context";
+import { cn } from "@/lib/utils";
 import {
   type ImageAttachment,
   clearPromptFromStorage,
-} from '@/components/ai-elements/prompt-input'
+} from "@/components/ai-elements/prompt-input";
 
 export function ChatDetailClient() {
-  const params = useParams()
-  const chatId = params.chatId as string
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
-  const [attachments, setAttachments] = useState<ImageAttachment[]>([])
-  const [activePanel, setActivePanel] = useState<'chat' | 'preview'>('chat')
+  const params = useParams();
+  const chatId = params.chatId as string;
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [attachments, setAttachments] = useState<ImageAttachment[]>([]);
+  const [activePanel, setActivePanel] = useState<"chat" | "preview">("chat");
   const [consoleLogs, setConsoleLogs] = useState<
     Array<{
-      level: 'log' | 'warn' | 'error'
-      message: string
-      timestamp: Date
+      level: "log" | "warn" | "error";
+      message: string;
+      timestamp: Date;
     }>
-  >([])
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  >([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { handoff } = useStreaming()
+  const { handoff } = useStreaming();
   const {
     message,
     setMessage,
@@ -45,10 +45,10 @@ export function ChatDetailClient() {
     handleSendMessage,
     handleStreamingComplete,
     handleChatData,
-  } = useChat(chatId)
+  } = useChat(chatId);
 
   // Determine if generation is happening (loading or streaming)
-  const isGenerating = isLoading || isStreaming
+  const isGenerating = isLoading || isStreaming;
 
   // Wrapper function to handle attachments
   const handleSubmitWithAttachments = (
@@ -56,30 +56,30 @@ export function ChatDetailClient() {
     attachmentUrls?: Array<{ url: string }>,
   ) => {
     // Clear sessionStorage immediately upon submission
-    clearPromptFromStorage()
+    clearPromptFromStorage();
     // Clear attachments after sending
-    setAttachments([])
-    return handleSendMessage(e, attachmentUrls)
-  }
+    setAttachments([]);
+    return handleSendMessage(e, attachmentUrls);
+  };
 
   // Handle fullscreen keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isFullscreen) {
-        setIsFullscreen(false)
+      if (event.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
       }
-    }
+    };
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen])
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen]);
 
   // Auto-focus the textarea on page load
   useEffect(() => {
     if (textareaRef.current && !isLoadingChat) {
-      textareaRef.current.focus()
+      textareaRef.current.focus();
     }
-  }, [isLoadingChat])
+  }, [isLoadingChat]);
 
   // Simulate console logs (in a real app, these would come from the iframe)
   useEffect(() => {
@@ -87,33 +87,31 @@ export function ChatDetailClient() {
       // Add some sample console logs
       setConsoleLogs([
         {
-          level: 'log',
-          message: 'Application initialized successfully',
+          level: "log",
+          message: "Application initialized successfully",
           timestamp: new Date(),
         },
         {
-          level: 'log',
-          message: 'React components mounted',
+          level: "log",
+          message: "React components mounted",
           timestamp: new Date(),
         },
-      ])
+      ]);
     }
-  }, [currentChat?.demo, consoleLogs.length])
+  }, [currentChat?.demo, consoleLogs.length]);
 
   return (
     <div
       className={cn(
-        'min-h-screen bg-gray-50 dark:bg-black',
-        isFullscreen && 'fixed inset-0 z-50',
+        "min-h-[calc(100vh-60px)] bg-gray-50 dark:bg-background",
+        isFullscreen && "fixed inset-0 z-50",
       )}
     >
-      <NavBar />
-
       <div className="flex flex-col h-[calc(100vh-60px-1px)] md:h-[calc(100vh-60px-1px)]">
         <ResizableLayout
           className="flex-1 min-h-0"
           singlePanelMode={false}
-          activePanel={activePanel === 'chat' ? 'left' : 'right'}
+          activePanel={activePanel === "chat" ? "left" : "right"}
           leftPanel={
             <div className="flex flex-col h-full">
               <div className="flex-1 overflow-y-auto">
@@ -161,5 +159,5 @@ export function ChatDetailClient() {
         </div>
       </div>
     </div>
-  )
+  );
 }
