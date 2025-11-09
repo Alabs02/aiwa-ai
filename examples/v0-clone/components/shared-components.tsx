@@ -20,19 +20,19 @@ import {
   IconProps,
   Message,
   StreamingMessage,
-  MessageContent,
+  MessageContent
 } from "@v0-sdk/react";
 import {
   Reasoning,
   ReasoningTrigger,
-  ReasoningContent,
+  ReasoningContent
 } from "@/components/ai-elements/reasoning";
 import {
   Task,
   TaskTrigger,
   TaskContent,
   TaskItem,
-  TaskItemFile,
+  TaskItemFile
 } from "@/components/ai-elements/task";
 
 // Wrapper component to adapt AI Elements Reasoning to @v0-sdk/react ThinkingSection
@@ -441,12 +441,12 @@ const CustomTaskSectionWrapper = (props: any) => {
     props.parts &&
     props.parts.some(
       (part: any) =>
-        part && typeof part === "object" && part.type === "code-project",
+        part && typeof part === "object" && part.type === "code-project"
     )
   ) {
     const codeProjectPart = props.parts.find(
       (part: any) =>
-        part && typeof part === "object" && part.type === "code-project",
+        part && typeof part === "object" && part.type === "code-project"
     );
 
     if (codeProjectPart) {
@@ -486,7 +486,7 @@ const CustomTaskSectionWrapper = (props: any) => {
                             `file-${index + 1}`}
                         </span>
                       </div>
-                    ),
+                    )
                   )}
                 </div>
               </div>
@@ -547,55 +547,55 @@ export const sharedComponents = {
 
   // Styled HTML elements for the v0 clone theme
   p: {
-    className: "mb-4 text-gray-700 dark:text-gray-200 leading-relaxed",
+    className: "mb-4 text-gray-700 dark:text-gray-200 leading-relaxed"
   },
   h1: {
-    className: "mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100",
+    className: "mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100"
   },
   h2: {
-    className: "mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100",
+    className: "mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100"
   },
   h3: {
-    className: "mb-3 text-lg font-medium text-gray-900 dark:text-gray-100",
+    className: "mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
   },
   h4: {
-    className: "mb-3 text-base font-medium text-gray-900 dark:text-gray-100",
+    className: "mb-3 text-base font-medium text-gray-900 dark:text-gray-100"
   },
   h5: {
-    className: "mb-2 text-sm font-medium text-gray-900 dark:text-gray-100",
+    className: "mb-2 text-sm font-medium text-gray-900 dark:text-gray-100"
   },
   h6: {
-    className: "mb-2 text-sm font-medium text-gray-900 dark:text-gray-100",
+    className: "mb-2 text-sm font-medium text-gray-900 dark:text-gray-100"
   },
   ul: {
-    className: "mb-4 ml-6 list-disc space-y-1 text-gray-700 dark:text-gray-200",
+    className: "mb-4 ml-6 list-disc space-y-1 text-gray-700 dark:text-gray-200"
   },
   ol: {
     className:
-      "mb-4 ml-6 list-decimal space-y-1 text-gray-700 dark:text-gray-200",
+      "mb-4 ml-6 list-decimal space-y-1 text-gray-700 dark:text-gray-200"
   },
   li: {
-    className: "text-gray-700 dark:text-gray-200",
+    className: "text-gray-700 dark:text-gray-200"
   },
   blockquote: {
     className:
-      "mb-4 border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400",
+      "mb-4 border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400"
   },
   code: {
     className:
-      "rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-sm font-mono text-gray-900 dark:text-gray-100",
+      "rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-sm font-mono text-gray-900 dark:text-gray-100"
   },
   pre: {
     className:
-      "mb-4 overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800 p-4",
+      "mb-4 overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800 p-4"
   },
   a: {
-    className: "text-blue-600 dark:text-blue-400 hover:underline",
+    className: "text-blue-600 dark:text-blue-400 hover:underline"
   },
   strong: {
-    className: "font-semibold text-gray-900 dark:text-gray-100",
+    className: "font-semibold text-gray-900 dark:text-gray-100"
   },
   em: {
-    className: "italic text-gray-700 dark:text-gray-300",
-  },
+    className: "italic text-gray-700 dark:text-gray-300"
+  }
 };

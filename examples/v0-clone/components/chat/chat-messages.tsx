@@ -2,11 +2,11 @@ import React, { useRef, useEffect } from "react";
 import {
   Message,
   MessageContent,
-  MessageAvatar,
+  MessageAvatar
 } from "@/components/ai-elements/message";
 import {
   Conversation,
-  ConversationContent,
+  ConversationContent
 } from "@/components/ai-elements/conversation";
 import { Loader } from "@/components/ai-elements/loader";
 import { MessageRenderer } from "@/components/message-renderer";
@@ -42,7 +42,7 @@ export function ChatMessages({
   currentChat,
   onStreamingComplete,
   onChatData,
-  onStreamingStarted,
+  onStreamingStarted
 }: ChatMessagesProps) {
   const streamingStartedRef = useRef(false);
   const { data: session } = useSession();
@@ -106,7 +106,7 @@ export function ChatMessages({
 
             return (
               <Message from={msg.type} key={index}>
-                <div className="flex items-start gap-3 w-full">
+                <div className="flex w-full items-start gap-3">
                   <MessageAvatar
                     type={msg.type}
                     initials={msg.type === "user" ? initials : "AI"}

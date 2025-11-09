@@ -7,10 +7,10 @@ const nextConfig: NextConfig = {
       "avatars.githubusercontent.com",
       "lh3.googleusercontent.com",
       "ui-avatars.com",
-      "cdn.openai.com",
-    ],
+      "cdn.openai.com"
+    ]
   },
-  reactStrictMode: true, // Enable strict mode for better development experience
+  reactStrictMode: true // Enable strict mode for better development experience
 };
 
 export default nextConfig;

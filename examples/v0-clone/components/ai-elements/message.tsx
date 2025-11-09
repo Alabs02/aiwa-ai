@@ -43,7 +43,7 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
     className={cn(
       "group message-item relative mb-6",
       from === "user" ? "is-user" : "is-assistant",
-      className,
+      className
     )}
     {...props}
   />
@@ -94,14 +94,14 @@ export const MessageContent = ({
           <MarkdownPreview
             source={contentToShow}
             className={cn(
-              isUser ? "text-neutral-300" : "text-gray-700 dark:text-gray-300",
+              isUser ? "text-neutral-300" : "text-gray-700 dark:text-gray-300"
             )}
             style={{
               fontFamily:
                 "Geist, -apple-system, BlinkMacSystemFont, sans-serif",
               fontSize: "14px",
               background: "transparent",
-              lineHeight: "1.6",
+              lineHeight: "1.6"
             }}
           />
         </div>
@@ -124,7 +124,7 @@ export const MessageContent = ({
         "group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground",
         "group-[.is-assistant]:bg-secondary group-[.is-assistant]:text-foreground",
         "group-[.is-user]:border group-[.is-user]:bg-white/5 group-[.is-user]:shadow-sm hover:shadow-md",
-        className,
+        className
       )}
       {...props}
     >
@@ -132,7 +132,7 @@ export const MessageContent = ({
         <Button
           variant="ghost"
           size="sm"
-          className="absolute right-2 top-2 h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800"
           onClick={handleCopy}
           title="Copy message"
         >
@@ -169,16 +169,16 @@ export const MessageAvatar = ({
   return (
     <Avatar
       className={cn(
-        "ring-border size-8 ring-1 shrink-0",
+        "ring-border size-8 shrink-0 ring-1",
         type === "assistant" && "bg-primary text-primary-foreground",
-        className,
+        className
       )}
       {...props}
     >
       {type === "assistant" && (
         <AvatarImage
           alt=""
-          className="mt-0 mb-0 bg-background/85"
+          className="bg-background/85 mt-0 mb-0"
           src={"/AI-Light.webp"}
         />
       )}
