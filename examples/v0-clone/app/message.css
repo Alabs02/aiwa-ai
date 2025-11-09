@@ -29,16 +29,18 @@
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37),
-              inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.37),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease-out;
 }
 
 .wmde-markdown pre:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 40px 0 rgba(0, 0, 0, 0.45),
-              inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 40px 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }
 
 .wmde-markdown pre code {
@@ -63,9 +65,15 @@
   letter-spacing: -0.01em;
 }
 
-.wmde-markdown h1 { font-size: 1.5rem; }
-.wmde-markdown h2 { font-size: 1.25rem; }
-.wmde-markdown h3 { font-size: 1.125rem; }
+.wmde-markdown h1 {
+  font-size: 1.5rem;
+}
+.wmde-markdown h2 {
+  font-size: 1.25rem;
+}
+.wmde-markdown h3 {
+  font-size: 1.125rem;
+}
 
 /* Lists */
 .wmde-markdown ul,
@@ -154,7 +162,7 @@
 
 /* Message Container Enhancements */
 .message-container {
-  max-width: 48rem;
+  max-width: 90%;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -192,17 +200,21 @@
 
 /* Avatar Gradients - Neutral Dark Theme */
 .avatar-user {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15) 0%, 
-    rgba(255, 255, 255, 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .avatar-assistant {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.12) 0%, 
-    rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -231,7 +243,9 @@
 }
 
 @keyframes pulse {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     opacity: 0.3;
     transform: scale(0.8);
   }
