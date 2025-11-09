@@ -1,8 +1,12 @@
 import React, { useRef, useEffect } from "react";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  Message,
+  MessageContent,
+  MessageAvatar,
+} from "@/components/ai-elements/message";
 import {
   Conversation,
-  ConversationContent
+  ConversationContent,
 } from "@/components/ai-elements/conversation";
 import { Loader } from "@/components/ai-elements/loader";
 import { MessageRenderer } from "@/components/message-renderer";
@@ -38,7 +42,7 @@ export function ChatMessages({
   currentChat,
   onStreamingComplete,
   onChatData,
-  onStreamingStarted
+  onStreamingStarted,
 }: ChatMessagesProps) {
   const streamingStartedRef = useRef(false);
   const { data: session } = useSession();
@@ -97,36 +101,59 @@ export function ChatMessages({
     <Conversation>
       <ConversationContent>
         <div className="mx-auto max-w-4xl space-y-1 px-4 py-6">
-          {chatHistory.map((msg, index) => (
-            <Message from={msg.type} key={index}>
-              {msg.isStreaming && msg.stream ? (
-                <StreamingMessage
-                  stream={msg.stream}
-                  messageId={`msg-${index}`}
-                  role={msg.type}
-                  onComplete={onStreamingComplete}
-                  onChatData={onChatData}
-                  onChunk={(chunk) => {
-                    // Hide external loader once we start receiving content (only once)
-                    if (onStreamingStarted && !streamingStartedRef.current) {
-                      streamingStartedRef.current = true;
-                      onStreamingStarted();
-                    }
-                  }}
-                  onError={(error) => console.error("Streaming error:", error)}
-                  components={sharedComponents}
-                  showLoadingIndicator={false}
-                />
-              ) : (
-                <MessageRenderer
-                  content={msg.content}
-                  role={msg.type}
-                  messageId={`msg-${index}`}
-                  userInitials={initials}
-                />
-              )}
-            </Message>
-          ))}
+          {chatHistory.map((msg, index) => {
+            const isStringContent = typeof msg.content === "string";
+
+            return (
+              <Message from={msg.type} key={index}>
+                <div className="flex items-start gap-3 w-full">
+                  <MessageAvatar
+                    type={msg.type}
+                    initials={msg.type === "user" ? initials : "AI"}
+                  />
+                  <div className="min-w-0 flex-1">
+                    {msg.isStreaming && msg.stream ? (
+                      <StreamingMessage
+                        stream={msg.stream}
+                        messageId={`msg-${index}`}
+                        role={msg.type}
+                        onComplete={onStreamingComplete}
+                        onChatData={onChatData}
+                        onChunk={(chunk) => {
+                          if (
+                            onStreamingStarted &&
+                            !streamingStartedRef.current
+                          ) {
+                            streamingStartedRef.current = true;
+                            onStreamingStarted();
+                          }
+                        }}
+                        onError={(error) =>
+                          console.error("Streaming error:", error)
+                        }
+                        components={sharedComponents}
+                        showLoadingIndicator={false}
+                      />
+                    ) : isStringContent ? (
+                      <MessageContent
+                        content={msg.content}
+                        enableMarkdown={true}
+                        enableCopy={true}
+                        enableExpansion={true}
+                      />
+                    ) : (
+                      <MessageRenderer
+                        content={msg.content}
+                        role={msg.type}
+                        messageId={`msg-${index}`}
+                        userInitials={initials}
+                      />
+                    )}
+                  </div>
+                </div>
+              </Message>
+            );
+          })}
           {isLoading && (
             <div className="flex items-center gap-2 px-3 py-4">
               <Loader size={14} className="text-gray-500 dark:text-gray-400" />
