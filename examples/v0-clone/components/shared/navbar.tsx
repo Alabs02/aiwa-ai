@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense, FC } from "react";
 import { useSession } from "next-auth/react";
+import { motion } from "framer-motion";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -43,14 +44,22 @@ export function NavBar({ className = "" }: NavbarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isHomepage = pathname === "/";
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     if (isHomepage) {
       e.preventDefault();
-      // Add reset parameter to trigger UI reset
       window.location.href = "/?reset=true";
     }
-    // If not on homepage, let the Link component handle navigation normally
   };
 
   return (
@@ -59,7 +68,19 @@ export function NavBar({ className = "" }: NavbarProps) {
         <SearchParamsHandler />
       </Suspense>
 
-      <nav className="border-border dark:border-input sticky top-0 z-50 flex h-[60px] w-full items-center justify-between border-b px-5 md:px-4">
+      <motion.nav
+        className="border-border dark:border-input sticky top-0 z-50 flex h-[60px] w-full items-center justify-between border-b px-5 md:px-4"
+        animate={{
+          backgroundColor: isScrolled
+            ? "rgba(0, 0, 0, 0.5)"
+            : "rgba(0, 0, 0, 0)",
+          backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)",
+        }}
+        transition={{
+          duration: 0.3,
+          ease: "easeInOut",
+        }}
+      >
         <div className="flex items-center md:gap-4">
           <Link href={"/"} onClick={handleLogoClick} passHref>
             <div className="relative grid h-9 w-20 cursor-pointer grid-cols-1 overflow-hidden border-none">
@@ -123,7 +144,7 @@ export function NavBar({ className = "" }: NavbarProps) {
             <Menu className="h-5 w-5" />
           </Button>
         </div>
-      </nav>
+      </motion.nav>
     </>
   );
 }

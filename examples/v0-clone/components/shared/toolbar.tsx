@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, Suspense, FC } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { motion } from "framer-motion";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -39,6 +40,16 @@ function SearchParamsHandler() {
 
 export function Toolbar({ className = "" }: ToolbarProps) {
   const { data: session } = useSession();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -46,7 +57,19 @@ export function Toolbar({ className = "" }: ToolbarProps) {
         <SearchParamsHandler />
       </Suspense>
 
-      <nav className="sticky top-0 z-50 flex h-[60px] w-full items-center justify-between border-none px-5 md:px-4">
+      <motion.nav
+        className="sticky top-0 z-50 flex h-[60px] w-full items-center justify-between border-none px-5 md:px-4"
+        animate={{
+          backgroundColor: isScrolled
+            ? "rgba(0, 0, 0, 0.5)"
+            : "rgba(0, 0, 0, 0)",
+          backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)",
+        }}
+        transition={{
+          duration: 0.3,
+          ease: "easeInOut",
+        }}
+      >
         <Link href="/" passHref>
           <div className="relative grid h-9 w-20 cursor-pointer grid-cols-1 overflow-hidden border-none">
             <Image
@@ -89,7 +112,7 @@ export function Toolbar({ className = "" }: ToolbarProps) {
             <UserNav session={session} />
           </div>
         </div>
-      </nav>
+      </motion.nav>
     </>
   );
 }
