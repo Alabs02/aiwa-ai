@@ -2,17 +2,18 @@ import React, { useRef, useEffect } from "react";
 import {
   Message,
   MessageContent,
-  MessageAvatar
+  MessageAvatar,
 } from "@/components/ai-elements/message";
 import {
   Conversation,
-  ConversationContent
+  ConversationContent,
 } from "@/components/ai-elements/conversation";
 import { Loader } from "@/components/ai-elements/loader";
 import { MessageRenderer } from "@/components/message-renderer";
 import { sharedComponents } from "@/components/shared-components";
 import { StreamingMessage } from "@v0-sdk/react";
 import { useSession } from "next-auth/react";
+import { SparklesIcon } from "lucide-react";
 
 interface ChatMessage {
   type: "user" | "assistant";
@@ -42,54 +43,48 @@ export function ChatMessages({
   currentChat,
   onStreamingComplete,
   onChatData,
-  onStreamingStarted
+  onStreamingStarted,
 }: ChatMessagesProps) {
   const streamingStartedRef = useRef(false);
   const { data: session } = useSession();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Get user initials from session
   const initials =
     session?.user?.email?.split("@")[0]?.slice(0, 2)?.toUpperCase() || "U";
 
-  // Reset the streaming started flag when a new message starts loading
   useEffect(() => {
     if (isLoading) {
       streamingStartedRef.current = false;
     }
   }, [isLoading]);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
 
   if (chatHistory.length === 0) {
     return (
       <Conversation>
         <ConversationContent>
-          <div className="flex min-h-[400px] items-center justify-center">
-            <div className="space-y-3 text-center">
-              <div className="from-nuetral-200 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br via-neutral-500 to-neutral-800">
-                <svg
-                  className="h-8 w-8 text-black"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                  />
-                </svg>
+          <div className="flex min-h-[500px] items-center justify-center">
+            <div className="space-y-4 text-center">
+              <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
+                <div className="absolute inset-0 animate-pulse-subtle rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-neutral-200 via-neutral-500 to-neutral-800 p-0.5 shadow-lg">
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-black">
+                    <SparklesIcon className="h-8 w-8 text-white" />
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Start a conversation
-              </p>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                  Start a conversation
+                </h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Ask me to build anything, and I'll create it for you in
+                  real-time
+                </p>
+              </div>
             </div>
           </div>
         </ConversationContent>
@@ -100,68 +95,92 @@ export function ChatMessages({
   return (
     <Conversation>
       <ConversationContent>
-        <div className="mx-auto max-w-4xl space-y-1 px-4 py-6">
+        <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
           {chatHistory.map((msg, index) => {
             const isStringContent = typeof msg.content === "string";
 
             return (
               <Message from={msg.type} key={index}>
                 <div className="flex w-full items-start gap-3">
-                  <MessageAvatar
-                    type={msg.type}
-                    initials={msg.type === "user" ? initials : "AI"}
-                  />
+                  <div className="shrink-0">
+                    <MessageAvatar
+                      type={msg.type}
+                      initials={msg.type === "user" ? initials : "AI"}
+                    />
+                  </div>
+
                   <div className="min-w-0 flex-1">
                     {msg.isStreaming && msg.stream ? (
-                      <StreamingMessage
-                        stream={msg.stream}
-                        messageId={`msg-${index}`}
-                        role={msg.type}
-                        onComplete={onStreamingComplete}
-                        onChatData={onChatData}
-                        onChunk={(chunk) => {
-                          if (
-                            onStreamingStarted &&
-                            !streamingStartedRef.current
-                          ) {
-                            streamingStartedRef.current = true;
-                            onStreamingStarted();
+                      <div className="message-streaming">
+                        <StreamingMessage
+                          stream={msg.stream}
+                          messageId={`msg-${index}`}
+                          role={msg.type}
+                          onComplete={onStreamingComplete}
+                          onChatData={onChatData}
+                          onChunk={(chunk) => {
+                            if (
+                              onStreamingStarted &&
+                              !streamingStartedRef.current
+                            ) {
+                              streamingStartedRef.current = true;
+                              onStreamingStarted();
+                            }
+                          }}
+                          onError={(error) =>
+                            console.error("Streaming error:", error)
                           }
-                        }}
-                        onError={(error) =>
-                          console.error("Streaming error:", error)
-                        }
-                        components={sharedComponents}
-                        showLoadingIndicator={false}
-                      />
+                          components={sharedComponents}
+                          showLoadingIndicator={false}
+                        />
+                      </div>
                     ) : isStringContent ? (
                       <MessageContent
                         content={msg.content}
                         enableMarkdown={true}
                         enableCopy={true}
                         enableExpansion={true}
+                        className="message-enter"
                       />
                     ) : (
-                      <MessageRenderer
-                        content={msg.content}
-                        role={msg.type}
-                        messageId={`msg-${index}`}
-                        userInitials={initials}
-                      />
+                      <div className="message-enter">
+                        <MessageRenderer
+                          content={msg.content}
+                          role={msg.type}
+                          messageId={`msg-${index}`}
+                          userInitials={initials}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
               </Message>
             );
           })}
+
           {isLoading && (
-            <div className="flex items-center gap-2 px-3 py-4">
-              <Loader size={14} className="text-gray-500 dark:text-gray-400" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Thinking...
-              </span>
+            <div className="flex items-start gap-3">
+              <div className="shrink-0">
+                <MessageAvatar type="assistant" initials="AI" />
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border border-neutral-200/50 bg-gradient-to-br from-neutral-50/50 to-neutral-100/30 px-4 py-3 backdrop-blur-sm dark:border-neutral-800/50 dark:from-neutral-900/30 dark:to-neutral-800/20">
+                <Loader
+                  size={14}
+                  className="text-purple-600 dark:text-purple-400"
+                />
+                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Thinking
+                </span>
+                <div className="flex gap-1">
+                  <span className="size-1 animate-bounce rounded-full bg-purple-500 [animation-delay:-0.3s] dark:bg-purple-400" />
+                  <span className="size-1 animate-bounce rounded-full bg-purple-500 [animation-delay:-0.15s] dark:bg-purple-400" />
+                  <span className="size-1 animate-bounce rounded-full bg-purple-500 dark:bg-purple-400" />
+                </div>
+              </div>
             </div>
           )}
+
+          <div ref={messagesEndRef} />
         </div>
       </ConversationContent>
     </Conversation>
