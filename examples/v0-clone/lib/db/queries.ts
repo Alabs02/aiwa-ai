@@ -20,10 +20,12 @@ import {
   chat_ownerships,
   anonymous_chat_logs,
   github_exports,
+  prompt_library,
   type User,
   type ChatOwnership,
   type AnonymousChatLog,
-  type GitHubExport
+  type GitHubExport,
+  type PromptLibraryItem
 } from "./schema";
 import { generateUUID } from "../utils";
 import { generateHashedPassword } from "./utils";
@@ -80,7 +82,6 @@ export async function getFeaturedChats({
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Build query with joins
     let query = db
       .select({
         id: chat_ownerships.id,
@@ -97,12 +98,10 @@ export async function getFeaturedChats({
       .from(chat_ownerships)
       .leftJoin(users, eq(chat_ownerships.user_id, users.id));
 
-    // Apply visibility filter
     if (whereClause) {
       query = query.where(whereClause) as any;
     }
 
-    // Apply search filter if provided
     if (searchQuery && searchQuery.trim()) {
       const searchPattern = `%${searchQuery.trim()}%`;
       const searchConditions = or(
@@ -118,7 +117,6 @@ export async function getFeaturedChats({
       }
     }
 
-    // Order and paginate
     const chatsWithUsers = await query
       .orderBy(desc(chat_ownerships.created_at))
       .limit(limit)
@@ -171,18 +169,15 @@ export async function getFeaturedChatsCount({
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Build query with joins for search
     let query = db
       .select({ count: count(chat_ownerships.id) })
       .from(chat_ownerships)
       .leftJoin(users, eq(chat_ownerships.user_id, users.id));
 
-    // Apply visibility filter
     if (whereClause) {
       query = query.where(whereClause) as any;
     }
 
-    // Apply search filter if provided
     if (searchQuery && searchQuery.trim()) {
       const searchPattern = `%${searchQuery.trim()}%`;
       const searchConditions = or(
@@ -234,7 +229,6 @@ export async function updateChatVisibility({
   }
 }
 
-// Original queries below (keeping them all)...
 export async function getUser(email: string): Promise<Array<User>> {
   try {
     return await db.select().from(users).where(eq(users.email, email));
@@ -281,7 +275,6 @@ export async function createGuestUser(): Promise<User[]> {
   }
 }
 
-// Chat ownership functions
 export async function createChatOwnership({
   v0ChatId,
   userId
@@ -346,7 +339,6 @@ export async function deleteChatOwnership({ v0ChatId }: { v0ChatId: string }) {
   }
 }
 
-// Rate limiting functions
 export async function getChatCountByUserId({
   userId,
   differenceInHours
@@ -419,7 +411,6 @@ export async function createAnonymousChatLog({
   }
 }
 
-// GitHub integration functions
 export async function saveGitHubToken({
   userId,
   accessToken
@@ -511,6 +502,257 @@ export async function getGitHubExportsByUserId({
       .orderBy(desc(github_exports.created_at));
   } catch (error) {
     console.error("Failed to get user GitHub exports from database");
+    throw error;
+  }
+}
+
+// ===============================================
+// PROMPT LIBRARY QUERIES
+// ===============================================
+
+export async function savePromptToLibrary({
+  userId,
+  promptText,
+  enhancedPrompt,
+  title,
+  category,
+  tags,
+  qualityScore
+}: {
+  userId: string;
+  promptText: string;
+  enhancedPrompt?: string;
+  title?: string;
+  category?: string;
+  tags?: string[];
+  qualityScore?: string;
+}): Promise<PromptLibraryItem> {
+  try {
+    const [result] = await db
+      .insert(prompt_library)
+      .values({
+        user_id: userId,
+        prompt_text: promptText,
+        enhanced_prompt: enhancedPrompt,
+        title: title || null,
+        category: category || null,
+        tags: tags || [],
+        quality_score: qualityScore || null
+      })
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to save prompt to library");
+    throw error;
+  }
+}
+
+export async function getUserPrompts({
+  userId,
+  limit = 50,
+  offset = 0,
+  category,
+  searchQuery,
+  favoritesOnly = false
+}: {
+  userId: string;
+  limit?: number;
+  offset?: number;
+  category?: string;
+  searchQuery?: string;
+  favoritesOnly?: boolean;
+}): Promise<PromptLibraryItem[]> {
+  try {
+    let conditions: SQL[] = [eq(prompt_library.user_id, userId)];
+
+    if (category) {
+      conditions.push(eq(prompt_library.category, category));
+    }
+
+    if (favoritesOnly) {
+      conditions.push(eq(prompt_library.is_favorite, "true"));
+    }
+
+    if (searchQuery && searchQuery.trim()) {
+      const searchPattern = `%${searchQuery.trim()}%`;
+      conditions.push(
+        or(
+          ilike(prompt_library.prompt_text, searchPattern),
+          ilike(prompt_library.title, searchPattern),
+          ilike(prompt_library.enhanced_prompt, searchPattern)
+        )!
+      );
+    }
+
+    const whereClause = and(...conditions);
+
+    return await db
+      .select()
+      .from(prompt_library)
+      .where(whereClause)
+      .orderBy(desc(prompt_library.created_at))
+      .limit(limit)
+      .offset(offset);
+  } catch (error) {
+    console.error("Failed to get user prompts from library");
+    throw error;
+  }
+}
+
+export async function getPromptById({
+  promptId,
+  userId
+}: {
+  promptId: string;
+  userId: string;
+}): Promise<PromptLibraryItem | undefined> {
+  try {
+    const [result] = await db
+      .select()
+      .from(prompt_library)
+      .where(
+        and(eq(prompt_library.id, promptId), eq(prompt_library.user_id, userId))
+      );
+
+    return result;
+  } catch (error) {
+    console.error("Failed to get prompt by ID");
+    throw error;
+  }
+}
+
+export async function updatePromptInLibrary({
+  promptId,
+  userId,
+  updates
+}: {
+  promptId: string;
+  userId: string;
+  updates: Partial<{
+    prompt_text: string;
+    enhanced_prompt: string;
+    title: string;
+    category: string;
+    tags: string[];
+    quality_score: string;
+    is_favorite: string;
+  }>;
+}): Promise<PromptLibraryItem> {
+  try {
+    const [result] = await db
+      .update(prompt_library)
+      .set({
+        ...updates,
+        updated_at: new Date()
+      })
+      .where(
+        and(eq(prompt_library.id, promptId), eq(prompt_library.user_id, userId))
+      )
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to update prompt in library");
+    throw error;
+  }
+}
+
+export async function deletePromptFromLibrary({
+  promptId,
+  userId
+}: {
+  promptId: string;
+  userId: string;
+}): Promise<void> {
+  try {
+    await db
+      .delete(prompt_library)
+      .where(
+        and(eq(prompt_library.id, promptId), eq(prompt_library.user_id, userId))
+      );
+  } catch (error) {
+    console.error("Failed to delete prompt from library");
+    throw error;
+  }
+}
+
+export async function incrementPromptUsage({
+  promptId,
+  userId
+}: {
+  promptId: string;
+  userId: string;
+}): Promise<void> {
+  try {
+    const prompt = await getPromptById({ promptId, userId });
+    if (prompt) {
+      await db
+        .update(prompt_library)
+        .set({
+          usage_count: prompt.usage_count + 1,
+          updated_at: new Date()
+        })
+        .where(
+          and(
+            eq(prompt_library.id, promptId),
+            eq(prompt_library.user_id, userId)
+          )
+        );
+    }
+  } catch (error) {
+    console.error("Failed to increment prompt usage");
+    throw error;
+  }
+}
+
+export async function getUserPromptStats({
+  userId
+}: {
+  userId: string;
+}): Promise<{
+  total: number;
+  favorites: number;
+  categories: { category: string; count: number }[];
+}> {
+  try {
+    const [totalResult] = await db
+      .select({ count: count(prompt_library.id) })
+      .from(prompt_library)
+      .where(eq(prompt_library.user_id, userId));
+
+    const [favoritesResult] = await db
+      .select({ count: count(prompt_library.id) })
+      .from(prompt_library)
+      .where(
+        and(
+          eq(prompt_library.user_id, userId),
+          eq(prompt_library.is_favorite, "true")
+        )
+      );
+
+    // Get category breakdown
+    const categoryResults = await db
+      .select({
+        category: prompt_library.category,
+        count: count(prompt_library.id)
+      })
+      .from(prompt_library)
+      .where(eq(prompt_library.user_id, userId))
+      .groupBy(prompt_library.category);
+
+    return {
+      total: totalResult?.count || 0,
+      favorites: favoritesResult?.count || 0,
+      categories: categoryResults
+        .filter((r: any) => r.category)
+        .map((r: any) => ({
+          category: r.category as string,
+          count: r.count
+        }))
+    };
+  } catch (error) {
+    console.error("Failed to get user prompt stats");
     throw error;
   }
 }

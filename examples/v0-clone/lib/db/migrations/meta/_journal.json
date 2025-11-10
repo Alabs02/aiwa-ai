@@ -43,6 +43,13 @@
       "when": 1761757094323,
       "tag": "0005_add-title",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1762750186129,
+      "tag": "0006_loving_madripoor",
+      "breakpoints": true
     }
   ]
 }

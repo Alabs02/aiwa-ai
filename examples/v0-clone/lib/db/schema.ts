@@ -6,7 +6,8 @@ import {
   uuid,
   primaryKey,
   unique,
-  text
+  text,
+  integer
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -19,44 +20,39 @@ export const users = pgTable("users", {
 
 export type User = InferSelectModel<typeof users>;
 
-// Simple ownership mapping for v0 chats
-// The actual chat data lives in v0 API, we just track who owns what
 export const chat_ownerships = pgTable(
   "chat_ownerships",
   {
     id: uuid("id").primaryKey().notNull().defaultRandom(),
-    v0_chat_id: varchar("v0_chat_id", { length: 255 }).notNull(), // v0 API chat ID
+    v0_chat_id: varchar("v0_chat_id", { length: 255 }).notNull(),
     user_id: uuid("user_id")
       .notNull()
       .references(() => users.id),
     visibility: varchar("visibility", { length: 20 })
       .notNull()
-      .default("private"), // 'public', 'private', 'team'
-    title: varchar("title", { length: 255 }), // Custom user-defined title
-    description: text("description"), // Custom description
-    preview_url: varchar("preview_url", { length: 512 }), // Screenshot or preview URL
-    demo_url: varchar("demo_url", { length: 512 }), // Live demo URL for iframe fallback
+      .default("private"),
+    title: varchar("title", { length: 255 }),
+    description: text("description"),
+    preview_url: varchar("preview_url", { length: 512 }),
+    demo_url: varchar("demo_url", { length: 512 }),
     created_at: timestamp("created_at").notNull().defaultNow()
   },
   (table) => ({
-    // Ensure each v0 chat can only be owned by one user
     unique_v0_chat: unique().on(table.v0_chat_id)
   })
 );
 
 export type ChatOwnership = InferSelectModel<typeof chat_ownerships>;
 
-// Track anonymous chat creation by IP for rate limiting
 export const anonymous_chat_logs = pgTable("anonymous_chat_logs", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
-  ip_address: varchar("ip_address", { length: 45 }).notNull(), // IPv6 can be up to 45 chars
-  v0_chat_id: varchar("v0_chat_id", { length: 255 }).notNull(), // v0 API chat ID
+  ip_address: varchar("ip_address", { length: 45 }).notNull(),
+  v0_chat_id: varchar("v0_chat_id", { length: 255 }).notNull(),
   created_at: timestamp("created_at").notNull().defaultNow()
 });
 
 export type AnonymousChatLog = InferSelectModel<typeof anonymous_chat_logs>;
 
-// Track GitHub exports for chats
 export const github_exports = pgTable("github_exports", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   v0_chat_id: varchar("v0_chat_id", { length: 255 }).notNull(),
@@ -65,8 +61,30 @@ export const github_exports = pgTable("github_exports", {
     .references(() => users.id),
   repo_name: varchar("repo_name", { length: 255 }).notNull(),
   repo_url: varchar("repo_url", { length: 512 }).notNull(),
-  is_private: varchar("is_private", { length: 10 }).notNull().default("true"), // 'true' or 'false' as string
+  is_private: varchar("is_private", { length: 10 }).notNull().default("true"),
   created_at: timestamp("created_at").notNull().defaultNow()
 });
 
 export type GitHubExport = InferSelectModel<typeof github_exports>;
+
+// Prompt library for saving and managing enhanced prompts
+export const prompt_library = pgTable("prompt_library", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  prompt_text: text("prompt_text").notNull(),
+  enhanced_prompt: text("enhanced_prompt"),
+  title: varchar("title", { length: 255 }),
+  category: varchar("category", { length: 100 }),
+  tags: text("tags").array().default([]),
+  quality_score: varchar("quality_score", { length: 20 }),
+  is_favorite: varchar("is_favorite", { length: 10 })
+    .notNull()
+    .default("false"),
+  usage_count: integer("usage_count").notNull().default(0),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow()
+});
+
+export type PromptLibraryItem = InferSelectModel<typeof prompt_library>;

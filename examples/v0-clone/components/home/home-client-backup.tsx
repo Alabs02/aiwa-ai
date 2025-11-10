@@ -19,11 +19,6 @@ import {
   type ImageAttachment
 } from "@/components/ai-elements/prompt-input";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
-import {
-  PromptQualityIndicator,
-  PromptEnhancerDialog,
-  PromptLibraryDialog
-} from "@/components/prompt-enhancement";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatInput } from "@/components/chat/chat-input";
 import { PreviewPanel } from "@/components/chat/preview-panel";
@@ -34,8 +29,6 @@ import { GL } from "@/components/gl";
 import { Leva } from "leva";
 import { suggestions } from "../constants/suggestions";
 import { FeaturedProjects } from "@/components/projects/featured";
-import { Button } from "@/components/ui/button";
-import { Wand2, Library } from "lucide-react";
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -86,11 +79,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hovering, setHovering] = useState(false);
-
-  // Prompt enhancement states
-  const [showEnhancer, setShowEnhancer] = useState(false);
-  const [showLibrary, setShowLibrary] = useState(false);
-  const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
 
   const handleReset = () => {
     // Reset all chat-related state
@@ -170,11 +158,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   const handleDrop = () => {
     setIsDragOver(false);
-  };
-
-  // Handle prompt from enhancer or library
-  const handleUseEnhancedPrompt = (enhancedPrompt: string) => {
-    setMessage(enhancedPrompt);
   };
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -261,11 +244,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           ? error.message
           : "Sorry, there was an error processing your message. Please try again.";
 
-      setChatHistory([
-        {
-          type: "user",
-          content: userMessage
-        },
+      setChatHistory((prev) => [
+        ...prev,
         {
           type: "assistant",
           content: errorMessage
@@ -278,34 +258,61 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setIsLoading(false);
   };
 
-  const handleChatData = (data: any) => {
-    if (data.chatId) {
-      setCurrentChatId(data.chatId);
-      setCurrentChat({ id: data.chatId, demo: data.demo });
+  const handleChatData = async (data: { id: string; demo?: string }) => {
+    if (!currentChatId && data.id) {
+      // First time receiving chat ID - set it and navigate
+      setCurrentChatId(data.id);
+      setCurrentChat(data);
+
+      // Update URL to /chats/{chatId}
+      window.history.pushState(null, "", `/chats/${data.id}`);
+
+      console.log("Chat created with ID:", data.id);
+
+      // Create ownership record for the new chat
+      try {
+        await fetch("/api/chat/ownership", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            chatId: data.id
+          })
+        });
+        console.log("Chat ownership created:", data.id);
+      } catch (error) {
+        console.error("Failed to create chat ownership:", error);
+        // Don't fail the UI if ownership creation fails
+      }
+    } else if (
+      data.demo &&
+      (!currentChat?.demo || currentChat.demo !== data.demo)
+    ) {
+      // Demo URL came through - update it
+      setCurrentChat((prev) => (prev ? { ...prev, demo: data.demo } : null));
+
+      // Auto-switch to preview on mobile when demo is ready
+      if (window.innerWidth < 768) {
+        setActivePanel("preview");
+      }
     }
   };
 
-  const handleChatSendMessage = async (
-    e: React.FormEvent<HTMLFormElement>,
-    attachmentUrls?: Array<{ url: string }>
-  ) => {
+  const handleStreamingStarted = () => {
+    setIsLoading(false);
+  };
+
+  const handleChatSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
 
     const userMessage = message.trim();
-
-    // Clear message immediately
     setMessage("");
-
-    // Add user message to history
-    setChatHistory((prev) => [
-      ...prev,
-      {
-        type: "user",
-        content: userMessage
-      }
-    ]);
     setIsLoading(true);
+
+    // Add user message to chat history
+    setChatHistory((prev) => [...prev, { type: "user", content: userMessage }]);
 
     try {
       const response = await fetch("/api/chat", {
@@ -316,7 +323,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         body: JSON.stringify({
           message: userMessage,
           chatId: currentChatId,
-          attachments: attachmentUrls,
           streaming: true
         })
       });
@@ -485,17 +491,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                     attachments={attachments}
                     onRemove={handleRemoveAttachment}
                   />
-
-                  {/* Quality indicator positioned above textarea */}
-                  {message.trim().length > 0 && (
-                    <div className="flex justify-end px-3 pt-2">
-                      <PromptQualityIndicator
-                        prompt={message}
-                        onAnalysisChange={setPromptAnalysis}
-                      />
-                    </div>
-                  )}
-
                   <PromptInputTextarea
                     ref={textareaRef}
                     onChange={(e) => setMessage(e.target.value)}
@@ -506,30 +501,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                   />
                   <PromptInputToolbar>
                     <PromptInputTools>
-                      {/* New enhancement tools */}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setShowLibrary(true)}
-                        className="h-8 w-8 p-0 text-white/60 hover:text-white"
-                        title="Browse prompt library"
-                        disabled={isLoading}
-                      >
-                        <Library className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setShowEnhancer(true)}
-                        className="h-8 w-8 p-0 text-white/60 hover:text-white"
-                        title="Enhance prompt"
-                        disabled={isLoading}
-                      >
-                        <Wand2 className="h-4 w-4" />
-                      </Button>
-
                       <PromptInputImageButton
                         onImageSelect={handleImageFiles}
                         disabled={isLoading}
@@ -589,20 +560,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           </div>
         </main>
       </div>
-
-      {/* Enhancement dialogs */}
-      <PromptEnhancerDialog
-        open={showEnhancer}
-        onOpenChange={setShowEnhancer}
-        initialPrompt={message}
-        onUsePrompt={handleUseEnhancedPrompt}
-      />
-
-      <PromptLibraryDialog
-        open={showLibrary}
-        onOpenChange={setShowLibrary}
-        onSelectPrompt={handleUseEnhancedPrompt}
-      />
 
       <Leva hidden />
     </>
