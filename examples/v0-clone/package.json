@@ -12,7 +12,11 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.43",
+    "@ai-sdk/google": "^2.0.30",
+    "@ai-sdk/openai": "^2.0.64",
     "@ai-sdk/react": "^2.0.22",
+    "@ai-sdk/xai": "^2.0.31",
     "@fontsource/geist": "^5.2.8",
     "@fontsource/geist-mono": "^5.2.7",
     "@fontsource/geist-sans": "^5.2.5",
@@ -36,7 +40,7 @@
     "@uiw/react-markdown-preview": "^5.1.5",
     "@v0-sdk/react": "workspace:*",
     "@vercel/postgres": "^0.10.0",
-    "ai": "^5.0.22",
+    "ai": "^5.0.89",
     "bcrypt-ts": "^7.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

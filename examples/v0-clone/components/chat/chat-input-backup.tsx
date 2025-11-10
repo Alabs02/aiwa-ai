@@ -15,14 +15,7 @@ import {
   type ImageAttachment
 } from "@/components/ai-elements/prompt-input";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
-import {
-  PromptQualityIndicator,
-  PromptEnhancerDialog,
-  PromptLibraryDialog
-} from "@/components/prompt-enhancement";
 import { useState, useCallback, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Wand2, Library } from "lucide-react";
 
 interface ChatInputProps {
   message: string;
@@ -49,9 +42,6 @@ export function ChatInput({
   textareaRef
 }: ChatInputProps) {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [showEnhancer, setShowEnhancer] = useState(false);
-  const [showLibrary, setShowLibrary] = useState(false);
-  const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
 
   const handleImageFiles = useCallback(
     async (files: File[]) => {
@@ -89,14 +79,17 @@ export function ChatInput({
     setIsDragOver(false);
   }, []);
 
+  // Save to sessionStorage when message or attachments change
   useEffect(() => {
     if (message.trim() || attachments.length > 0) {
       savePromptToStorage(message, attachments);
     } else {
+      // Clear sessionStorage if both message and attachments are empty
       clearPromptFromStorage();
     }
   }, [message, attachments]);
 
+  // Restore from sessionStorage on mount (only if no existing data)
   useEffect(() => {
     if (!message && attachments.length === 0) {
       const storedData = loadPromptFromStorage();
@@ -114,6 +107,7 @@ export function ChatInput({
 
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
+      // Clear sessionStorage immediately upon submission
       clearPromptFromStorage();
 
       const attachmentUrls = attachments.map((att) => ({ url: att.dataUrl }));
@@ -121,10 +115,6 @@ export function ChatInput({
     },
     [onSubmit, attachments]
   );
-
-  const handleUseEnhancedPrompt = (enhancedPrompt: string) => {
-    setMessage(enhancedPrompt);
-  };
 
   return (
     <div className="px-4 md:pb-4">
@@ -142,17 +132,6 @@ export function ChatInput({
             attachments={attachments}
             onRemove={handleRemoveAttachment}
           />
-
-          {/* Quality indicator positioned above textarea */}
-          {message.trim().length > 0 && (
-            <div className="flex justify-end px-3 pt-2">
-              <PromptQualityIndicator
-                prompt={message}
-                onAnalysisChange={setPromptAnalysis}
-              />
-            </div>
-          )}
-
           <PromptInputTextarea
             ref={textareaRef}
             onChange={(e) => setMessage(e.target.value)}
@@ -160,31 +139,8 @@ export function ChatInput({
             className="min-h-[60px]"
             placeholder="Continue the conversation..."
           />
-
           <PromptInputToolbar>
             <PromptInputTools>
-              {/* New enhancement tools */}
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowLibrary(true)}
-                className="h-8 w-8 p-0 text-white/60 hover:text-white"
-                title="Browse prompt library"
-              >
-                <Library className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowEnhancer(true)}
-                className="h-8 w-8 p-0 text-white/60 hover:text-white"
-                title="Enhance prompt"
-              >
-                <Wand2 className="h-4 w-4" />
-              </Button>
-
               <PromptInputImageButton onImageSelect={handleImageFiles} />
             </PromptInputTools>
             <PromptInputTools>
@@ -204,13 +160,13 @@ export function ChatInput({
           </PromptInputToolbar>
         </PromptInput>
       </div>
-
       {showSuggestions && (
         <div className="mx-auto mt-2 max-w-2xl">
           <Suggestions>
             <Suggestion
               onClick={() => {
                 setMessage("Landing page");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -223,6 +179,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("Todo app");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -235,6 +192,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("Dashboard");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -247,6 +205,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("Blog");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -259,6 +218,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("E-commerce");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -271,6 +231,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("Portfolio");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -283,6 +244,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("Chat app");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -295,6 +257,7 @@ export function ChatInput({
             <Suggestion
               onClick={() => {
                 setMessage("Calculator");
+                // Submit after setting message
                 setTimeout(() => {
                   const form = textareaRef?.current?.form;
                   if (form) {
@@ -307,20 +270,6 @@ export function ChatInput({
           </Suggestions>
         </div>
       )}
-
-      {/* Enhancement dialogs */}
-      <PromptEnhancerDialog
-        open={showEnhancer}
-        onOpenChange={setShowEnhancer}
-        initialPrompt={message}
-        onUsePrompt={handleUseEnhancedPrompt}
-      />
-
-      <PromptLibraryDialog
-        open={showLibrary}
-        onOpenChange={setShowLibrary}
-        onSelectPrompt={handleUseEnhancedPrompt}
-      />
     </div>
   );
 }
