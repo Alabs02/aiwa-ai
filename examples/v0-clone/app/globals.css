@@ -1,5 +1,7 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./message.css";
+@import "./animations.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -43,12 +45,12 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* Font Families */
-  --font-heading: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  --font-body-sans: 'Geist Sans', system-ui, -apple-system, sans-serif;
-  --font-body: 'Geist', system-ui, -apple-system, sans-serif;
-  --font-button: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', 'Courier New', monospace;
-  
+  --font-heading: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-body-sans: "Geist Sans", system-ui, -apple-system, sans-serif;
+  --font-body: "Geist", system-ui, -apple-system, sans-serif;
+  --font-button: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", "Courier New", monospace;
+
   /* Animations */
   --animate-rippling: rippling var(--duration) ease-out;
   --animate-shimmer: shimmer 2s linear infinite;
@@ -60,6 +62,9 @@
   --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
   --animate-fade-in-line: fade-in-line 0.3s ease-out forwards;
   --animate-blink: blink 1s step-end infinite;
+  --animate-pulse-subtle: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-accordion-down: accordion-down 0.3s ease-out;
+  --animate-accordion-up: accordion-up 0.3s ease-out;
 
   @keyframes rippling {
     0% {
@@ -82,17 +87,20 @@
 
   @keyframes glow {
     0% {
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1),
-                  0 0 40px rgba(255, 255, 255, 0.05);
+      box-shadow:
+        0 0 20px rgba(255, 255, 255, 0.1),
+        0 0 40px rgba(255, 255, 255, 0.05);
     }
     100% {
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2),
-                  0 0 60px rgba(255, 255, 255, 0.1);
+      box-shadow:
+        0 0 30px rgba(255, 255, 255, 0.2),
+        0 0 60px rgba(255, 255, 255, 0.1);
     }
   }
 
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -101,7 +109,8 @@
   }
 
   @keyframes gradient {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateX(-50%) translateY(-50%) rotate(0deg);
     }
     50% {
@@ -130,7 +139,8 @@
   }
 
   @keyframes pulse-slow {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
@@ -150,7 +160,8 @@
   }
 
   @keyframes blink {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
@@ -182,7 +193,7 @@
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-4: oklch(82.901% 0.17115 81.038);
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -212,7 +223,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(55.553% 0.00006 271.152);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -296,7 +307,7 @@
   }
 
   .shimmer::before {
-    content: '';
+    content: "";
     @apply absolute inset-0 -translate-x-full;
     @apply bg-gradient-to-r from-transparent via-white/10 to-transparent;
     animation: shimmer 2s infinite;
