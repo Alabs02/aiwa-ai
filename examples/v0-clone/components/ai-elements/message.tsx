@@ -186,7 +186,7 @@ export const MessageAvatar = ({
       {type === "user" && !src && (
         <AvatarImage
           alt={initials || name || "User Avatar"}
-          src={`https://ui-avatars.com/api/?name=${initials}&background=random&color=fff&rounded=true&size=64`}
+          src={`https://ui-avatars.com/api/?name=${initials}&background=737373&color=fff&rounded=true&size=64`}
         />
       )}
       <AvatarFallback className="text-xs font-semibold">

@@ -1,26 +1,10 @@
 import React from "react";
 import {
-  CodeProjectPart,
   CodeBlock,
   MathPart,
   ThinkingSectionProps,
   TaskSectionProps,
-  CodeProjectPartProps,
-  CodeBlockData,
-  CodeBlockProps,
-  CodeProjectBlock,
-  AssistantMessageContentPart,
-  CodeProjectData,
-  ContentPartRenderer,
-  ContentPartData,
-  CodeProjectBlockProps,
-  Icon,
-  IconData,
-  IconProvider,
-  IconProps,
-  Message,
-  StreamingMessage,
-  MessageContent
+  CodeProjectPartProps
 } from "@v0-sdk/react";
 import {
   Reasoning,
@@ -34,8 +18,11 @@ import {
   TaskItem,
   TaskItemFile
 } from "@/components/ai-elements/task";
+import { FileIcon, FolderIcon } from "lucide-react";
 
-// Wrapper component to adapt AI Elements Reasoning to @v0-sdk/react ThinkingSection
+// ===============================================
+// THINKING SECTION WRAPPER
+// ===============================================
 export const ThinkingSectionWrapper = ({
   title,
   duration,
@@ -43,15 +30,11 @@ export const ThinkingSectionWrapper = ({
   collapsed,
   onCollapse,
   children,
-  brainIcon,
-  chevronRightIcon,
-  chevronDownIcon,
-  iconRenderer,
   ...props
 }: ThinkingSectionProps) => {
   return (
     <Reasoning
-      duration={duration ? Math.round(duration) : duration}
+      duration={duration ? Math.round(duration) : undefined}
       defaultOpen={!collapsed}
       onOpenChange={(open) => onCollapse?.()}
       {...props}
@@ -59,372 +42,122 @@ export const ThinkingSectionWrapper = ({
       <ReasoningTrigger title={title || "Thinking"} />
       <ReasoningContent>
         {thought ||
-          (typeof children === "string"
-            ? children
-            : "No thinking content available")}
+          (typeof children === "string" ? children : "Processing thoughts...")}
       </ReasoningContent>
     </Reasoning>
   );
 };
 
-// Wrapper component to adapt AI Elements Task to @v0-sdk/react TaskSection
-export const TaskSectionWrapper = ({
-  title,
-  type,
-  parts,
-  collapsed,
-  onCollapse,
-  children,
-  taskIcon,
-  chevronRightIcon,
-  chevronDownIcon,
-  iconRenderer,
-  ...props
-}: TaskSectionProps) => {
-  return (
-    <Task
-      className="mb-4 w-full"
-      defaultOpen={!collapsed}
-      onOpenChange={(open) => onCollapse?.()}
-    >
-      <TaskTrigger title={title || type || "Task"} />
-      <TaskContent>
-        {parts &&
-          parts.length > 0 &&
-          parts.map((part, index) => {
-            if (typeof part === "string") {
-              return <TaskItem key={index}>{part}</TaskItem>;
-            }
+// ===============================================
+// CODE PROJECT WRAPPER
+// ===============================================
 
-            // Handle structured task data with proper AI Elements components
-            if (part && typeof part === "object") {
-              const partObj = part as any;
+// Helper to clean V0_FILE markers and shell placeholders
+const cleanCodeContent = (content: string): string => {
+  if (!content) return "";
 
-              if (partObj.type === "starting-repo-search" && partObj.query) {
-                return (
-                  <TaskItem key={index}>Searching: "{partObj.query}"</TaskItem>
-                );
-              }
+  // Remove V0_FILE markers with various patterns
+  let cleaned = content.replace(/\[V0_FILE\][^:]*:file="[^"]*"\n?/g, "");
+  cleaned = cleaned.replace(/\[V0_FILE\][^\n]*\n?/g, "");
 
-              if (
-                partObj.type === "select-files" &&
-                Array.isArray(partObj.filePaths)
-              ) {
-                return (
-                  <TaskItem key={index}>
-                    Read{" "}
-                    {partObj.filePaths.map((file: string, i: number) => (
-                      <TaskItemFile key={i}>
-                        {file.split("/").pop()}
-                      </TaskItemFile>
-                    ))}
-                  </TaskItem>
-                );
-              }
+  // Remove shell placeholders
+  cleaned = cleaned.replace(/\.\.\.\s*shell\s*\.\.\./g, "");
 
-              if (partObj.type === "fetching-diagnostics") {
-                return <TaskItem key={index}>Checking for issues...</TaskItem>;
-              }
+  // Clean up excessive newlines
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
+  cleaned = cleaned.trim();
 
-              if (partObj.type === "diagnostics-passed") {
-                return <TaskItem key={index}>✓ No issues found</TaskItem>;
-              }
-
-              // Handle task-read-file-v1 part types
-              if (partObj.type === "reading-file" && partObj.filePath) {
-                return (
-                  <TaskItem key={index}>
-                    Reading file <TaskItemFile>{partObj.filePath}</TaskItemFile>
-                  </TaskItem>
-                );
-              }
-
-              // Handle task-coding-v1 part types
-              if (partObj.type === "code-project" && partObj.changedFiles) {
-                return (
-                  <TaskItem key={index}>
-                    Editing{" "}
-                    {partObj.changedFiles.map((file: any, i: number) => (
-                      <TaskItemFile key={i}>
-                        {file.fileName || file.baseName}
-                      </TaskItemFile>
-                    ))}
-                  </TaskItem>
-                );
-              }
-
-              if (partObj.type === "launch-tasks") {
-                return <TaskItem key={index}>Starting tasks...</TaskItem>;
-              }
-
-              // Handle task-search-web-v1 part types
-              if (partObj.type === "starting-web-search" && partObj.query) {
-                return (
-                  <TaskItem key={index}>Searching: "{partObj.query}"</TaskItem>
-                );
-              }
-
-              if (partObj.type === "got-results" && partObj.count) {
-                return (
-                  <TaskItem key={index}>Found {partObj.count} results</TaskItem>
-                );
-              }
-
-              if (partObj.type === "finished-web-search" && partObj.answer) {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                      {partObj.answer}
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Handle design inspiration task parts
-              if (partObj.type === "generating-design-inspiration") {
-                return (
-                  <TaskItem key={index}>
-                    Generating design inspiration...
-                  </TaskItem>
-                );
-              }
-
-              if (
-                partObj.type === "design-inspiration-complete" &&
-                Array.isArray(partObj.inspirations)
-              ) {
-                return (
-                  <TaskItem key={index}>
-                    <div className="space-y-2">
-                      <div className="text-sm text-gray-700 dark:text-gray-300">
-                        Generated {partObj.inspirations.length} design
-                        inspirations
-                      </div>
-                      {partObj.inspirations
-                        .slice(0, 3)
-                        .map((inspiration: any, i: number) => (
-                          <div
-                            key={i}
-                            className="rounded bg-gray-100 p-2 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                          >
-                            {inspiration.title ||
-                              inspiration.description ||
-                              `Inspiration ${i + 1}`}
-                          </div>
-                        ))}
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Handle other potential task types
-              if (partObj.type === "analyzing-requirements") {
-                return (
-                  <TaskItem key={index}>Analyzing requirements...</TaskItem>
-                );
-              }
-
-              if (
-                partObj.type === "requirements-complete" &&
-                partObj.requirements
-              ) {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
-                      Analyzed {partObj.requirements.length || "several"}{" "}
-                      requirements
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Handle additional common task part types
-              if (partObj.type === "thinking" || partObj.type === "analyzing") {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-gray-600 italic dark:text-gray-400">
-                      Thinking...
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              if (partObj.type === "processing" || partObj.type === "working") {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Processing...
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              if (partObj.type === "complete" || partObj.type === "finished") {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-green-600 dark:text-green-400">
-                      ✓ Complete
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Handle error states
-              if (partObj.type === "error" || partObj.type === "failed") {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-red-600 dark:text-red-400">
-                      ✗ {partObj.error || partObj.message || "Task failed"}
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Fallback for other structured data
-              // Try to extract meaningful information from unknown task parts
-              const taskType = partObj.type || "unknown";
-              const status = partObj.status;
-              const message =
-                partObj.message || partObj.description || partObj.text;
-
-              if (message) {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
-                      {message}
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              if (status) {
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-gray-600 capitalize dark:text-gray-400">
-                      {status.replace(/-/g, " ")}...
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Show task type as a readable label
-              if (taskType !== "unknown") {
-                const readableType = taskType
-                  .replace(/-/g, " ")
-                  .replace(/([a-z])([A-Z])/g, "$1 $2")
-                  .toLowerCase()
-                  .replace(/^\w/, (c: string) => c.toUpperCase());
-
-                return (
-                  <TaskItem key={index}>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {readableType}
-                    </div>
-                  </TaskItem>
-                );
-              }
-
-              // Final fallback - only show JSON for truly unknown structures
-              return (
-                <TaskItem key={index}>
-                  <details className="text-xs">
-                    <summary className="cursor-pointer text-gray-500 dark:text-gray-400">
-                      Unknown task part (click to expand)
-                    </summary>
-                    <div className="mt-2 rounded bg-gray-100 p-2 font-mono dark:bg-gray-800">
-                      {JSON.stringify(part, null, 2)}
-                    </div>
-                  </details>
-                </TaskItem>
-              );
-            }
-
-            return null;
-          })}
-
-        {children && <TaskItem>{children}</TaskItem>}
-      </TaskContent>
-    </Task>
-  );
+  return cleaned;
 };
 
-// Wrapper component to adapt AI Elements styling to @v0-sdk/react CodeProjectPart
-export const CodeProjectPartWrapper = ({
+const CodeProjectPartWrapper = ({
   title,
   filename,
   code,
-  language,
-  collapsed,
-  className,
+  language = "typescript",
+  collapsed = false,
   children,
-  iconRenderer,
   ...props
 }: CodeProjectPartProps) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(collapsed ?? true);
+  const [isCollapsed, setIsCollapsed] = React.useState(collapsed);
+
+  // Extract files from props if this is a code project
+  const codeProjectPart = props as any;
+  const files = codeProjectPart.changedFiles || [];
+  const hasMultipleFiles = files.length > 1;
+
+  // Clean the code content
+  const cleanedCode = cleanCodeContent(code || codeProjectPart.source || "");
 
   return (
-    <div
-      className={`border-border dark:border-input my-6 rounded-lg border ${className || ""}`}
-      {...props}
-    >
+    <div className="not-prose group/code-project mb-4 overflow-hidden rounded-lg border border-neutral-200/50 bg-gradient-to-br from-neutral-50/50 to-neutral-100/30 backdrop-blur-sm transition-all duration-300 dark:border-neutral-800/50 dark:from-neutral-900/30 dark:to-neutral-800/20">
+      {/* Header */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 transition-all duration-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-6 w-6 items-center justify-center">
-            <svg
-              className="h-5 w-5 text-black dark:text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-            </svg>
+          <div className="rounded-md bg-neutral-100 p-1.5 dark:bg-neutral-800">
+            <FolderIcon className="size-4 text-neutral-600 dark:text-neutral-400" />
           </div>
-          <span className="font-medium text-gray-900 dark:text-gray-100">
-            {title || "Code Project"}
-          </span>
+          <div className="flex flex-col items-start gap-0.5">
+            <span className="font-medium text-neutral-900 dark:text-neutral-100">
+              {title || "Code Project"}
+            </span>
+            {hasMultipleFiles && (
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                {files.length} file{files.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
-            v1
-          </span>
-          <svg
-            className={`h-4 w-4 text-gray-400 transition-transform ${isCollapsed ? "" : "rotate-90"}`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
+        <svg
+          className={`size-4 text-neutral-500 transition-transform duration-300 dark:text-neutral-400 ${
+            isCollapsed ? "" : "rotate-90"
+          }`}
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
       </button>
 
+      {/* Content */}
       {!isCollapsed && (
-        <div className="border-border dark:border-input border-t">
+        <div className="border-t border-neutral-200/50 dark:border-neutral-800/50">
           {children || (
             <div className="p-4">
-              <div className="mb-4 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-black dark:text-white">
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="font-mono">
-                    {filename || "app/page.tsx"}
-                  </span>
-                </div>
+              {/* Main file display */}
+              <div className="flex items-center gap-2 text-sm">
+                <FileIcon className="size-4 shrink-0 text-neutral-600 dark:text-neutral-400" />
+                <span className="font-mono text-neutral-900 dark:text-neutral-100">
+                  {filename ||
+                    files[0]?.fileName ||
+                    files[0]?.baseName ||
+                    "app/page.tsx"}
+                </span>
               </div>
+
+              {/* Additional files if multiple */}
+              {hasMultipleFiles && (
+                <div className="mt-3 space-y-1.5 pl-6">
+                  {files.slice(1).map((file: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400"
+                    >
+                      <FileIcon className="size-3 shrink-0" />
+                      <span className="font-mono">
+                        {file.fileName || file.baseName || `file-${index + 2}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -433,10 +166,229 @@ export const CodeProjectPartWrapper = ({
   );
 };
 
-// Shared components object that can be used by both StreamingMessage and MessageRenderer
-// Custom TaskSection that handles code projects properly
+// ===============================================
+// TASK SECTION WRAPPER
+// ===============================================
+const parseTaskStatus = (
+  parts: any[]
+): "pending" | "active" | "complete" | undefined => {
+  if (!Array.isArray(parts) || parts.length === 0) return undefined;
+
+  const hasComplete = parts.some(
+    (p) =>
+      p &&
+      typeof p === "object" &&
+      (p.status === "complete" ||
+        p.type === "diagnostics-passed" ||
+        p.type === "finished-web-search")
+  );
+
+  const hasActive = parts.some(
+    (p) =>
+      p &&
+      typeof p === "object" &&
+      (p.status === "searching" ||
+        p.status === "analyzing" ||
+        p.status === "reading" ||
+        p.type === "fetching-diagnostics" ||
+        p.type === "starting-web-search" ||
+        p.type === "starting-repo-search")
+  );
+
+  if (hasComplete) return "complete";
+  if (hasActive) return "active";
+  return "pending";
+};
+
+export const TaskSectionWrapper = ({
+  title,
+  type,
+  parts = [],
+  collapsed,
+  onCollapse,
+  children,
+  ...props
+}: TaskSectionProps) => {
+  const status = parseTaskStatus(parts);
+
+  return (
+    <Task
+      status={status}
+      className="mb-4 w-full"
+      defaultOpen={!collapsed}
+      onOpenChange={(open) => onCollapse?.()}
+    >
+      <TaskTrigger title={title || type || "Task"} status={status} />
+      <TaskContent>
+        {parts && parts.length > 0
+          ? parts.map((part, index) => renderTaskPart(part, index))
+          : children}
+      </TaskContent>
+    </Task>
+  );
+};
+
+// Helper to render individual task parts
+const renderTaskPart = (part: any, index: number): React.ReactNode => {
+  if (typeof part === "string") {
+    return <TaskItem key={index}>{part}</TaskItem>;
+  }
+
+  if (!part || typeof part !== "object") return null;
+
+  // Starting design inspiration
+  if (part.type === "starting-design-inspiration" && part.prompt) {
+    return (
+      <TaskItem key={index} status="active">
+        <div className="space-y-2">
+          <div className="font-medium">Generating design inspiration</div>
+          <div className="text-xs text-neutral-600 dark:text-neutral-400">
+            {part.prompt}
+          </div>
+        </div>
+      </TaskItem>
+    );
+  }
+
+  // Finished design inspiration
+  if (part.type === "finished-design-inspiration") {
+    return (
+      <TaskItem key={index} status="complete">
+        ✓ Design inspiration generated
+      </TaskItem>
+    );
+  }
+
+  // Starting repo search
+  if (part.type === "starting-repo-search" && part.query) {
+    return (
+      <TaskItem key={index} status="active">
+        Searching: "{part.query}"
+      </TaskItem>
+    );
+  }
+
+  // Select files
+  if (part.type === "select-files" && Array.isArray(part.filePaths)) {
+    return (
+      <TaskItem key={index} status="active">
+        Reading{" "}
+        {part.filePaths.map((file: string, i: number) => (
+          <TaskItemFile key={i}>{file.split("/").pop()}</TaskItemFile>
+        ))}
+      </TaskItem>
+    );
+  }
+
+  // Starting web search
+  if (part.type === "starting-web-search" && part.query) {
+    return (
+      <TaskItem key={index} status="active">
+        Searching web: "{part.query}"
+      </TaskItem>
+    );
+  }
+
+  // Got results
+  if (part.type === "got-results" && part.count) {
+    return (
+      <TaskItem key={index} status="active">
+        Analyzing {part.count} results...
+      </TaskItem>
+    );
+  }
+
+  // Finished web search
+  if (part.type === "finished-web-search" && part.answer) {
+    return (
+      <TaskItem key={index} status="complete">
+        {part.answer}
+      </TaskItem>
+    );
+  }
+
+  // Fetching diagnostics
+  if (part.type === "fetching-diagnostics") {
+    return (
+      <TaskItem key={index} status="active">
+        Checking for issues...
+      </TaskItem>
+    );
+  }
+
+  // Diagnostics passed
+  if (part.type === "diagnostics-passed") {
+    return (
+      <TaskItem key={index} status="complete">
+        ✓ No issues found
+      </TaskItem>
+    );
+  }
+
+  // Reading file
+  if (part.type === "reading-file" && part.filePath) {
+    return (
+      <TaskItem key={index} status="active">
+        Reading <TaskItemFile>{part.filePath}</TaskItemFile>
+      </TaskItem>
+    );
+  }
+
+  // Code project
+  if (part.type === "code-project" && part.source) {
+    return (
+      <CodeProjectPartWrapper
+        key={index}
+        title="Generated Code"
+        code={part.source}
+        language={part.language || "typescript"}
+        {...part}
+      />
+    );
+  }
+
+  // Hide technical/empty objects
+  if (
+    part.type &&
+    (part.type.includes("start") ||
+      part.type.includes("end") ||
+      Object.keys(part).length <= 1)
+  ) {
+    return null;
+  }
+
+  // Format remaining objects nicely
+  const displayKeys = Object.keys(part).filter(
+    (key) => key !== "type" && part[key] && part[key].toString().length > 0
+  );
+
+  if (displayKeys.length === 0) return null;
+
+  return (
+    <TaskItem key={index}>
+      <div className="space-y-1">
+        {displayKeys.map((key) => (
+          <div key={key} className="text-xs">
+            <span className="font-medium text-neutral-700 capitalize dark:text-neutral-300">
+              {key.replace(/_/g, " ")}:{" "}
+            </span>
+            <span className="text-neutral-600 dark:text-neutral-400">
+              {typeof part[key] === "object"
+                ? JSON.stringify(part[key])
+                : part[key].toString()}
+            </span>
+          </div>
+        ))}
+      </div>
+    </TaskItem>
+  );
+};
+
+// ===============================================
+// CUSTOM TASK SECTION FOR CODE PROJECTS
+// ===============================================
 const CustomTaskSectionWrapper = (props: any) => {
-  // If this task contains code project parts, render as CodeProjectPart instead
+  // If this task contains code project parts, render as CodeProjectPart
   if (
     props.parts &&
     props.parts.some(
@@ -457,62 +409,28 @@ const CustomTaskSectionWrapper = (props: any) => {
           code={codeProjectPart.source || ""}
           language="typescript"
           collapsed={false}
-        >
-          {/* Show all files in the project */}
-          {codeProjectPart.changedFiles &&
-            codeProjectPart.changedFiles.length > 0 && (
-              <div className="p-4">
-                <div className="space-y-2">
-                  {codeProjectPart.changedFiles.map(
-                    (file: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 text-sm text-black dark:text-white"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="font-mono">
-                          {file.fileName ||
-                            file.baseName ||
-                            `file-${index + 1}`}
-                        </span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            )}
-        </CodeProjectPartWrapper>
+          {...codeProjectPart}
+        />
       );
     }
   }
 
-  // Handle task-generate-design-inspiration-v1 and similar design tasks
+  // Handle design inspiration task
   if (props.type === "task-generate-design-inspiration-v1") {
     return (
       <TaskSectionWrapper
         {...props}
-        title={props.title || "Generating Design Inspiration"}
+        title={props.title || "Design Inspiration"}
       />
     );
   }
 
-  // Handle other potential new task types
+  // Handle other task types by extracting a friendly name
   if (
     props.type &&
     props.type.startsWith("task-") &&
     props.type.endsWith("-v1")
   ) {
-    // Extract a readable title from the task type
     const taskName = props.type
       .replace("task-", "")
       .replace("-v1", "")
@@ -533,10 +451,13 @@ const CustomTaskSectionWrapper = (props: any) => {
     );
   }
 
-  // Otherwise, use the regular task wrapper
+  // Default task rendering
   return <TaskSectionWrapper {...props} />;
 };
 
+// ===============================================
+// SHARED COMPONENTS EXPORT
+// ===============================================
 export const sharedComponents = {
   // AI Elements components for structured content
   ThinkingSection: ThinkingSectionWrapper,
@@ -545,57 +466,72 @@ export const sharedComponents = {
   CodeBlock,
   MathPart,
 
-  // Styled HTML elements for the v0 clone theme
+  // Styled HTML elements with glassmorphic theme
   p: {
-    className: "mb-4 text-gray-700 dark:text-gray-200 leading-relaxed"
+    className:
+      "my-4 leading-relaxed text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0"
   },
   h1: {
-    className: "mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100"
+    className:
+      "mb-4 mt-6 text-2xl font-bold text-neutral-900 dark:text-neutral-100 first:mt-0"
   },
   h2: {
-    className: "mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100"
+    className:
+      "mb-3 mt-5 text-xl font-semibold text-neutral-900 dark:text-neutral-100 first:mt-0"
   },
   h3: {
-    className: "mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
-  },
-  h4: {
-    className: "mb-3 text-base font-medium text-gray-900 dark:text-gray-100"
-  },
-  h5: {
-    className: "mb-2 text-sm font-medium text-gray-900 dark:text-gray-100"
-  },
-  h6: {
-    className: "mb-2 text-sm font-medium text-gray-900 dark:text-gray-100"
+    className:
+      "mb-2 mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100 first:mt-0"
   },
   ul: {
-    className: "mb-4 ml-6 list-disc space-y-1 text-gray-700 dark:text-gray-200"
+    className:
+      "my-4 space-y-2 pl-6 text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0 [&>li]:list-disc"
   },
   ol: {
     className:
-      "mb-4 ml-6 list-decimal space-y-1 text-gray-700 dark:text-gray-200"
+      "my-4 space-y-2 pl-6 text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0 [&>li]:list-decimal"
   },
   li: {
-    className: "text-gray-700 dark:text-gray-200"
-  },
-  blockquote: {
-    className:
-      "mb-4 border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400"
+    className: "leading-relaxed"
   },
   code: {
     className:
-      "rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-sm font-mono text-gray-900 dark:text-gray-100"
+      "rounded-md bg-neutral-100 px-1.5 py-0.5 font-mono text-sm text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200"
   },
   pre: {
     className:
-      "mb-4 overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800 p-4"
+      "my-4 overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm dark:bg-neutral-950 last:mb-0 first:mt-0"
+  },
+  blockquote: {
+    className:
+      "my-4 border-l-4 border-neutral-300 pl-4 italic text-neutral-600 dark:border-neutral-700 dark:text-neutral-400 last:mb-0 first:mt-0"
   },
   a: {
-    className: "text-blue-600 dark:text-blue-400 hover:underline"
+    className:
+      "text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-all duration-200 hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
+  },
+  table: {
+    className:
+      "my-4 w-full border-collapse overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50/50 text-sm dark:border-neutral-800 dark:bg-neutral-900/30 last:mb-0 first:mt-0"
+  },
+  thead: {
+    className: "bg-neutral-100 dark:bg-neutral-800"
+  },
+  th: {
+    className:
+      "border border-neutral-200 px-4 py-2 text-left font-semibold text-neutral-900 dark:border-neutral-700 dark:text-neutral-100"
+  },
+  td: {
+    className:
+      "border border-neutral-200 px-4 py-2 text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
+  },
+  hr: {
+    className: "my-6 border-neutral-200 dark:border-neutral-800"
   },
   strong: {
-    className: "font-semibold text-gray-900 dark:text-gray-100"
+    className: "font-semibold text-neutral-900 dark:text-neutral-100"
   },
   em: {
-    className: "italic text-gray-700 dark:text-gray-300"
+    className: "italic"
   }
 };
