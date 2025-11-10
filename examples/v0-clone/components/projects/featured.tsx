@@ -35,7 +35,7 @@ interface FeaturedProjectsProps {
 }
 
 export function FeaturedProjects({
-  isAuthenticated = false,
+  isAuthenticated = false
 }: FeaturedProjectsProps) {
   const [activeFilter, setActiveFilter] = useState<VisibilityFilter>("all");
   const [chats, setChats] = useState<FeaturedChat[]>([]);
@@ -54,7 +54,7 @@ export function FeaturedProjects({
   const fetchChats = async (
     visibility: VisibilityFilter,
     currentOffset: number,
-    reset = false,
+    reset = false
   ) => {
     try {
       if (reset) {
@@ -64,7 +64,7 @@ export function FeaturedProjects({
       }
 
       const response = await fetch(
-        `/api/chats/featured?visibility=${visibility}&limit=${limit}&offset=${currentOffset}`,
+        `/api/chats/featured?visibility=${visibility}&limit=${limit}&offset=${currentOffset}`
       );
 
       if (!response.ok) {
@@ -101,7 +101,7 @@ export function FeaturedProjects({
           { value: "all", label: "All" },
           { value: "public", label: "Public" },
           { value: "private", label: "Private" },
-          { value: "team", label: "Team" },
+          { value: "team", label: "Team" }
         ]
       : [{ value: "public", label: "Public" }];
 
@@ -116,10 +116,10 @@ export function FeaturedProjects({
     <section className="mx-auto w-full max-w-7xl px-4 py-16 md:px-8">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="mb-2 text-3xl font-bold text-white md:text-4xl font-heading">
+        <h2 className="font-heading mb-2 text-3xl font-bold text-white md:text-4xl">
           Featured Projects
         </h2>
-        <p className="text-neutral-400 font-body">
+        <p className="font-body text-neutral-400">
           Discover what the community is building with Aiwa
         </p>
       </div>
@@ -131,7 +131,7 @@ export function FeaturedProjects({
             <button
               key={filter.value}
               onClick={() => setActiveFilter(filter.value)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap font-button transition-all ${
+              className={`font-button rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-all ${
                 activeFilter === filter.value
                   ? "bg-white text-black"
                   : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
@@ -148,7 +148,7 @@ export function FeaturedProjects({
         <FeaturedProjectsSkeleton count={6} />
       ) : chats.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-lg text-neutral-400 font-body">
+          <p className="font-body text-lg text-neutral-400">
             No projects found. Be the first to share!
           </p>
         </div>
@@ -167,7 +167,7 @@ export function FeaturedProjects({
               <button
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
-                className="flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium font-button text-black transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
+                className="font-button flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-black transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoadingMore ? (
                   <>
@@ -192,7 +192,7 @@ function generateTitle(chat: FeaturedChat): string {
 
   if (chat.messages && chat.messages.length > 0) {
     const firstUserMessage = chat.messages.find(
-      (msg: any) => msg.role === "user",
+      (msg: any) => msg.role === "user"
     );
     if (firstUserMessage?.content) {
       const content =
@@ -278,14 +278,14 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
                 transform: "scale(0.5)",
                 transformOrigin: "top left",
                 width: "200%",
-                height: "200%",
+                height: "200%"
               }}
               title={displayTitle}
             />
           </div>
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <div className="text-4xl font-bold text-neutral-700 font-heading">
+            <div className="font-heading text-4xl font-bold text-neutral-700">
               {chat.id.slice(0, 2).toUpperCase()}
             </div>
           </div>
@@ -294,7 +294,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
         {/* Visibility Badge */}
         {chat.visibility && chat.visibility !== "public" && (
           <div className="absolute top-2 right-2">
-            <span className="rounded-md font-body border border-neutral-700 bg-black/80 px-2 py-1 text-xs font-medium text-white capitalize backdrop-blur-sm">
+            <span className="font-body rounded-md border border-neutral-700 bg-black/80 px-2 py-1 text-xs font-medium text-white capitalize backdrop-blur-sm">
               {chat.visibility}
             </span>
           </div>
@@ -303,10 +303,10 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="mb-1 line-clamp-2 text-lg font-heading font-medium text-white transition-colors group-hover:text-neutral-200">
+        <h3 className="font-heading mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
           {displayTitle}
         </h3>
-        <p className="mb-3 text-sm text-neutral-500 font-body">
+        <p className="font-body mb-3 text-sm text-neutral-500">
           Created{" "}
           {chat.created_at
             ? new Date(chat.created_at).toLocaleDateString()
@@ -314,14 +314,14 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
         </p>
 
         {/* Creator Attribution */}
-        <div className="flex items-center gap-2 border-t border-neutral-800 pt-2 font-body">
+        <div className="font-body flex items-center gap-2 border-t border-neutral-800 pt-2">
           {/* Avatar */}
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400 font-body">
+          <div className="font-body flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400">
             {initials}
           </div>
 
           {/* Creator Name */}
-          <span className="text-sm text-neutral-500 ">
+          <span className="text-sm text-neutral-500">
             by <span className="text-neutral-400">{displayName}</span>
           </span>
         </div>

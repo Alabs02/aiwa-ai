@@ -66,7 +66,7 @@ export function ChatsClient() {
                 <h2 className="font-heading mb-2 text-2xl font-bold text-gray-900 dark:text-white">
                   Chats
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 font-body">
+                <p className="font-body text-gray-600 dark:text-gray-300">
                   {chats.length} {chats.length === 1 ? "chat" : "chats"}
                 </p>
               </div>
@@ -81,10 +81,10 @@ export function ChatsClient() {
 
             {chats.length === 0 ? (
               <div className="py-12 text-center">
-                <h3 className="mt-2 text-sm font-heading font-medium text-gray-900 dark:text-white">
+                <h3 className="font-heading mt-2 text-sm font-medium text-gray-900 dark:text-white">
                   No chats yet
                 </h3>
-                <p className="mt-1 text-sm font-body text-gray-500 dark:text-gray-400">
+                <p className="font-body mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Get started by creating your first chat.
                 </p>
                 <div className="mt-6">
@@ -107,13 +107,13 @@ export function ChatsClient() {
                     <div className="border-border dark:border-input rounded-lg border p-6 transition-shadow hover:shadow-md">
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
-                          <h3 className="truncate font-heading text-lg font-medium text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+                          <h3 className="font-heading truncate text-lg font-medium text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                             {chat.name || getFirstUserMessage(chat)}
                           </h3>
-                          <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 font-body">
+                          <div className="font-body mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
                             <span>{chat.messages?.length || 0} messages</span>
                           </div>
-                          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 font-body">
+                          <p className="font-body mt-2 text-sm text-gray-500 dark:text-gray-400">
                             Updated{" "}
                             {new Date(chat.updatedAt).toLocaleDateString()}
                           </p>

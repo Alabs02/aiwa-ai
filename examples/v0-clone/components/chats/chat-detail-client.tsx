@@ -13,7 +13,7 @@ import { useStreaming } from "@/contexts/streaming-context";
 import { cn } from "@/lib/utils";
 import {
   type ImageAttachment,
-  clearPromptFromStorage,
+  clearPromptFromStorage
 } from "@/components/ai-elements/prompt-input";
 
 export function ChatDetailClient() {
@@ -45,7 +45,7 @@ export function ChatDetailClient() {
     isLoadingChat,
     handleSendMessage,
     handleStreamingComplete,
-    handleChatData,
+    handleChatData
   } = useChat(chatId);
 
   // Determine if generation is happening (loading or streaming)
@@ -54,7 +54,7 @@ export function ChatDetailClient() {
   // Wrapper function to handle attachments
   const handleSubmitWithAttachments = (
     e: React.FormEvent<HTMLFormElement>,
-    attachmentUrls?: Array<{ url: string }>,
+    attachmentUrls?: Array<{ url: string }>
   ) => {
     // Clear sessionStorage immediately upon submission
     clearPromptFromStorage();
@@ -90,13 +90,13 @@ export function ChatDetailClient() {
         {
           level: "log",
           message: "Application initialized successfully",
-          timestamp: new Date(),
+          timestamp: new Date()
         },
         {
           level: "log",
           message: "React components mounted",
-          timestamp: new Date(),
-        },
+          timestamp: new Date()
+        }
       ]);
     }
   }, [currentChat?.demo, consoleLogs.length]);
@@ -105,7 +105,7 @@ export function ChatDetailClient() {
     <div
       className={cn(
         "dark:bg-background min-h-[calc(100vh-60px)] bg-gray-50",
-        isFullscreen && "fixed inset-0 z-50",
+        isFullscreen && "fixed inset-0 z-50"
       )}
     >
       <div className="flex h-[calc(100vh-60px-1px)] flex-col md:h-[calc(100vh-60px-1px)]">
