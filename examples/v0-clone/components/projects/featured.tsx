@@ -35,7 +35,7 @@ interface FeaturedProjectsProps {
 }
 
 export function FeaturedProjects({
-  isAuthenticated = false
+  isAuthenticated = false,
 }: FeaturedProjectsProps) {
   const [activeFilter, setActiveFilter] = useState<VisibilityFilter>("all");
   const [chats, setChats] = useState<FeaturedChat[]>([]);
@@ -54,7 +54,7 @@ export function FeaturedProjects({
   const fetchChats = async (
     visibility: VisibilityFilter,
     currentOffset: number,
-    reset = false
+    reset = false,
   ) => {
     try {
       if (reset) {
@@ -64,7 +64,7 @@ export function FeaturedProjects({
       }
 
       const response = await fetch(
-        `/api/chats/featured?visibility=${visibility}&limit=${limit}&offset=${currentOffset}`
+        `/api/chats/featured?visibility=${visibility}&limit=${limit}&offset=${currentOffset}`,
       );
 
       if (!response.ok) {
@@ -101,7 +101,7 @@ export function FeaturedProjects({
           { value: "all", label: "All" },
           { value: "public", label: "Public" },
           { value: "private", label: "Private" },
-          { value: "team", label: "Team" }
+          { value: "team", label: "Team" },
         ]
       : [{ value: "public", label: "Public" }];
 
@@ -192,7 +192,7 @@ function generateTitle(chat: FeaturedChat): string {
 
   if (chat.messages && chat.messages.length > 0) {
     const firstUserMessage = chat.messages.find(
-      (msg: any) => msg.role === "user"
+      (msg: any) => msg.role === "user",
     );
     if (firstUserMessage?.content) {
       const content =
@@ -263,7 +263,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
             onError={() => setImageError(true)}
           />
         ) : canShowIframe ? (
-          <div className="relative h-full w-full">
+          <div className="relative h-full w-full overflow-hidden project-iframe-container">
             {!iframeLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
                 <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
@@ -271,14 +271,17 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
             )}
             <iframe
               src={chat.latestVersion?.demoUrl || chat.demo_url || chat.demo}
-              className="pointer-events-none h-full w-full border-0"
+              className="project-iframe pointer-events-none h-full w-full border-0"
               sandbox="allow-scripts allow-same-origin"
               onLoad={() => setIframeLoaded(true)}
               style={{
                 transform: "scale(0.5)",
                 transformOrigin: "top left",
                 width: "200%",
-                height: "200%"
+                height: "200%",
+                overflow: "hidden",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
               }}
               title={displayTitle}
             />

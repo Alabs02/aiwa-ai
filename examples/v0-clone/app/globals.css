@@ -352,3 +352,13 @@ button {
 ::selection {
   @apply bg-white/20 text-white;
 }
+
+.project-iframe-container::-webkit-scrollbar {
+  display: none !important;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+iframe.project-iframe::-webkit-scrollbar {
+  display: none !important;
+}
