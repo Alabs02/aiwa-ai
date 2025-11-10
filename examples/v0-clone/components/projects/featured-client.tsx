@@ -36,7 +36,7 @@ interface FeaturedClientProps {
 }
 
 export function FeaturedClient({
-  isAuthenticated = false,
+  isAuthenticated = false
 }: FeaturedClientProps) {
   const [activeFilter, setActiveFilter] = useState<VisibilityFilter>("all");
   const [chats, setChats] = useState<FeaturedChat[]>([]);
@@ -56,7 +56,7 @@ export function FeaturedClient({
       visibility: VisibilityFilter,
       currentOffset: number,
       reset = false,
-      search?: string,
+      search?: string
     ) => {
       try {
         if (reset) {
@@ -68,7 +68,7 @@ export function FeaturedClient({
         const params = new URLSearchParams({
           visibility,
           limit: limit.toString(),
-          offset: currentOffset.toString(),
+          offset: currentOffset.toString()
         });
 
         if (search && search.trim()) {
@@ -98,7 +98,7 @@ export function FeaturedClient({
         setIsLoadingMore(false);
       }
     },
-    [limit],
+    [limit]
   );
 
   // Reset when filter or search changes
@@ -130,7 +130,7 @@ export function FeaturedClient({
         { value: "all", label: "All" },
         { value: "public", label: "Public" },
         { value: "private", label: "Private" },
-        { value: "team", label: "Team", disabled: true, badge: "Soon" },
+        { value: "team", label: "Team", disabled: true, badge: "Soon" }
       ]
     : [{ value: "public", label: "Public" }];
 
@@ -159,18 +159,18 @@ export function FeaturedClient({
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+            <Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search projects by title, description, or creator..."
-              className="font-body w-full rounded-lg border border-neutral-800 bg-neutral-900 py-3 pl-12 pr-12 text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-600"
+              className="font-body w-full rounded-lg border border-neutral-800 bg-neutral-900 py-3 pr-12 pl-12 text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 focus:outline-none"
             />
             {searchInput && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
+                className="absolute top-1/2 right-4 -translate-y-1/2 text-neutral-400 transition-colors hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -192,7 +192,7 @@ export function FeaturedClient({
                   activeFilter === filter.value
                     ? "bg-white text-black"
                     : filter.disabled
-                      ? "bg-neutral-800/50 text-neutral-500 cursor-not-allowed"
+                      ? "cursor-not-allowed bg-neutral-800/50 text-neutral-500"
                       : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                 }`}
               >
@@ -226,7 +226,7 @@ export function FeaturedClient({
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900">
               <Search className="h-8 w-8 text-neutral-600" />
             </div>
-            <p className="font-heading text-xl font-medium text-white mb-2">
+            <p className="font-heading mb-2 text-xl font-medium text-white">
               No projects found
             </p>
             <p className="font-body text-neutral-400">
@@ -276,7 +276,7 @@ function generateTitle(chat: FeaturedChat): string {
 
   if (chat.messages && chat.messages.length > 0) {
     const firstUserMessage = chat.messages.find(
-      (msg: any) => msg.role === "user",
+      (msg: any) => msg.role === "user"
     );
     if (firstUserMessage?.content) {
       const content =
@@ -359,7 +359,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
                 transform: "scale(0.5)",
                 transformOrigin: "top left",
                 width: "200%",
-                height: "200%",
+                height: "200%"
               }}
               title={displayTitle}
             />

@@ -74,11 +74,11 @@ export function NavBar({ className = "" }: NavbarProps) {
           backgroundColor: isScrolled
             ? "rgba(0, 0, 0, 0.5)"
             : "rgba(0, 0, 0, 0)",
-          backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)",
+          backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)"
         }}
         transition={{
           duration: 0.3,
-          ease: "easeInOut",
+          ease: "easeInOut"
         }}
       >
         <div className="flex items-center md:gap-4">

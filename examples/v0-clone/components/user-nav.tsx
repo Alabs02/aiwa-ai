@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {
   IconLogout,
@@ -16,7 +16,7 @@ import {
   IconLayoutGrid,
   IconMessages,
   IconSettings,
-  IconCreditCard,
+  IconCreditCard
 } from "@tabler/icons-react";
 import { Session } from "next-auth";
 

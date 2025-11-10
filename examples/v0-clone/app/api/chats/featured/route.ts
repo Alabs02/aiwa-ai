@@ -5,7 +5,7 @@ import { getFeaturedChats, getFeaturedChatsCount } from "@/lib/db/queries";
 
 // Create v0 client with custom baseUrl if V0_API_URL is set
 const v0 = createClient(
-  process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {},
+  process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
 );
 
 // Helper to extract title from chat messages
@@ -13,7 +13,7 @@ function extractTitleFromChat(chat: any): string | null {
   if (!chat.messages || chat.messages.length === 0) return null;
 
   const firstUserMessage = chat.messages.find(
-    (msg: any) => msg.role === "user",
+    (msg: any) => msg.role === "user"
   );
   if (!firstUserMessage?.content) return null;
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
       searchQuery,
-      userId: session?.user?.id,
+      userId: session?.user?.id
     });
 
     // For anonymous users, force public visibility
@@ -60,14 +60,14 @@ export async function GET(request: NextRequest) {
       userId: session?.user?.id,
       limit,
       offset,
-      searchQuery,
+      searchQuery
     });
 
     // Get total count for pagination
     const totalCount = await getFeaturedChatsCount({
       visibility: effectiveVisibility,
       userId: session?.user?.id,
-      searchQuery,
+      searchQuery
     });
 
     // If no ownerships found, return empty array
@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
           total: 0,
           limit,
           offset,
-          hasMore: false,
-        },
+          hasMore: false
+        }
       });
     }
 
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
             owner_id: ownership?.user_id,
             owner_email: ownership?.owner_email, // User attribution!
             owner_name: ownership?.owner_name, // User attribution!
-            created_at: ownership?.created_at,
+            created_at: ownership?.created_at
           };
         })
         .sort((a, b) => {
@@ -133,8 +133,8 @@ export async function GET(request: NextRequest) {
         total: totalCount,
         limit,
         offset,
-        hasMore: offset + limit < totalCount,
-      },
+        hasMore: offset + limit < totalCount
+      }
     });
   } catch (error) {
     console.error("Featured chats fetch error:", error);
@@ -147,9 +147,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to fetch featured chats",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

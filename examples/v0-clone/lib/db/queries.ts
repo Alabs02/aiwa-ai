@@ -12,7 +12,7 @@ import {
   lt,
   type SQL,
   or,
-  ilike,
+  ilike
 } from "drizzle-orm";
 
 import {
@@ -23,7 +23,7 @@ import {
   type User,
   type ChatOwnership,
   type AnonymousChatLog,
-  type GitHubExport,
+  type GitHubExport
 } from "./schema";
 import { generateUUID } from "../utils";
 import { generateHashedPassword } from "./utils";
@@ -41,7 +41,7 @@ export async function getFeaturedChats({
   userId,
   limit = 12,
   offset = 0,
-  searchQuery,
+  searchQuery
 }: {
   visibility?: "all" | "public" | "private" | "team";
   userId?: string;
@@ -58,8 +58,8 @@ export async function getFeaturedChats({
       conditions.push(
         and(
           eq(chat_ownerships.visibility, "private"),
-          eq(chat_ownerships.user_id, userId),
-        )!,
+          eq(chat_ownerships.user_id, userId)
+        )!
       );
     } else if (visibility === "team") {
       conditions.push(eq(chat_ownerships.visibility, "team"));
@@ -70,9 +70,9 @@ export async function getFeaturedChats({
           eq(chat_ownerships.visibility, "team"),
           and(
             eq(chat_ownerships.visibility, "private"),
-            eq(chat_ownerships.user_id, userId),
-          )!,
-        )!,
+            eq(chat_ownerships.user_id, userId)
+          )!
+        )!
       );
     } else {
       conditions.push(eq(chat_ownerships.visibility, "public"));
@@ -92,7 +92,7 @@ export async function getFeaturedChats({
         preview_url: chat_ownerships.preview_url,
         demo_url: chat_ownerships.demo_url,
         created_at: chat_ownerships.created_at,
-        owner_email: users.email,
+        owner_email: users.email
       })
       .from(chat_ownerships)
       .leftJoin(users, eq(chat_ownerships.user_id, users.id));
@@ -108,7 +108,7 @@ export async function getFeaturedChats({
       const searchConditions = or(
         ilike(chat_ownerships.title, searchPattern),
         ilike(chat_ownerships.description, searchPattern),
-        ilike(users.email, searchPattern),
+        ilike(users.email, searchPattern)
       );
 
       if (whereClause && searchConditions) {
@@ -134,7 +134,7 @@ export async function getFeaturedChats({
 export async function getFeaturedChatsCount({
   visibility = "all",
   userId,
-  searchQuery,
+  searchQuery
 }: {
   visibility?: "all" | "public" | "private" | "team";
   userId?: string;
@@ -149,8 +149,8 @@ export async function getFeaturedChatsCount({
       conditions.push(
         and(
           eq(chat_ownerships.visibility, "private"),
-          eq(chat_ownerships.user_id, userId),
-        )!,
+          eq(chat_ownerships.user_id, userId)
+        )!
       );
     } else if (visibility === "team") {
       conditions.push(eq(chat_ownerships.visibility, "team"));
@@ -161,9 +161,9 @@ export async function getFeaturedChatsCount({
           eq(chat_ownerships.visibility, "team"),
           and(
             eq(chat_ownerships.visibility, "private"),
-            eq(chat_ownerships.user_id, userId),
-          )!,
-        )!,
+            eq(chat_ownerships.user_id, userId)
+          )!
+        )!
       );
     } else {
       conditions.push(eq(chat_ownerships.visibility, "public"));
@@ -188,7 +188,7 @@ export async function getFeaturedChatsCount({
       const searchConditions = or(
         ilike(chat_ownerships.title, searchPattern),
         ilike(chat_ownerships.description, searchPattern),
-        ilike(users.email, searchPattern),
+        ilike(users.email, searchPattern)
       );
 
       if (whereClause && searchConditions) {
@@ -211,7 +211,7 @@ export async function updateChatVisibility({
   v0ChatId,
   visibility,
   previewUrl,
-  demoUrl,
+  demoUrl
 }: {
   v0ChatId: string;
   visibility: "public" | "private" | "team";
@@ -224,7 +224,7 @@ export async function updateChatVisibility({
       .set({
         visibility,
         preview_url: previewUrl,
-        demo_url: demoUrl,
+        demo_url: demoUrl
       })
       .where(eq(chat_ownerships.v0_chat_id, v0ChatId))
       .returning();
@@ -246,7 +246,7 @@ export async function getUser(email: string): Promise<Array<User>> {
 
 export async function createUser(
   email: string,
-  password: string,
+  password: string
 ): Promise<User[]> {
   try {
     const hashedPassword = generateHashedPassword(password);
@@ -254,7 +254,7 @@ export async function createUser(
       .insert(users)
       .values({
         email,
-        password: hashedPassword,
+        password: hashedPassword
       })
       .returning();
   } catch (error) {
@@ -272,7 +272,7 @@ export async function createGuestUser(): Promise<User[]> {
       .insert(users)
       .values({
         email: guestEmail,
-        password: null,
+        password: null
       })
       .returning();
   } catch (error) {
@@ -284,7 +284,7 @@ export async function createGuestUser(): Promise<User[]> {
 // Chat ownership functions
 export async function createChatOwnership({
   v0ChatId,
-  userId,
+  userId
 }: {
   v0ChatId: string;
   userId: string;
@@ -294,7 +294,7 @@ export async function createChatOwnership({
       .insert(chat_ownerships)
       .values({
         v0_chat_id: v0ChatId,
-        user_id: userId,
+        user_id: userId
       })
       .onConflictDoNothing({ target: chat_ownerships.v0_chat_id });
   } catch (error) {
@@ -317,7 +317,7 @@ export async function getChatOwnership({ v0ChatId }: { v0ChatId: string }) {
 }
 
 export async function getChatIdsByUserId({
-  userId,
+  userId
 }: {
   userId: string;
 }): Promise<string[]> {
@@ -349,7 +349,7 @@ export async function deleteChatOwnership({ v0ChatId }: { v0ChatId: string }) {
 // Rate limiting functions
 export async function getChatCountByUserId({
   userId,
-  differenceInHours,
+  differenceInHours
 }: {
   userId: string;
   differenceInHours: number;
@@ -363,8 +363,8 @@ export async function getChatCountByUserId({
       .where(
         and(
           eq(chat_ownerships.user_id, userId),
-          gte(chat_ownerships.created_at, hoursAgo),
-        ),
+          gte(chat_ownerships.created_at, hoursAgo)
+        )
       );
 
     return stats?.count || 0;
@@ -376,7 +376,7 @@ export async function getChatCountByUserId({
 
 export async function getChatCountByIP({
   ipAddress,
-  differenceInHours,
+  differenceInHours
 }: {
   ipAddress: string;
   differenceInHours: number;
@@ -390,8 +390,8 @@ export async function getChatCountByIP({
       .where(
         and(
           eq(anonymous_chat_logs.ip_address, ipAddress),
-          gte(anonymous_chat_logs.created_at, hoursAgo),
-        ),
+          gte(anonymous_chat_logs.created_at, hoursAgo)
+        )
       );
 
     return stats?.count || 0;
@@ -403,7 +403,7 @@ export async function getChatCountByIP({
 
 export async function createAnonymousChatLog({
   ipAddress,
-  v0ChatId,
+  v0ChatId
 }: {
   ipAddress: string;
   v0ChatId: string;
@@ -411,7 +411,7 @@ export async function createAnonymousChatLog({
   try {
     return await db.insert(anonymous_chat_logs).values({
       ip_address: ipAddress,
-      v0_chat_id: v0ChatId,
+      v0_chat_id: v0ChatId
     });
   } catch (error) {
     console.error("Failed to create anonymous chat log in database");
@@ -422,7 +422,7 @@ export async function createAnonymousChatLog({
 // GitHub integration functions
 export async function saveGitHubToken({
   userId,
-  accessToken,
+  accessToken
 }: {
   userId: string;
   accessToken: string;
@@ -440,7 +440,7 @@ export async function saveGitHubToken({
 }
 
 export async function getUserWithGitHubToken(
-  userId: string,
+  userId: string
 ): Promise<User | undefined> {
   try {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
@@ -456,7 +456,7 @@ export async function createGitHubExport({
   userId,
   repoName,
   repoUrl,
-  isPrivate,
+  isPrivate
 }: {
   v0ChatId: string;
   userId: string;
@@ -472,7 +472,7 @@ export async function createGitHubExport({
         user_id: userId,
         repo_name: repoName,
         repo_url: repoUrl,
-        is_private: isPrivate ? "true" : "false",
+        is_private: isPrivate ? "true" : "false"
       })
       .returning();
   } catch (error) {
@@ -482,7 +482,7 @@ export async function createGitHubExport({
 }
 
 export async function getGitHubExportsByChatId({
-  v0ChatId,
+  v0ChatId
 }: {
   v0ChatId: string;
 }): Promise<GitHubExport[]> {
@@ -499,7 +499,7 @@ export async function getGitHubExportsByChatId({
 }
 
 export async function getGitHubExportsByUserId({
-  userId,
+  userId
 }: {
   userId: string;
 }): Promise<GitHubExport[]> {
