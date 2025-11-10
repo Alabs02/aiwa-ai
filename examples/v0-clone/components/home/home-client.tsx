@@ -448,7 +448,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   return (
     <>
-      <div className="flex min-h-svh flex-col bg-gray-50 dark:bg-black">
+      <div className="dark:bg-background flex min-h-svh flex-col bg-gray-50">
         <GL hovering={hovering} />
 
         {/* Handle search params with Suspense boundary */}
@@ -468,7 +468,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                 Vibe. Build. Deploy.
               </h2>
 
-              <p className="font-body mt-4 inline-block w-auto rounded-full border bg-black/50 px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
+              <p className="font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
                 Vibe-code your imagination. Bring it to life with Aiwa.
               </p>
 

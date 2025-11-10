@@ -54,7 +54,7 @@ export const GL = ({ hovering }: { hovering: boolean }) => {
         }}
       >
         {/* <Perf position="top-left" /> */}
-        <color attach="background" args={["#000"]} />
+        <color attach="background" args={["#232323"]} />
         <Particles
           speed={speed}
           aperture={aperture}
