@@ -16,7 +16,7 @@ import {
   savePromptToStorage,
   loadPromptFromStorage,
   clearPromptFromStorage,
-  type ImageAttachment,
+  type ImageAttachment
 } from "@/components/ai-elements/prompt-input";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { ChatMessages } from "@/components/chat/chat-messages";
@@ -115,7 +115,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       setMessage(storedData.message);
       if (storedData.attachments.length > 0) {
         const restoredAttachments = storedData.attachments.map(
-          createImageAttachmentFromStored,
+          createImageAttachmentFromStored
         );
         setAttachments(restoredAttachments);
       }
@@ -136,7 +136,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
   const handleImageFiles = async (files: File[]) => {
     try {
       const newAttachments = await Promise.all(
-        files.map((file) => createImageAttachment(file)),
+        files.map((file) => createImageAttachment(file))
       );
       setAttachments((prev) => [...prev, ...newAttachments]);
     } catch (error) {
@@ -178,8 +178,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setChatHistory([
       {
         type: "user",
-        content: userMessage,
-      },
+        content: userMessage
+      }
     ]);
     setIsLoading(true);
 
@@ -187,13 +187,13 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           message: userMessage,
           streaming: true,
-          attachments: currentAttachments.map((att) => ({ url: att.dataUrl })),
-        }),
+          attachments: currentAttachments.map((att) => ({ url: att.dataUrl }))
+        })
       });
 
       if (!response.ok) {
@@ -231,8 +231,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           type: "assistant",
           content: [],
           isStreaming: true,
-          stream: response.body,
-        },
+          stream: response.body
+        }
       ]);
     } catch (error) {
       console.error("Error creating chat:", error);
@@ -248,8 +248,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         ...prev,
         {
           type: "assistant",
-          content: errorMessage,
-        },
+          content: errorMessage
+        }
       ]);
     }
   };
@@ -274,11 +274,11 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         await fetch("/api/chat/ownership", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            chatId: data.id,
-          }),
+            chatId: data.id
+          })
         });
         console.log("Chat ownership created:", data.id);
       } catch (error) {
@@ -318,13 +318,13 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           message: userMessage,
           chatId: currentChatId,
-          streaming: true,
-        }),
+          streaming: true
+        })
       });
 
       if (!response.ok) {
@@ -362,8 +362,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           type: "assistant",
           content: [],
           isStreaming: true,
-          stream: response.body,
-        },
+          stream: response.body
+        }
       ]);
     } catch (error) {
       console.error("Error:", error);
@@ -378,8 +378,8 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         ...prev,
         {
           type: "assistant",
-          content: errorMessage,
-        },
+          content: errorMessage
+        }
       ]);
       setIsLoading(false);
     }
@@ -448,7 +448,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   return (
     <>
-      <div className="flex min-h-svh flex-col bg-gray-50 dark:bg-background">
+      <div className="dark:bg-background flex min-h-svh flex-col bg-gray-50">
         <GL hovering={hovering} />
 
         {/* Handle search params with Suspense boundary */}
@@ -468,7 +468,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                 Vibe. Build. Deploy.
               </h2>
 
-              <p className="font-body mt-4 inline-block w-auto rounded-full border bg-background/65 px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
+              <p className="font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
                 Vibe-code your imagination. Bring it to life with Aiwa.
               </p>
 
@@ -510,7 +510,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                       <PromptInputMicButton
                         onTranscript={(transcript) => {
                           setMessage(
-                            (prev) => prev + (prev ? " " : "") + transcript,
+                            (prev) => prev + (prev ? " " : "") + transcript
                           );
                         }}
                         onError={(error) => {
