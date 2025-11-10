@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     "build with AI",
     "AI web development",
     "Lovable alternative",
-    "Orchids alternative",
+    "Orchids alternative"
   ],
   authors: [{ name: "Aiwa Team" }],
   creator: "Aiwa",
@@ -39,11 +39,11 @@ export const metadata: Metadata = {
         url: "/aiwa-hero.webp",
         width: 1200,
         height: 630,
-        alt: "Aiwa App Hero Section Preview",
-      },
+        alt: "Aiwa App Hero Section Preview"
+      }
     ],
     locale: "en_US",
-    type: "website",
+    type: "website"
   },
   twitter: {
     card: "summary_large_image",
@@ -51,15 +51,15 @@ export const metadata: Metadata = {
     description:
       "Create and deploy fullstack apps instantly by chatting with Aiwa. Build what you imagine, no coding required.",
     images: ["/aiwa-hero.webp"],
-    creator: "@aiwa_build",
+    creator: "@aiwa_build"
   },
   icons: {
-    icon: "/aiwa.webp",
-  },
+    icon: "/aiwa.webp"
+  }
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {

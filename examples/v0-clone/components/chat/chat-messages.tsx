@@ -2,11 +2,11 @@ import React, { useRef, useEffect } from "react";
 import {
   Message,
   MessageContent,
-  MessageAvatar,
+  MessageAvatar
 } from "@/components/ai-elements/message";
 import {
   Conversation,
-  ConversationContent,
+  ConversationContent
 } from "@/components/ai-elements/conversation";
 import { Loader } from "@/components/ai-elements/loader";
 import { MessageRenderer } from "@/components/message-renderer";
@@ -43,7 +43,7 @@ export function ChatMessages({
   currentChat,
   onStreamingComplete,
   onChatData,
-  onStreamingStarted,
+  onStreamingStarted
 }: ChatMessagesProps) {
   const streamingStartedRef = useRef(false);
   const { data: session } = useSession();
@@ -69,7 +69,7 @@ export function ChatMessages({
           <div className="flex min-h-[500px] items-center justify-center">
             <div className="space-y-4 text-center">
               <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
-                <div className="absolute inset-0 animate-pulse-subtle rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
+                <div className="animate-pulse-subtle absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
                 <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-neutral-200 via-neutral-500 to-neutral-800 p-0.5 shadow-lg">
                   <div className="flex h-full w-full items-center justify-center rounded-full bg-black">
                     <SparklesIcon className="h-8 w-8 text-white" />

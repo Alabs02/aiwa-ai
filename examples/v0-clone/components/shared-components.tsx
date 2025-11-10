@@ -4,19 +4,19 @@ import {
   MathPart,
   ThinkingSectionProps,
   TaskSectionProps,
-  CodeProjectPartProps,
+  CodeProjectPartProps
 } from "@v0-sdk/react";
 import {
   Reasoning,
   ReasoningTrigger,
-  ReasoningContent,
+  ReasoningContent
 } from "@/components/ai-elements/reasoning";
 import {
   Task,
   TaskTrigger,
   TaskContent,
   TaskItem,
-  TaskItemFile,
+  TaskItemFile
 } from "@/components/ai-elements/task";
 import { FileIcon, FolderIcon } from "lucide-react";
 
@@ -170,7 +170,7 @@ const CodeProjectPartWrapper = ({
 // TASK SECTION WRAPPER
 // ===============================================
 const parseTaskStatus = (
-  parts: any[],
+  parts: any[]
 ): "pending" | "active" | "complete" | undefined => {
   if (!Array.isArray(parts) || parts.length === 0) return undefined;
 
@@ -180,7 +180,7 @@ const parseTaskStatus = (
       typeof p === "object" &&
       (p.status === "complete" ||
         p.type === "diagnostics-passed" ||
-        p.type === "finished-web-search"),
+        p.type === "finished-web-search")
   );
 
   const hasActive = parts.some(
@@ -192,7 +192,7 @@ const parseTaskStatus = (
         p.status === "reading" ||
         p.type === "fetching-diagnostics" ||
         p.type === "starting-web-search" ||
-        p.type === "starting-repo-search"),
+        p.type === "starting-repo-search")
   );
 
   if (hasComplete) return "complete";
@@ -359,7 +359,7 @@ const renderTaskPart = (part: any, index: number): React.ReactNode => {
 
   // Format remaining objects nicely
   const displayKeys = Object.keys(part).filter(
-    (key) => key !== "type" && part[key] && part[key].toString().length > 0,
+    (key) => key !== "type" && part[key] && part[key].toString().length > 0
   );
 
   if (displayKeys.length === 0) return null;
@@ -369,7 +369,7 @@ const renderTaskPart = (part: any, index: number): React.ReactNode => {
       <div className="space-y-1">
         {displayKeys.map((key) => (
           <div key={key} className="text-xs">
-            <span className="font-medium capitalize text-neutral-700 dark:text-neutral-300">
+            <span className="font-medium text-neutral-700 capitalize dark:text-neutral-300">
               {key.replace(/_/g, " ")}:{" "}
             </span>
             <span className="text-neutral-600 dark:text-neutral-400">
@@ -393,12 +393,12 @@ const CustomTaskSectionWrapper = (props: any) => {
     props.parts &&
     props.parts.some(
       (part: any) =>
-        part && typeof part === "object" && part.type === "code-project",
+        part && typeof part === "object" && part.type === "code-project"
     )
   ) {
     const codeProjectPart = props.parts.find(
       (part: any) =>
-        part && typeof part === "object" && part.type === "code-project",
+        part && typeof part === "object" && part.type === "code-project"
     );
 
     if (codeProjectPart) {
@@ -469,69 +469,69 @@ export const sharedComponents = {
   // Styled HTML elements with glassmorphic theme
   p: {
     className:
-      "my-4 leading-relaxed text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0",
+      "my-4 leading-relaxed text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0"
   },
   h1: {
     className:
-      "mb-4 mt-6 text-2xl font-bold text-neutral-900 dark:text-neutral-100 first:mt-0",
+      "mb-4 mt-6 text-2xl font-bold text-neutral-900 dark:text-neutral-100 first:mt-0"
   },
   h2: {
     className:
-      "mb-3 mt-5 text-xl font-semibold text-neutral-900 dark:text-neutral-100 first:mt-0",
+      "mb-3 mt-5 text-xl font-semibold text-neutral-900 dark:text-neutral-100 first:mt-0"
   },
   h3: {
     className:
-      "mb-2 mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100 first:mt-0",
+      "mb-2 mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100 first:mt-0"
   },
   ul: {
     className:
-      "my-4 space-y-2 pl-6 text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0 [&>li]:list-disc",
+      "my-4 space-y-2 pl-6 text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0 [&>li]:list-disc"
   },
   ol: {
     className:
-      "my-4 space-y-2 pl-6 text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0 [&>li]:list-decimal",
+      "my-4 space-y-2 pl-6 text-neutral-700 dark:text-neutral-300 last:mb-0 first:mt-0 [&>li]:list-decimal"
   },
   li: {
-    className: "leading-relaxed",
+    className: "leading-relaxed"
   },
   code: {
     className:
-      "rounded-md bg-neutral-100 px-1.5 py-0.5 font-mono text-sm text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200",
+      "rounded-md bg-neutral-100 px-1.5 py-0.5 font-mono text-sm text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200"
   },
   pre: {
     className:
-      "my-4 overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm dark:bg-neutral-950 last:mb-0 first:mt-0",
+      "my-4 overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm dark:bg-neutral-950 last:mb-0 first:mt-0"
   },
   blockquote: {
     className:
-      "my-4 border-l-4 border-neutral-300 pl-4 italic text-neutral-600 dark:border-neutral-700 dark:text-neutral-400 last:mb-0 first:mt-0",
+      "my-4 border-l-4 border-neutral-300 pl-4 italic text-neutral-600 dark:border-neutral-700 dark:text-neutral-400 last:mb-0 first:mt-0"
   },
   a: {
     className:
-      "text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-all duration-200 hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50",
+      "text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-all duration-200 hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
   },
   table: {
     className:
-      "my-4 w-full border-collapse overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50/50 text-sm dark:border-neutral-800 dark:bg-neutral-900/30 last:mb-0 first:mt-0",
+      "my-4 w-full border-collapse overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50/50 text-sm dark:border-neutral-800 dark:bg-neutral-900/30 last:mb-0 first:mt-0"
   },
   thead: {
-    className: "bg-neutral-100 dark:bg-neutral-800",
+    className: "bg-neutral-100 dark:bg-neutral-800"
   },
   th: {
     className:
-      "border border-neutral-200 px-4 py-2 text-left font-semibold text-neutral-900 dark:border-neutral-700 dark:text-neutral-100",
+      "border border-neutral-200 px-4 py-2 text-left font-semibold text-neutral-900 dark:border-neutral-700 dark:text-neutral-100"
   },
   td: {
     className:
-      "border border-neutral-200 px-4 py-2 text-neutral-700 dark:border-neutral-700 dark:text-neutral-300",
+      "border border-neutral-200 px-4 py-2 text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
   },
   hr: {
-    className: "my-6 border-neutral-200 dark:border-neutral-800",
+    className: "my-6 border-neutral-200 dark:border-neutral-800"
   },
   strong: {
-    className: "font-semibold text-neutral-900 dark:text-neutral-100",
+    className: "font-semibold text-neutral-900 dark:text-neutral-100"
   },
   em: {
-    className: "italic",
-  },
+    className: "italic"
+  }
 };

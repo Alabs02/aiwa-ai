@@ -4,7 +4,7 @@ import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
+  CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { BrainIcon, ChevronDownIcon, SparklesIcon } from "lucide-react";
@@ -53,11 +53,11 @@ export const Reasoning = memo(
     const [isOpen, setIsOpen] = useControllableState({
       prop: open,
       defaultProp: defaultOpen,
-      onChange: onOpenChange,
+      onChange: onOpenChange
     });
     const [duration, setDuration] = useControllableState({
       prop: durationProp,
-      defaultProp: 0,
+      defaultProp: 0
     });
 
     const [hasAutoClosedRef, setHasAutoClosedRef] = useState(false);
@@ -110,7 +110,7 @@ export const Reasoning = memo(
             hasCompletedOnce &&
               !isStreaming &&
               "ring-2 ring-green-500/10 dark:ring-green-400/10",
-            className,
+            className
           )}
           onOpenChange={handleOpenChange}
           open={isOpen}
@@ -120,7 +120,7 @@ export const Reasoning = memo(
         </Collapsible>
       </ReasoningContext.Provider>
     );
-  },
+  }
 );
 
 export type ReasoningTriggerProps = ComponentProps<
@@ -144,7 +144,7 @@ export const ReasoningTrigger = memo(
           "group/trigger flex w-full items-center gap-3 px-4 py-3 text-sm transition-all duration-200",
           "hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50",
           isOpen && "bg-neutral-100/50 dark:bg-neutral-800/30",
-          className,
+          className
         )}
         {...props}
       >
@@ -154,7 +154,7 @@ export const ReasoningTrigger = memo(
               {isStreaming ? (
                 <div className="relative">
                   <BrainIcon className="size-4 text-purple-600 dark:text-purple-400" />
-                  <SparklesIcon className="absolute -right-1 -top-1 size-2.5 animate-pulse text-purple-500 dark:text-purple-300" />
+                  <SparklesIcon className="absolute -top-1 -right-1 size-2.5 animate-pulse text-purple-500 dark:text-purple-300" />
                 </div>
               ) : (
                 <BrainIcon
@@ -162,7 +162,7 @@ export const ReasoningTrigger = memo(
                     "size-4 transition-colors duration-200",
                     isOpen
                       ? "text-purple-600 dark:text-purple-400"
-                      : "text-neutral-600 dark:text-neutral-400",
+                      : "text-neutral-600 dark:text-neutral-400"
                   )}
                 />
               )}
@@ -200,14 +200,14 @@ export const ReasoningTrigger = memo(
               className={cn(
                 "size-4 shrink-0 text-neutral-500 transition-all duration-300 dark:text-neutral-400",
                 "group-hover/trigger:text-neutral-700 dark:group-hover/trigger:text-neutral-200",
-                isOpen && "rotate-180 text-purple-600 dark:text-purple-400",
+                isOpen && "rotate-180 text-purple-600 dark:text-purple-400"
               )}
             />
           </>
         )}
       </CollapsibleTrigger>
     );
-  },
+  }
 );
 
 export type ReasoningContentProps = ComponentProps<
@@ -222,17 +222,17 @@ export const ReasoningContent = memo(
       className={cn(
         "overflow-hidden transition-all duration-300",
         "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
-        className,
+        className
       )}
       {...props}
     >
       <div className="border-t border-neutral-200/50 bg-gradient-to-br from-purple-50/30 to-transparent px-4 py-3 dark:border-neutral-800/50 dark:from-purple-900/10">
-        <Response className="prose prose-sm max-w-none dark:prose-invert prose-p:leading-relaxed prose-p:text-neutral-700 dark:prose-p:text-neutral-300">
+        <Response className="prose prose-sm dark:prose-invert prose-p:leading-relaxed prose-p:text-neutral-700 dark:prose-p:text-neutral-300 max-w-none">
           {children}
         </Response>
       </div>
     </CollapsibleContent>
-  ),
+  )
 );
 
 Reasoning.displayName = "Reasoning";

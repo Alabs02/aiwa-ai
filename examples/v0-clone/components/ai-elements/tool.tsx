@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
+  CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
@@ -15,7 +15,7 @@ import {
   ClockIcon,
   WrenchIcon,
   XCircleIcon,
-  Loader2Icon,
+  Loader2Icon
 } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { CodeBlock } from "./code-block";
@@ -29,7 +29,7 @@ export const Tool = ({ className, ...props }: ToolProps) => (
       "border-neutral-200/50 bg-gradient-to-br from-neutral-50/50 to-neutral-100/30 backdrop-blur-sm",
       "dark:border-neutral-800/50 dark:from-neutral-900/30 dark:to-neutral-800/20",
       "data-[state=open]:ring-2 data-[state=open]:ring-neutral-500/10 dark:data-[state=open]:ring-neutral-400/10",
-      className,
+      className
     )}
     {...props}
   />
@@ -48,7 +48,7 @@ const getStatusConfig = (status: ToolUIPart["state"]) => {
       icon: <CircleIcon className="size-3.5 text-neutral-400" />,
       badgeVariant: "secondary" as const,
       badgeClass:
-        "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+        "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
     },
     "input-available": {
       label: "Running",
@@ -57,7 +57,7 @@ const getStatusConfig = (status: ToolUIPart["state"]) => {
       ),
       badgeVariant: "secondary" as const,
       badgeClass:
-        "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 animate-pulse-subtle",
+        "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 animate-pulse-subtle"
     },
     "output-available": {
       label: "Completed",
@@ -66,14 +66,14 @@ const getStatusConfig = (status: ToolUIPart["state"]) => {
       ),
       badgeVariant: "secondary" as const,
       badgeClass:
-        "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+        "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300"
     },
     "output-error": {
       label: "Error",
       icon: <XCircleIcon className="size-3.5 text-red-600 dark:text-red-400" />,
       badgeVariant: "destructive" as const,
-      badgeClass: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-    },
+      badgeClass: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+    }
   } as const;
 
   return config[status];
@@ -93,7 +93,7 @@ export const ToolHeader = ({
         "group/trigger flex w-full items-center justify-between gap-4 px-4 py-3 transition-all duration-200",
         "hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50",
         "group-data-[state=open]/tool:bg-neutral-100/50 dark:group-data-[state=open]/tool:bg-neutral-800/30",
-        className,
+        className
       )}
       {...props}
     >
@@ -101,7 +101,7 @@ export const ToolHeader = ({
         <div className="relative">
           <WrenchIcon className="size-4 text-neutral-600 transition-colors group-hover/trigger:text-neutral-900 dark:text-neutral-400 dark:group-hover/trigger:text-neutral-100" />
           {state === "input-available" && (
-            <div className="absolute -right-0.5 -top-0.5 size-1.5 animate-ping rounded-full bg-blue-500 dark:bg-blue-400" />
+            <div className="absolute -top-0.5 -right-0.5 size-1.5 animate-ping rounded-full bg-blue-500 dark:bg-blue-400" />
           )}
         </div>
         <span className="font-mono text-sm font-medium text-neutral-900 dark:text-neutral-100">
@@ -110,7 +110,7 @@ export const ToolHeader = ({
         <Badge
           className={cn(
             "gap-1.5 rounded-full border-0 px-2 py-0.5 text-xs font-semibold transition-all duration-200",
-            statusConfig.badgeClass,
+            statusConfig.badgeClass
           )}
           variant={statusConfig.badgeVariant}
         >
@@ -122,7 +122,7 @@ export const ToolHeader = ({
         className={cn(
           "size-4 shrink-0 text-neutral-500 transition-all duration-300 dark:text-neutral-400",
           "group-hover/trigger:text-neutral-700 dark:group-hover/trigger:text-neutral-200",
-          "group-data-[state=open]/tool:rotate-180 group-data-[state=open]/tool:text-neutral-900 dark:group-data-[state=open]/tool:text-neutral-100",
+          "group-data-[state=open]/tool:rotate-180 group-data-[state=open]/tool:text-neutral-900 dark:group-data-[state=open]/tool:text-neutral-100"
         )}
       />
     </CollapsibleTrigger>
@@ -136,7 +136,7 @@ export const ToolContent = ({ className, ...props }: ToolContentProps) => (
     className={cn(
       "overflow-hidden transition-all duration-300",
       "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
-      className,
+      className
     )}
     {...props}
   />
@@ -150,13 +150,13 @@ export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
   <div
     className={cn(
       "space-y-3 overflow-hidden border-t border-neutral-200/50 p-4 dark:border-neutral-800/50",
-      className,
+      className
     )}
     {...props}
   >
     <div className="flex items-center gap-2">
       <div className="size-1 rounded-full bg-blue-500 dark:bg-blue-400" />
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+      <h4 className="text-xs font-semibold tracking-wider text-neutral-600 uppercase dark:text-neutral-400">
         Parameters
       </h4>
     </div>
@@ -185,7 +185,7 @@ export const ToolOutput = ({
     <div
       className={cn(
         "space-y-3 border-t border-neutral-200/50 p-4 dark:border-neutral-800/50",
-        className,
+        className
       )}
       {...props}
     >
@@ -195,15 +195,15 @@ export const ToolOutput = ({
             "size-1 rounded-full",
             errorText
               ? "bg-red-500 dark:bg-red-400"
-              : "bg-green-500 dark:bg-green-400",
+              : "bg-green-500 dark:bg-green-400"
           )}
         />
         <h4
           className={cn(
-            "text-xs font-semibold uppercase tracking-wider",
+            "text-xs font-semibold tracking-wider uppercase",
             errorText
               ? "text-red-600 dark:text-red-400"
-              : "text-green-600 dark:text-green-400",
+              : "text-green-600 dark:text-green-400"
           )}
         >
           {errorText ? "Error" : "Result"}
@@ -214,12 +214,12 @@ export const ToolOutput = ({
           "overflow-x-auto rounded-md text-xs [&_table]:w-full",
           errorText
             ? "bg-red-50/50 p-4 text-red-700 ring-1 ring-red-200 dark:bg-red-900/10 dark:text-red-300 dark:ring-red-800"
-            : "bg-neutral-50/50 p-4 text-neutral-700 ring-1 ring-neutral-200 dark:bg-neutral-900/30 dark:text-neutral-300 dark:ring-neutral-800",
+            : "bg-neutral-50/50 p-4 text-neutral-700 ring-1 ring-neutral-200 dark:bg-neutral-900/30 dark:text-neutral-300 dark:ring-neutral-800"
         )}
       >
         {errorText && <div className="font-medium">{errorText}</div>}
         {output && (
-          <div className="prose prose-sm max-w-none dark:prose-invert">
+          <div className="prose prose-sm dark:prose-invert max-w-none">
             {output}
           </div>
         )}

@@ -8,7 +8,7 @@ import { createContext, useContext, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   oneDark,
-  oneLight,
+  oneLight
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 type CodeBlockContextType = {
@@ -16,7 +16,7 @@ type CodeBlockContextType = {
 };
 
 const CodeBlockContext = createContext<CodeBlockContextType>({
-  code: "",
+  code: ""
 });
 
 export type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
@@ -43,7 +43,7 @@ export const CodeBlock = ({
         "border-neutral-200 bg-neutral-50/50 backdrop-blur-sm",
         "dark:border-neutral-800 dark:bg-neutral-900/50",
         "hover:ring-2 hover:ring-neutral-500/10 dark:hover:ring-neutral-400/10",
-        className,
+        className
       )}
       {...props}
     >
@@ -69,21 +69,21 @@ export const CodeBlock = ({
         <SyntaxHighlighter
           className="overflow-hidden !bg-transparent dark:hidden"
           codeTagProps={{
-            className: "font-mono text-sm",
+            className: "font-mono text-sm"
           }}
           customStyle={{
             margin: 0,
             padding: "1rem",
             fontSize: "0.875rem",
             background: "transparent",
-            color: "hsl(var(--foreground))",
+            color: "hsl(var(--foreground))"
           }}
           language={language}
           lineNumberStyle={{
             color: "hsl(var(--muted-foreground))",
             paddingRight: "1rem",
             minWidth: "2.5rem",
-            userSelect: "none",
+            userSelect: "none"
           }}
           showLineNumbers={showLineNumbers}
           style={oneLight}
@@ -94,21 +94,21 @@ export const CodeBlock = ({
         <SyntaxHighlighter
           className="hidden overflow-hidden !bg-transparent dark:block"
           codeTagProps={{
-            className: "font-mono text-sm",
+            className: "font-mono text-sm"
           }}
           customStyle={{
             margin: 0,
             padding: "1rem",
             fontSize: "0.875rem",
             background: "transparent",
-            color: "hsl(var(--foreground))",
+            color: "hsl(var(--foreground))"
           }}
           language={language}
           lineNumberStyle={{
             color: "hsl(var(--muted-foreground))",
             paddingRight: "1rem",
             minWidth: "2.5rem",
-            userSelect: "none",
+            userSelect: "none"
           }}
           showLineNumbers={showLineNumbers}
           style={oneDark}
@@ -118,7 +118,7 @@ export const CodeBlock = ({
 
         {/* Floating copy button */}
         {!children && (
-          <div className="absolute right-2 top-2">
+          <div className="absolute top-2 right-2">
             <CodeBlockCopyButton />
           </div>
         )}
@@ -169,7 +169,7 @@ export const CodeBlockCopyButton = ({
         "hover:bg-neutral-200 dark:hover:bg-neutral-700",
         isCopied &&
           "!bg-green-100 text-green-700 dark:!bg-green-900/30 dark:text-green-300",
-        className,
+        className
       )}
       onClick={copyToClipboard}
       size="icon"

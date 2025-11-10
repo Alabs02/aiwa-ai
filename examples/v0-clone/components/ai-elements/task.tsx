@@ -3,7 +3,7 @@
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
+  CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +11,7 @@ import {
   SearchIcon,
   CheckCircle2Icon,
   Clock3Icon,
-  FileTextIcon,
+  FileTextIcon
 } from "lucide-react";
 import type { ComponentProps } from "react";
 
@@ -28,7 +28,7 @@ export const TaskItemFile = ({
       "hover:border-neutral-300 hover:bg-neutral-100/80 hover:shadow-sm",
       "dark:border-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-300",
       "dark:hover:border-neutral-700 dark:hover:bg-neutral-800/50",
-      className,
+      className
     )}
     {...props}
   >
@@ -56,7 +56,7 @@ export const TaskItem = ({
     ),
     complete: (
       <CheckCircle2Icon className="size-3.5 text-green-600 dark:text-green-400" />
-    ),
+    )
   };
 
   return (
@@ -65,7 +65,7 @@ export const TaskItem = ({
         "group/item flex items-start gap-2 rounded-md px-2 py-1.5 text-sm transition-all duration-200",
         "hover:bg-neutral-100/50 dark:hover:bg-neutral-800/30",
         status === "complete" && "opacity-75",
-        className,
+        className
       )}
       {...props}
     >
@@ -73,7 +73,7 @@ export const TaskItem = ({
       <div
         className={cn(
           "flex-1 text-neutral-700 dark:text-neutral-300",
-          status === "complete" && "line-through",
+          status === "complete" && "line-through"
         )}
       >
         {children}
@@ -104,7 +104,7 @@ export const Task = ({
       status === "complete" && "ring-green-500/10 dark:ring-green-400/10",
       !status && "ring-neutral-500/10 dark:ring-neutral-400/10",
       "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
-      className,
+      className
     )}
     defaultOpen={defaultOpen}
     {...props}
@@ -132,7 +132,7 @@ export const TaskTrigger = ({
     ),
     complete: (
       <CheckCircle2Icon className="size-4 text-green-600 dark:text-green-400" />
-    ),
+    )
   };
 
   return (
@@ -142,7 +142,7 @@ export const TaskTrigger = ({
       {...props}
     >
       {children ?? (
-        <button className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:bg-neutral-100/50 group-data-[state=open]/task:bg-neutral-100/50 dark:hover:bg-neutral-800/50 dark:group-data-[state=open]/task:bg-neutral-800/30">
+        <button className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-all duration-200 group-data-[state=open]/task:bg-neutral-100/50 hover:bg-neutral-100/50 dark:group-data-[state=open]/task:bg-neutral-800/30 dark:hover:bg-neutral-800/50">
           <div className="relative shrink-0">
             {status ? (
               statusIcon[status]
@@ -166,7 +166,7 @@ export const TaskTrigger = ({
             className={cn(
               "size-4 shrink-0 text-neutral-500 transition-all duration-300 dark:text-neutral-400",
               "group-hover/trigger:text-neutral-700 dark:group-hover/trigger:text-neutral-200",
-              "group-data-[state=open]/task:rotate-180 group-data-[state=open]/task:text-neutral-900 dark:group-data-[state=open]/task:text-neutral-100",
+              "group-data-[state=open]/task:rotate-180 group-data-[state=open]/task:text-neutral-900 dark:group-data-[state=open]/task:text-neutral-100"
             )}
           />
         </button>
@@ -186,7 +186,7 @@ export const TaskContent = ({
     className={cn(
       "overflow-hidden transition-all duration-300",
       "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
-      className,
+      className
     )}
     {...props}
   >
