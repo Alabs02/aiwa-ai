@@ -10,7 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { IconLogout, IconUserSquareRounded } from "@tabler/icons-react";
+import {
+  IconLogout,
+  IconUserSquareRounded,
+  IconLayoutGrid,
+  IconMessages,
+  IconSettings,
+  IconCreditCard
+} from "@tabler/icons-react";
 import { Session } from "next-auth";
 
 interface UserNavProps {
@@ -51,6 +58,39 @@ export function UserNav({ session }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+
+        {/* Navigation Links - Only for authenticated users */}
+        {!isSignedOut && !isGuest && (
+          <>
+            <DropdownMenuItem asChild>
+              <a href="/projects" className="font-button cursor-pointer">
+                <IconLayoutGrid className="mr-2 size-4 lg:size-5" />
+                <span>Projects</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/chats" className="font-button cursor-pointer">
+                <IconMessages className="mr-2 size-4 lg:size-5" />
+                <span>All Chats</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a href="/settings" className="font-button cursor-pointer">
+                <IconSettings className="mr-2 size-4 lg:size-5" />
+                <span>Settings</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/pricing" className="font-button cursor-pointer">
+                <IconCreditCard className="mr-2 size-4 lg:size-5" />
+                <span>Billing</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
         {(isGuest || isSignedOut) && (
           <>
             <DropdownMenuItem asChild>

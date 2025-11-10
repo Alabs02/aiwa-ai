@@ -40,11 +40,13 @@ export async function GET(request: NextRequest) {
       | "team";
     const limit = parseInt(searchParams.get("limit") || "12");
     const offset = parseInt(searchParams.get("offset") || "0");
+    const searchQuery = searchParams.get("search") || undefined;
 
     console.log("Fetching featured chats:", {
       visibility,
       limit,
       offset,
+      searchQuery,
       userId: session?.user?.id
     });
 
@@ -57,13 +59,15 @@ export async function GET(request: NextRequest) {
       visibility: effectiveVisibility,
       userId: session?.user?.id,
       limit,
-      offset
+      offset,
+      searchQuery
     });
 
     // Get total count for pagination
     const totalCount = await getFeaturedChatsCount({
       visibility: effectiveVisibility,
-      userId: session?.user?.id
+      userId: session?.user?.id,
+      searchQuery
     });
 
     // If no ownerships found, return empty array

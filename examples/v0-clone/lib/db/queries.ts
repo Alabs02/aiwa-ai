@@ -11,7 +11,8 @@ import {
   inArray,
   lt,
   type SQL,
-  or
+  or,
+  ilike
 } from "drizzle-orm";
 
 import {
@@ -39,12 +40,14 @@ export async function getFeaturedChats({
   visibility = "all",
   userId,
   limit = 12,
-  offset = 0
+  offset = 0,
+  searchQuery
 }: {
   visibility?: "all" | "public" | "private" | "team";
   userId?: string;
   limit?: number;
   offset?: number;
+  searchQuery?: string;
 }): Promise<ChatOwnershipWithUser[]> {
   try {
     let conditions: SQL[] = [];
@@ -77,8 +80,8 @@ export async function getFeaturedChats({
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Join with users table to get owner information
-    const chatsWithUsers = await db
+    // Build query with joins
+    let query = db
       .select({
         id: chat_ownerships.id,
         v0_chat_id: chat_ownerships.v0_chat_id,
@@ -92,8 +95,31 @@ export async function getFeaturedChats({
         owner_email: users.email
       })
       .from(chat_ownerships)
-      .leftJoin(users, eq(chat_ownerships.user_id, users.id))
-      .where(whereClause)
+      .leftJoin(users, eq(chat_ownerships.user_id, users.id));
+
+    // Apply visibility filter
+    if (whereClause) {
+      query = query.where(whereClause) as any;
+    }
+
+    // Apply search filter if provided
+    if (searchQuery && searchQuery.trim()) {
+      const searchPattern = `%${searchQuery.trim()}%`;
+      const searchConditions = or(
+        ilike(chat_ownerships.title, searchPattern),
+        ilike(chat_ownerships.description, searchPattern),
+        ilike(users.email, searchPattern)
+      );
+
+      if (whereClause && searchConditions) {
+        query = query.where(and(whereClause, searchConditions)) as any;
+      } else if (searchConditions) {
+        query = query.where(searchConditions) as any;
+      }
+    }
+
+    // Order and paginate
+    const chatsWithUsers = await query
       .orderBy(desc(chat_ownerships.created_at))
       .limit(limit)
       .offset(offset);
@@ -107,10 +133,12 @@ export async function getFeaturedChats({
 
 export async function getFeaturedChatsCount({
   visibility = "all",
-  userId
+  userId,
+  searchQuery
 }: {
   visibility?: "all" | "public" | "private" | "team";
   userId?: string;
+  searchQuery?: string;
 }): Promise<number> {
   try {
     let conditions: SQL[] = [];
@@ -143,10 +171,34 @@ export async function getFeaturedChatsCount({
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [result] = await db
+    // Build query with joins for search
+    let query = db
       .select({ count: count(chat_ownerships.id) })
       .from(chat_ownerships)
-      .where(whereClause);
+      .leftJoin(users, eq(chat_ownerships.user_id, users.id));
+
+    // Apply visibility filter
+    if (whereClause) {
+      query = query.where(whereClause) as any;
+    }
+
+    // Apply search filter if provided
+    if (searchQuery && searchQuery.trim()) {
+      const searchPattern = `%${searchQuery.trim()}%`;
+      const searchConditions = or(
+        ilike(chat_ownerships.title, searchPattern),
+        ilike(chat_ownerships.description, searchPattern),
+        ilike(users.email, searchPattern)
+      );
+
+      if (whereClause && searchConditions) {
+        query = query.where(and(whereClause, searchConditions)) as any;
+      } else if (searchConditions) {
+        query = query.where(searchConditions) as any;
+      }
+    }
+
+    const [result] = await query;
 
     return result?.count || 0;
   } catch (error) {
