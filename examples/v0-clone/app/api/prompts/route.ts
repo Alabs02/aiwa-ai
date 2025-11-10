@@ -3,7 +3,7 @@ import { auth } from "@/app/(auth)/auth";
 import {
   savePromptToLibrary,
   getUserPrompts,
-  getUserPromptStats,
+  getUserPromptStats
 } from "@/lib/db/queries";
 
 export async function POST(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (!promptText) {
       return NextResponse.json(
         { error: "Prompt text is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       title,
       category,
       tags,
-      qualityScore,
+      qualityScore
     });
 
     return NextResponse.json(savedPrompt);
@@ -41,9 +41,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to save prompt",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       offset,
       category,
       searchQuery,
-      favoritesOnly,
+      favoritesOnly
     });
 
     return NextResponse.json({ data: prompts });
@@ -84,9 +84,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to fetch prompts",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

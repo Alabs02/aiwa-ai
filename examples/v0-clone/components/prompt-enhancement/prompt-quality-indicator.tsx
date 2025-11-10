@@ -6,7 +6,7 @@ import { Sparkles, AlertCircle, CheckCircle, Lightbulb } from "lucide-react";
 import {
   HoverCard,
   HoverCardContent,
-  HoverCardTrigger,
+  HoverCardTrigger
 } from "@/components/ui/hover-card";
 
 interface PromptAnalysis {
@@ -32,35 +32,35 @@ const QUALITY_CONFIG = {
     label: "Excellent",
     color: "text-green-500",
     bgColor: "bg-green-500/10",
-    borderColor: "border-green-500/20",
+    borderColor: "border-green-500/20"
   },
   good: {
     icon: CheckCircle,
     label: "Good",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
-    borderColor: "border-blue-500/20",
+    borderColor: "border-blue-500/20"
   },
   fair: {
     icon: Lightbulb,
     label: "Fair",
     color: "text-yellow-500",
     bgColor: "bg-yellow-500/10",
-    borderColor: "border-yellow-500/20",
+    borderColor: "border-yellow-500/20"
   },
   weak: {
     icon: AlertCircle,
     label: "Needs Work",
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
-    borderColor: "border-orange-500/20",
-  },
+    borderColor: "border-orange-500/20"
+  }
 };
 
 export function PromptQualityIndicator({
   prompt,
   onAnalysisChange,
-  className,
+  className
 }: PromptQualityIndicatorProps) {
   const [analysis, setAnalysis] = useState<PromptAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -78,7 +78,7 @@ export function PromptQualityIndicator({
         const response = await fetch("/api/prompts/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify({ prompt })
         });
 
         if (response.ok) {
@@ -113,7 +113,7 @@ export function PromptQualityIndicator({
             config.bgColor,
             config.borderColor,
             "hover:opacity-80",
-            className,
+            className
           )}
           type="button"
         >

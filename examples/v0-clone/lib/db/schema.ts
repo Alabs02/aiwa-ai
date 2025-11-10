@@ -7,7 +7,7 @@ import {
   primaryKey,
   unique,
   text,
-  integer,
+  integer
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -15,7 +15,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 64 }).notNull(),
   password: varchar("password", { length: 64 }),
   github_access_token: varchar("github_access_token", { length: 255 }),
-  created_at: timestamp("created_at").notNull().defaultNow(),
+  created_at: timestamp("created_at").notNull().defaultNow()
 });
 
 export type User = InferSelectModel<typeof users>;
@@ -35,11 +35,11 @@ export const chat_ownerships = pgTable(
     description: text("description"),
     preview_url: varchar("preview_url", { length: 512 }),
     demo_url: varchar("demo_url", { length: 512 }),
-    created_at: timestamp("created_at").notNull().defaultNow(),
+    created_at: timestamp("created_at").notNull().defaultNow()
   },
   (table) => ({
-    unique_v0_chat: unique().on(table.v0_chat_id),
-  }),
+    unique_v0_chat: unique().on(table.v0_chat_id)
+  })
 );
 
 export type ChatOwnership = InferSelectModel<typeof chat_ownerships>;
@@ -48,7 +48,7 @@ export const anonymous_chat_logs = pgTable("anonymous_chat_logs", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   ip_address: varchar("ip_address", { length: 45 }).notNull(),
   v0_chat_id: varchar("v0_chat_id", { length: 255 }).notNull(),
-  created_at: timestamp("created_at").notNull().defaultNow(),
+  created_at: timestamp("created_at").notNull().defaultNow()
 });
 
 export type AnonymousChatLog = InferSelectModel<typeof anonymous_chat_logs>;
@@ -62,7 +62,7 @@ export const github_exports = pgTable("github_exports", {
   repo_name: varchar("repo_name", { length: 255 }).notNull(),
   repo_url: varchar("repo_url", { length: 512 }).notNull(),
   is_private: varchar("is_private", { length: 10 }).notNull().default("true"),
-  created_at: timestamp("created_at").notNull().defaultNow(),
+  created_at: timestamp("created_at").notNull().defaultNow()
 });
 
 export type GitHubExport = InferSelectModel<typeof github_exports>;
@@ -84,7 +84,7 @@ export const prompt_library = pgTable("prompt_library", {
     .default("false"),
   usage_count: integer("usage_count").notNull().default(0),
   created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow()
 });
 
 export type PromptLibraryItem = InferSelectModel<typeof prompt_library>;

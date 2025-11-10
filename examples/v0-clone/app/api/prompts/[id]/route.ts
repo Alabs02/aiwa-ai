@@ -4,12 +4,12 @@ import {
   getPromptById,
   updatePromptInLibrary,
   deletePromptFromLibrary,
-  incrementPromptUsage,
+  incrementPromptUsage
 } from "@/lib/db/queries";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -22,7 +22,7 @@ export async function GET(
 
     const prompt = await getPromptById({
       promptId: id,
-      userId: session.user.id,
+      userId: session.user.id
     });
 
     if (!prompt) {
@@ -35,16 +35,16 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Failed to fetch prompt",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -78,7 +78,7 @@ export async function PATCH(
     const updatedPrompt = await updatePromptInLibrary({
       promptId: id,
       userId: session.user.id,
-      updates,
+      updates
     });
 
     return NextResponse.json(updatedPrompt);
@@ -87,16 +87,16 @@ export async function PATCH(
     return NextResponse.json(
       {
         error: "Failed to update prompt",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -109,7 +109,7 @@ export async function DELETE(
 
     await deletePromptFromLibrary({
       promptId: id,
-      userId: session.user.id,
+      userId: session.user.id
     });
 
     return NextResponse.json({ success: true });
@@ -118,9 +118,9 @@ export async function DELETE(
     return NextResponse.json(
       {
         error: "Failed to delete prompt",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : "Unknown error"
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
