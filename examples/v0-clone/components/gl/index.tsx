@@ -20,7 +20,7 @@ export const GL = ({ hovering }: { hovering: boolean }) => {
     vignetteDarkness,
     vignetteOffset,
     useManualTime,
-    manualTime
+    manualTime,
   } = useControls("Particle System", {
     speed: { value: 1.0, min: 0, max: 2, step: 0.01 },
     noiseScale: { value: 0.6, min: 0.1, max: 5, step: 0.1 },
@@ -33,28 +33,28 @@ export const GL = ({ hovering }: { hovering: boolean }) => {
     planeScale: { value: 10.0, min: 0.1, max: 10, step: 0.1 },
     size: {
       value: 512,
-      options: [256, 512, 1024]
+      options: [256, 512, 1024],
     },
     showDebugPlane: { value: false },
     vignetteDarkness: { value: 1.5, min: 0, max: 2, step: 0.1 },
     vignetteOffset: { value: 0.4, min: 0, max: 2, step: 0.1 },
     useManualTime: { value: false },
-    manualTime: { value: 0, min: 0, max: 50, step: 0.01 }
+    manualTime: { value: 0, min: 0, max: 50, step: 0.01 },
   });
   return (
     <div id="webgl" className="brightness-75">
       <Canvas
         camera={{
           position: [
-            1.2629783123314589, 2.664606471394044, -1.8178993743288914
+            1.2629783123314589, 2.664606471394044, -1.8178993743288914,
           ],
           fov: 50,
           near: 0.01,
-          far: 300
+          far: 300,
         }}
       >
         {/* <Perf position="top-left" /> */}
-        <color attach="background" args={["#000"]} />
+        <color attach="background" args={["#232323"]} />
         <Particles
           speed={speed}
           aperture={aperture}
