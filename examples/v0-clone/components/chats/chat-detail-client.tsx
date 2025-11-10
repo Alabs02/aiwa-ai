@@ -33,6 +33,7 @@ export function ChatDetailClient() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { handoff } = useStreaming();
+
   const {
     message,
     setMessage,
