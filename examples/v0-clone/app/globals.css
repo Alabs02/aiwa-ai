@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "./message.css";
-@import "./animations.css";
+@import "./css/message.css";
+@import "./css/animations.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -343,7 +343,7 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/20 rounded-full;
+  @apply rounded-full bg-white/20;
   @apply hover:bg-white/30;
   @apply transition-colors duration-200;
 }

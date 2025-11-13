@@ -23,6 +23,7 @@ import {
   Wand2
 } from "lucide-react";
 import { toast } from "sonner";
+import { MarkdownPreview } from "react-markdown-preview";
 
 interface PromptEnhancerDialogProps {
   open: boolean;
@@ -146,7 +147,7 @@ export function PromptEnhancerDialog({
       <DialogContent
         className={cn(
           "glass from-background/75 via-background/45 to-background/25 bg-gradient-to-br",
-          "max-h-[90vh] max-w-4xl",
+          "max-h-[90vh] max-w-4xl overflow-y-auto",
           "shadow-[0_20px_60px_rgba(0,0,0,0.5)]",
           "p-0"
         )}
@@ -283,7 +284,7 @@ export function PromptEnhancerDialog({
                     </div>
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap text-white/80">
-                    {enhancedPrompt}
+                    <MarkdownPreview doc={enhancedPrompt} />
                   </p>
                 </div>
               )}

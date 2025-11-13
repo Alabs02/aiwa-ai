@@ -106,12 +106,14 @@ export const MessageContent = ({
           />
         </div>
         {enableExpansion && isLongMessage && (
-          <button
+          <Button
             onClick={toggleExpanded}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:opacity-80"
+            variant={"ghost"}
+            size={"sm"}
+            className="mt-3 inline-flex items-center gap-1.5 !text-xs font-medium !text-neutral-100/75 transition-colors hover:opacity-80"
           >
             {expanded ? "Show less" : "Show full message"}
-          </button>
+          </Button>
         )}
       </>
     );
