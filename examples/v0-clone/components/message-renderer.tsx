@@ -115,12 +115,14 @@ export function MessageRenderer({
                   />
                 </div>
                 {isLongMessage && (
-                  <button
+                  <Button
                     onClick={toggleExpanded}
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-neutral-100 transition-colors hover:text-neutral-400"
+                    variant={"ghost"}
+                    size={"sm"}
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium !text-neutral-100 transition-colors hover:text-neutral-400"
                   >
                     {expanded ? "Show less" : "Show full message"}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
