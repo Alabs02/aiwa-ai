@@ -36,6 +36,7 @@ import { suggestions } from "../constants/suggestions";
 import { FeaturedProjects } from "@/components/projects/featured";
 import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
+import { SidebarLayout } from "../shared/sidebar-layout";
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -177,6 +178,137 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setMessage(enhancedPrompt);
   };
 
+  const handleStreamingComplete = () => {
+    setIsLoading(false);
+  };
+
+  const handleChatData = async (data: { id: string; demo?: string }) => {
+    if (!currentChatId && data.id) {
+      // First time receiving chat ID - set it and navigate
+      setCurrentChatId(data.id);
+      setCurrentChat(data);
+
+      // Update URL to /chats/{chatId}
+      window.history.pushState(null, "", `/chats/${data.id}`);
+
+      console.log("Chat created with ID:", data.id);
+
+      // Create ownership record for the new chat
+      try {
+        await fetch("/api/chat/ownership", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            chatId: data.id
+          })
+        });
+        console.log("Chat ownership created:", data.id);
+      } catch (error) {
+        console.error("Failed to create chat ownership:", error);
+        // Don't fail the UI if ownership creation fails
+      }
+    } else if (
+      data.demo &&
+      (!currentChat?.demo || currentChat.demo !== data.demo)
+    ) {
+      // Demo URL came through - update it
+      setCurrentChat((prev) => (prev ? { ...prev, demo: data.demo } : null));
+
+      // Auto-switch to preview on mobile when demo is ready
+      if (window.innerWidth < 768) {
+        setActivePanel("preview");
+      }
+    }
+  };
+
+  const handleStreamingStarted = () => {
+    setIsLoading(false);
+  };
+
+  const handleChatSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!message.trim() || isLoading) return;
+
+    const userMessage = message.trim();
+    setMessage("");
+    setIsLoading(true);
+
+    // Add user message to chat history
+    setChatHistory((prev) => [...prev, { type: "user", content: userMessage }]);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          chatId: currentChatId,
+          streaming: true
+        })
+      });
+
+      if (!response.ok) {
+        // Try to get the specific error message from the response
+        let errorMessage =
+          "Sorry, there was an error processing your message. Please try again.";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (response.status === 429) {
+            errorMessage =
+              "You have exceeded your maximum number of messages for the day. Please try again later.";
+          }
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
+          if (response.status === 429) {
+            errorMessage =
+              "You have exceeded your maximum number of messages for the day. Please try again later.";
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body for streaming");
+      }
+
+      setIsLoading(false);
+
+      // Add streaming response
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          type: "assistant",
+          content: [],
+          isStreaming: true,
+          stream: response.body
+        }
+      ]);
+    } catch (error) {
+      console.error("Error:", error);
+
+      // Use the specific error message if available, otherwise fall back to generic message
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Sorry, there was an error processing your message. Please try again.";
+
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          type: "assistant",
+          content: errorMessage
+        }
+      ]);
+      setIsLoading(false);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
@@ -274,175 +406,70 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     }
   };
 
-  const handleStreamingComplete = () => {
-    setIsLoading(false);
-  };
-
-  const handleChatData = (data: any) => {
-    if (data.chatId) {
-      setCurrentChatId(data.chatId);
-      setCurrentChat({ id: data.chatId, demo: data.demo });
-    }
-  };
-
-  const handleChatSendMessage = async (
-    e: React.FormEvent<HTMLFormElement>,
-    attachmentUrls?: Array<{ url: string }>
-  ) => {
-    e.preventDefault();
-    if (!message.trim() || isLoading) return;
-
-    const userMessage = message.trim();
-
-    // Clear message immediately
-    setMessage("");
-
-    // Add user message to history
-    setChatHistory((prev) => [
-      ...prev,
-      {
-        type: "user",
-        content: userMessage
-      }
-    ]);
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          chatId: currentChatId,
-          attachments: attachmentUrls,
-          streaming: true
-        })
-      });
-
-      if (!response.ok) {
-        // Try to get the specific error message from the response
-        let errorMessage =
-          "Sorry, there was an error processing your message. Please try again.";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          } else if (response.status === 429) {
-            errorMessage =
-              "You have exceeded your maximum number of messages for the day. Please try again later.";
-          }
-        } catch (parseError) {
-          console.error("Error parsing error response:", parseError);
-          if (response.status === 429) {
-            errorMessage =
-              "You have exceeded your maximum number of messages for the day. Please try again later.";
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      if (!response.body) {
-        throw new Error("No response body for streaming");
-      }
-
-      setIsLoading(false);
-
-      // Add streaming response
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: [],
-          isStreaming: true,
-          stream: response.body
-        }
-      ]);
-    } catch (error) {
-      console.error("Error:", error);
-
-      // Use the specific error message if available, otherwise fall back to generic message
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Sorry, there was an error processing your message. Please try again.";
-
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: errorMessage
-        }
-      ]);
-      setIsLoading(false);
-    }
-  };
-
   if (showChatInterface) {
     return (
-      <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-black">
-        {/* Handle search params with Suspense boundary */}
-        <Suspense fallback={null}>
-          <SearchParamsHandler onReset={handleReset} />
-        </Suspense>
-
-        {/* Navbar */}
+      <>
         <NavBar />
 
-        <div className="flex h-[calc(100vh-60px-40px)] flex-col md:h-[calc(100vh-60px)]">
-          <ResizableLayout
-            className="min-h-0 flex-1"
-            singlePanelMode={false}
-            activePanel={activePanel === "chat" ? "left" : "right"}
-            leftPanel={
-              <div className="flex h-full flex-col">
-                <div className="flex-1 overflow-y-auto">
-                  <ChatMessages
-                    chatHistory={chatHistory}
-                    isLoading={isLoading}
-                    currentChat={currentChat}
-                    onStreamingComplete={handleStreamingComplete}
-                    onChatData={handleChatData}
-                    onStreamingStarted={() => setIsLoading(false)}
-                  />
-                </div>
+        <SidebarLayout>
+          <Suspense fallback={<div>Loading...</div>}>
+            <SearchParamsHandler onReset={handleReset} />
 
-                <ChatInput
-                  message={message}
-                  setMessage={setMessage}
-                  onSubmit={handleChatSendMessage}
-                  isLoading={isLoading}
-                  showSuggestions={false}
+            <div className="dark:bg-background flex h-[calc(100vh-60px-40px)] flex-col bg-gray-50 md:h-[calc(100vh-60px)]">
+              <ResizableLayout
+                className="min-h-0 flex-1"
+                singlePanelMode={false}
+                activePanel={activePanel === "chat" ? "left" : "right"}
+                leftPanel={
+                  <div className="flex h-full flex-col">
+                    <div className="flex-1 overflow-y-auto">
+                      <ChatMessages
+                        chatHistory={chatHistory}
+                        isLoading={isLoading}
+                        currentChat={currentChat}
+                        onStreamingComplete={handleStreamingComplete}
+                        onChatData={handleChatData}
+                        onStreamingStarted={handleStreamingStarted}
+                      />
+                    </div>
+
+                    <ChatInput
+                      message={message}
+                      setMessage={setMessage}
+                      onSubmit={handleChatSendMessage}
+                      isLoading={isLoading}
+                      showSuggestions={false}
+                    />
+                  </div>
+                }
+                rightPanel={
+                  <PreviewPanel
+                    currentChat={currentChat}
+                    isFullscreen={isFullscreen}
+                    setIsFullscreen={setIsFullscreen}
+                    refreshKey={refreshKey}
+                    setRefreshKey={setRefreshKey}
+                  />
+                }
+              />
+
+              <div className="md:hidden">
+                <BottomToolbar
+                  activePanel={activePanel}
+                  onPanelChange={setActivePanel}
+                  hasPreview={!!currentChat}
                 />
               </div>
-            }
-            rightPanel={
-              <PreviewPanel
-                currentChat={currentChat}
-                isFullscreen={isFullscreen}
-                setIsFullscreen={setIsFullscreen}
-                refreshKey={refreshKey}
-                setRefreshKey={setRefreshKey}
-              />
-            }
-          />
-
-          <div className="md:hidden">
-            <BottomToolbar
-              activePanel={activePanel}
-              onPanelChange={setActivePanel}
-              hasPreview={!!currentChat}
-            />
-          </div>
-        </div>
-      </div>
+            </div>
+          </Suspense>
+        </SidebarLayout>
+      </>
     );
   }
 
   return (
     <>
-      <div className="dark:bg-background flex min-h-svh flex-col bg-gray-50">
+      <div className="dark:bg-background flex min-h-[calc(100vh-60px)] flex-col bg-gray-50">
         <GL hovering={hovering} />
 
         {/* Handle search params with Suspense boundary */}
