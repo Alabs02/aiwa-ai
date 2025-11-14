@@ -99,7 +99,7 @@ export const Suggestion = ({
   return (
     <Button
       className={cn(
-        "animate-shimmer font-button cursor-pointer rounded-full bg-[linear-gradient(110deg,rgba(0,1,2,.70),45%,rgba(0,1,3,.70),55%,rgba(27,27,28,.70))] bg-[length:100%_200%] px-4 brightness-100 transition-all duration-300 hover:bg-[linear-gradient(110deg,#1a1a1c,45%,#000103,55%,#000102)] hover:brightness-110",
+        "animate-shimmer font-button cursor-pointer rounded-full bg-[linear-gradient(110deg,rgba(0,1,2,1),45%,rgba(0,1,3,1),55%,rgba(27,27,28,1))] bg-[length:100%_200%] px-4 brightness-100 transition-all duration-300 hover:bg-[linear-gradient(110deg,#1a1a1c,45%,#000103,55%,#000102)] hover:brightness-110",
         className
       )}
       onClick={handleClick}
