@@ -402,6 +402,9 @@ importers:
       zod:
         specifier: ^4.1.1
         version: 4.1.1
+      zustand:
+        specifier: ^5.0.8
+        version: 5.0.8(@types/react@19.1.11)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
