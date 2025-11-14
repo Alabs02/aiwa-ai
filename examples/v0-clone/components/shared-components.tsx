@@ -51,25 +51,6 @@ export const ThinkingSectionWrapper = ({
 // ===============================================
 // CODE PROJECT WRAPPER
 // ===============================================
-
-// Helper to clean V0_FILE markers and shell placeholders
-const cleanCodeContent = (content: string): string => {
-  if (!content) return "";
-
-  // Remove V0_FILE markers with various patterns
-  let cleaned = content.replace(/\[V0_FILE\][^:]*:file="[^"]*"\n?/g, "");
-  cleaned = cleaned.replace(/\[V0_FILE\][^\n]*\n?/g, "");
-
-  // Remove shell placeholders
-  cleaned = cleaned.replace(/\.\.\.\s*shell\s*\.\.\./g, "");
-
-  // Clean up excessive newlines
-  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
-  cleaned = cleaned.trim();
-
-  return cleaned;
-};
-
 const CodeProjectPartWrapper = ({
   title,
   filename,
@@ -85,9 +66,6 @@ const CodeProjectPartWrapper = ({
   const codeProjectPart = props as any;
   const files = codeProjectPart.changedFiles || [];
   const hasMultipleFiles = files.length > 1;
-
-  // Clean the code content
-  const cleanedCode = cleanCodeContent(code || codeProjectPart.source || "");
 
   return (
     <div className="not-prose group/code-project mb-4 overflow-hidden rounded-lg border border-neutral-200/50 bg-gradient-to-br from-neutral-50/50 to-neutral-100/30 backdrop-blur-sm transition-all duration-300 dark:border-neutral-800/50 dark:from-neutral-900/30 dark:to-neutral-800/20">

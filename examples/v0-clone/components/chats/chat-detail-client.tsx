@@ -6,7 +6,6 @@ import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatInput } from "@/components/chat/chat-input";
 import { PreviewPanel } from "@/components/chat/preview-panel";
 import { ResizableLayout } from "@/components/shared/resizable-layout";
-import { NavBar } from "@/components/shared";
 import { BottomToolbar } from "@/components/shared/bottom-toolbar";
 import { useChat } from "@/hooks/use-chat";
 import { useStreaming } from "@/contexts/streaming-context";

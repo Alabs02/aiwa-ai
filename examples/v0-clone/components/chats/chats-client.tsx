@@ -107,7 +107,7 @@ export function ChatsClient() {
                     <div className="border-border dark:border-input rounded-lg border p-6 transition-shadow hover:shadow-md">
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-heading truncate text-lg font-medium text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+                          <h3 className="font-heading group-hover:text-primary truncate text-lg font-medium text-gray-900 transition-colors dark:text-white dark:group-hover:text-orange-400">
                             {chat.name || getFirstUserMessage(chat)}
                           </h3>
                           <div className="font-body mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
