@@ -36,7 +36,10 @@ import { suggestions } from "../constants/suggestions";
 import { FeaturedProjects } from "@/components/projects/featured";
 import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
-import { SidebarLayout } from "../shared/sidebar-layout";
+import { cn } from "@/lib/utils";
+import { AppSidebar } from "@/components/shared/app-sidebar";
+import { useSidebarCollapse } from "@/hooks/use-sidebar-collapse";
+import { useChatStore } from "./home-client.store";
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -63,49 +66,49 @@ interface HomeClientProps {
 }
 
 export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
+  // Get all state and actions from Zustand store
+  const {
+    currentChatId,
+    showChatInterface,
+    chatHistory,
+    currentChat,
+    isLoading,
+    isFullscreen,
+    refreshKey,
+    activePanel,
+    setCurrentChatId,
+    setShowChatInterface,
+    setChatHistory,
+    addChatMessage,
+    setCurrentChat,
+    setIsLoading,
+    setIsFullscreen,
+    setRefreshKey,
+    setActivePanel,
+    resetChatState
+  } = useChatStore();
+
+  const { isCollapsed } = useSidebarCollapse();
+
+  // Local UI state (not critical for persistence)
   const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showChatInterface, setShowChatInterface] = useState(false);
   const [attachments, setAttachments] = useState<ImageAttachment[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [chatHistory, setChatHistory] = useState<
-    Array<{
-      type: "user" | "assistant";
-      content: string | any;
-      isStreaming?: boolean;
-      stream?: ReadableStream<Uint8Array> | null;
-    }>
-  >([]);
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [currentChat, setCurrentChat] = useState<{
-    id: string;
-    demo?: string;
-  } | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [activePanel, setActivePanel] = useState<"chat" | "preview">("chat");
-  const router = useRouter();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hovering, setHovering] = useState(false);
-
-  // Prompt enhancement states
   const [showEnhancer, setShowEnhancer] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
 
+  const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const handleReset = () => {
-    // Reset all chat-related state
-    setShowChatInterface(false);
-    setChatHistory([]);
-    setCurrentChatId(null);
-    setCurrentChat(null);
+    // Reset all chat-related state in store
+    resetChatState();
+
+    // Reset local state
     setMessage("");
     setAttachments([]);
-    setIsLoading(false);
-    setIsFullscreen(false);
-    setRefreshKey((prev) => prev + 1);
-
-    // Clear any stored data
     clearPromptFromStorage();
 
     // Focus textarea after reset
@@ -116,7 +119,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     }, 0);
   };
 
-  // Auto-focus the textarea on page load and restore from sessionStorage
+  // Auto-focus textarea and restore from sessionStorage
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -135,12 +138,11 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     }
   }, []);
 
-  // Save prompt data to sessionStorage whenever message or attachments change
+  // Save prompt data to sessionStorage
   useEffect(() => {
     if (message.trim() || attachments.length > 0) {
       savePromptToStorage(message, attachments);
     } else {
-      // Clear sessionStorage if both message and attachments are empty
       clearPromptFromStorage();
     }
   }, [message, attachments]);
@@ -161,17 +163,9 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
 
-  const handleDragOver = () => {
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
-  const handleDrop = () => {
-    setIsDragOver(false);
-  };
+  const handleDragOver = () => setIsDragOver(true);
+  const handleDragLeave = () => setIsDragOver(false);
+  const handleDrop = () => setIsDragOver(false);
 
   // Handle prompt from enhancer or library
   const handleUseEnhancedPrompt = (enhancedPrompt: string) => {
@@ -182,14 +176,21 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setIsLoading(false);
   };
 
-  const handleChatData = async (data: { id: string; demo?: string }) => {
+  const handleChatData = async (data: any) => {
+    console.log({ data });
+
     if (!currentChatId && data.id) {
       // First time receiving chat ID - set it and navigate
       setCurrentChatId(data.id);
       setCurrentChat(data);
 
       // Update URL to /chats/{chatId}
-      window.history.pushState(null, "", `/chats/${data.id}`);
+      const stateObject = {
+        chatId: data.id,
+        asPath: `/chats/${data.id}`,
+        scroll: false
+      };
+      window.history.pushState(stateObject, "", `/chats/${data.id}`);
 
       console.log("Chat created with ID:", data.id);
 
@@ -207,18 +208,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
         console.log("Chat ownership created:", data.id);
       } catch (error) {
         console.error("Failed to create chat ownership:", error);
-        // Don't fail the UI if ownership creation fails
-      }
-    } else if (
-      data.demo &&
-      (!currentChat?.demo || currentChat.demo !== data.demo)
-    ) {
-      // Demo URL came through - update it
-      setCurrentChat((prev) => (prev ? { ...prev, demo: data.demo } : null));
-
-      // Auto-switch to preview on mobile when demo is ready
-      if (window.innerWidth < 768) {
-        setActivePanel("preview");
       }
     }
   };
@@ -236,7 +225,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setIsLoading(true);
 
     // Add user message to chat history
-    setChatHistory((prev) => [...prev, { type: "user", content: userMessage }]);
+    addChatMessage({ type: "user", content: userMessage });
 
     try {
       const response = await fetch("/api/chat", {
@@ -252,7 +241,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       });
 
       if (!response.ok) {
-        // Try to get the specific error message from the response
         let errorMessage =
           "Sorry, there was an error processing your message. Please try again.";
         try {
@@ -280,31 +268,24 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       setIsLoading(false);
 
       // Add streaming response
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: [],
-          isStreaming: true,
-          stream: response.body
-        }
-      ]);
+      addChatMessage({
+        type: "assistant",
+        content: [],
+        isStreaming: true,
+        stream: response.body
+      });
     } catch (error) {
       console.error("Error:", error);
 
-      // Use the specific error message if available, otherwise fall back to generic message
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Sorry, there was an error processing your message. Please try again.";
 
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: errorMessage
-        }
-      ]);
+      addChatMessage({
+        type: "assistant",
+        content: errorMessage
+      });
       setIsLoading(false);
     }
   };
@@ -346,7 +327,6 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       });
 
       if (!response.ok) {
-        // Try to get the specific error message from the response
         let errorMessage =
           "Sorry, there was an error processing your message. Please try again.";
         try {
@@ -374,20 +354,16 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
       setIsLoading(false);
 
       // Add streaming assistant response
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: [],
-          isStreaming: true,
-          stream: response.body
-        }
-      ]);
+      addChatMessage({
+        type: "assistant",
+        content: [],
+        isStreaming: true,
+        stream: response.body
+      });
     } catch (error) {
       console.error("Error creating chat:", error);
       setIsLoading(false);
 
-      // Use the specific error message if available, otherwise fall back to generic message
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -406,232 +382,239 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     }
   };
 
-  if (showChatInterface) {
+  if (showChatInterface || currentChatId) {
     return (
-      <>
-        <NavBar />
-
-        <SidebarLayout>
-          <Suspense fallback={<div>Loading...</div>}>
-            <SearchParamsHandler onReset={handleReset} />
-
-            <div className="dark:bg-background flex h-[calc(100vh-60px-40px)] flex-col bg-gray-50 md:h-[calc(100vh-60px)]">
-              <ResizableLayout
-                className="min-h-0 flex-1"
-                singlePanelMode={false}
-                activePanel={activePanel === "chat" ? "left" : "right"}
-                leftPanel={
-                  <div className="flex h-full flex-col">
-                    <div className="flex-1 overflow-y-auto">
-                      <ChatMessages
-                        chatHistory={chatHistory}
-                        isLoading={isLoading}
-                        currentChat={currentChat}
-                        onStreamingComplete={handleStreamingComplete}
-                        onChatData={handleChatData}
-                        onStreamingStarted={handleStreamingStarted}
-                      />
-                    </div>
-
-                    <ChatInput
-                      message={message}
-                      setMessage={setMessage}
-                      onSubmit={handleChatSendMessage}
-                      isLoading={isLoading}
-                      showSuggestions={false}
-                    />
-                  </div>
-                }
-                rightPanel={
-                  <PreviewPanel
-                    currentChat={currentChat}
-                    isFullscreen={isFullscreen}
-                    setIsFullscreen={setIsFullscreen}
-                    refreshKey={refreshKey}
-                    setRefreshKey={setRefreshKey}
-                  />
-                }
-              />
-
-              <div className="md:hidden">
-                <BottomToolbar
-                  activePanel={activePanel}
-                  onPanelChange={setActivePanel}
-                  hasPreview={!!currentChat}
-                />
-              </div>
-            </div>
-          </Suspense>
-        </SidebarLayout>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <div className="dark:bg-background flex min-h-[calc(100vh-60px)] flex-col bg-gray-50">
-        <GL hovering={hovering} />
-
+      <div className="dark:bg-background flex min-h-screen flex-col bg-gray-50">
         {/* Handle search params with Suspense boundary */}
         <Suspense fallback={null}>
           <SearchParamsHandler onReset={handleReset} />
         </Suspense>
 
-        {/* Toolbar */}
-        <Toolbar />
+        <NavBar />
+        <AppSidebar />
 
-        {/* Main Content */}
-        <main className="relative z-10 flex w-full flex-1 flex-col border-none border-white">
-          {/* Hero Section */}
-          <div className="flex min-h-[calc(100vh-60px)] flex-col items-center-safe justify-center-safe gap-y-12 px-5 md:gap-y-24 md:px-4">
-            <div className="flex w-full max-w-3xl flex-col items-center-safe border-none">
-              <h2 className="font-heading text-center text-2xl font-bold text-white sm:text-3xl md:text-5xl 2xl:text-6xl">
-                Vibe. Build. Deploy.
-              </h2>
-
-              <p className="font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
-                Vibe-code your imagination. Bring it to life with Aiwa.
-              </p>
-
-              {/* Prompt Input */}
-              <div
-                className="mt-8 w-full"
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => setHovering(false)}
-              >
-                <PromptInput
-                  onSubmit={handleSendMessage}
-                  className="relative w-full"
-                  onImageDrop={handleImageFiles}
-                  isDragOver={isDragOver}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <PromptInputImagePreview
-                    attachments={attachments}
-                    onRemove={handleRemoveAttachment}
+        <div
+          className={cn(
+            "flex h-[calc(100vh-60px-40px)] flex-col md:h-[calc(100vh-60px)]",
+            "md:ml-16",
+            !isCollapsed && "md:ml-64"
+          )}
+        >
+          <ResizableLayout
+            className="min-h-0 flex-1"
+            singlePanelMode={false}
+            activePanel={activePanel === "chat" ? "left" : "right"}
+            leftPanel={
+              <div className="flex h-full flex-col">
+                <div className={cn("flex-1 overflow-y-auto")}>
+                  <ChatMessages
+                    chatHistory={chatHistory}
+                    isLoading={isLoading}
+                    currentChat={currentChat}
+                    onStreamingComplete={handleStreamingComplete}
+                    onChatData={handleChatData}
+                    onStreamingStarted={handleStreamingStarted}
                   />
+                </div>
 
-                  {/* Quality indicator positioned above textarea */}
-                  {message.trim().length > 0 && (
-                    <div className="flex justify-end px-3 pt-2">
-                      <PromptQualityIndicator
-                        prompt={message}
-                        onAnalysisChange={setPromptAnalysis}
-                      />
-                    </div>
-                  )}
-
-                  <PromptInputTextarea
-                    ref={textareaRef}
-                    onChange={(e) => setMessage(e.target.value)}
-                    value={message}
-                    placeholder="Describe what you want to build..."
-                    className="min-h-[80px] text-base"
-                    disabled={isLoading}
-                  />
-                  <PromptInputToolbar>
-                    <PromptInputTools>
-                      {/* New enhancement tools */}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setShowLibrary(true)}
-                        className="h-8 w-8 p-0 text-white/60 hover:text-white"
-                        title="Browse prompt library"
-                        disabled={isLoading}
-                      >
-                        <Library className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setShowEnhancer(true)}
-                        className="h-8 w-8 p-0 text-white/60 hover:text-white"
-                        title="Enhance prompt"
-                        disabled={isLoading}
-                      >
-                        <Wand2 className="h-4 w-4" />
-                      </Button>
-
-                      <PromptInputImageButton
-                        onImageSelect={handleImageFiles}
-                        disabled={isLoading}
-                      />
-                    </PromptInputTools>
-                    <PromptInputTools>
-                      <PromptInputMicButton
-                        onTranscript={(transcript) => {
-                          setMessage(
-                            (prev) => prev + (prev ? " " : "") + transcript
-                          );
-                        }}
-                        onError={(error) => {
-                          console.error("Speech recognition error:", error);
-                        }}
-                        disabled={isLoading}
-                      />
-                      <PromptInputSubmit
-                        disabled={!message.trim() || isLoading}
-                        status={isLoading ? "streaming" : "ready"}
-                      />
-                    </PromptInputTools>
-                  </PromptInputToolbar>
-                </PromptInput>
+                <ChatInput
+                  message={message}
+                  setMessage={setMessage}
+                  onSubmit={handleChatSendMessage}
+                  isLoading={isLoading}
+                  showSuggestions={false}
+                />
               </div>
+            }
+            rightPanel={
+              <PreviewPanel
+                currentChat={currentChat}
+                isFullscreen={isFullscreen}
+                setIsFullscreen={setIsFullscreen}
+                refreshKey={refreshKey}
+                isGenerating={isLoading}
+                setRefreshKey={setRefreshKey}
+              />
+            }
+          />
 
-              {/* Suggestions */}
-              <div className="mt-4 w-full">
-                <Suggestions>
-                  {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
-                    <Suggestion
-                      key={`${Copy}-${idx}`}
-                      onClick={() => {
-                        setMessage(Prompt);
-                        // Submit after setting message
-                        setTimeout(() => {
-                          const form = textareaRef.current?.form;
-                          if (form) {
-                            form.requestSubmit();
-                          }
-                        }, 0);
-                      }}
-                      suggestion={Copy}
-                    >
-                      {Icon}
-                      <span>{Copy}</span>
-                    </Suggestion>
-                  ))}
-                </Suggestions>
+          <div className="md:hidden">
+            <BottomToolbar
+              activePanel={activePanel}
+              onPanelChange={setActivePanel}
+              hasPreview={!!currentChat}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <>
+        <div className="dark:bg-background flex min-h-[calc(100vh-60px)] flex-col bg-gray-50">
+          <GL hovering={hovering} />
+
+          {/* Handle search params with Suspense boundary */}
+          <Suspense fallback={null}>
+            <SearchParamsHandler onReset={handleReset} />
+          </Suspense>
+
+          {/* Toolbar */}
+          <Toolbar />
+
+          {/* Main Content */}
+          <main className="relative z-10 flex w-full flex-1 flex-col border-none border-white">
+            {/* Hero Section */}
+            <div className="flex min-h-[calc(100vh-60px)] flex-col items-center-safe justify-center-safe gap-y-12 px-5 md:gap-y-24 md:px-4">
+              <div className="flex w-full max-w-3xl flex-col items-center-safe border-none">
+                <h2 className="font-heading text-center text-2xl font-bold text-white sm:text-3xl md:text-5xl 2xl:text-6xl">
+                  Vibe. Build. Deploy.
+                </h2>
+
+                <p className="font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
+                  Vibe-code your imagination. Bring it to life with Aiwa.
+                </p>
+
+                {/* Prompt Input */}
+                <div
+                  className="mt-8 w-full"
+                  onMouseEnter={() => setHovering(true)}
+                  onMouseLeave={() => setHovering(false)}
+                >
+                  <PromptInput
+                    onSubmit={handleSendMessage}
+                    className="relative w-full"
+                    onImageDrop={handleImageFiles}
+                    isDragOver={isDragOver}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <PromptInputImagePreview
+                      attachments={attachments}
+                      onRemove={handleRemoveAttachment}
+                    />
+
+                    {/* Quality indicator positioned above textarea */}
+                    {message.trim().length > 0 && (
+                      <div className="flex justify-end px-3 pt-2">
+                        <PromptQualityIndicator
+                          prompt={message}
+                          onAnalysisChange={setPromptAnalysis}
+                        />
+                      </div>
+                    )}
+
+                    <PromptInputTextarea
+                      ref={textareaRef}
+                      onChange={(e) => setMessage(e.target.value)}
+                      value={message}
+                      placeholder="Describe what you want to build..."
+                      className="min-h-[80px] text-base"
+                      disabled={isLoading}
+                    />
+                    <PromptInputToolbar>
+                      <PromptInputTools>
+                        {/* Enhancement tools */}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setShowLibrary(true)}
+                          className="h-8 w-8 p-0 text-white/60 hover:text-white"
+                          title="Browse prompt library"
+                          disabled={isLoading}
+                        >
+                          <Library className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setShowEnhancer(true)}
+                          className="h-8 w-8 p-0 text-white/60 hover:text-white"
+                          title="Enhance prompt"
+                          disabled={isLoading}
+                        >
+                          <Wand2 className="h-4 w-4" />
+                        </Button>
+
+                        <PromptInputImageButton
+                          onImageSelect={handleImageFiles}
+                          disabled={isLoading}
+                        />
+                      </PromptInputTools>
+                      <PromptInputTools>
+                        <PromptInputMicButton
+                          onTranscript={(transcript) => {
+                            setMessage(
+                              (prev) => prev + (prev ? " " : "") + transcript
+                            );
+                          }}
+                          onError={(error) => {
+                            console.error("Speech recognition error:", error);
+                          }}
+                          disabled={isLoading}
+                        />
+                        <PromptInputSubmit
+                          disabled={!message.trim() || isLoading}
+                          status={isLoading ? "streaming" : "ready"}
+                        />
+                      </PromptInputTools>
+                    </PromptInputToolbar>
+                  </PromptInput>
+                </div>
+
+                {/* Suggestions */}
+                <div className="mt-4 w-full">
+                  <Suggestions>
+                    {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
+                      <Suggestion
+                        key={`${Copy}-${idx}`}
+                        onClick={() => {
+                          setMessage(Prompt);
+                          // Submit after setting message
+                          setTimeout(() => {
+                            const form = textareaRef.current?.form;
+                            if (form) {
+                              form.requestSubmit();
+                            }
+                          }, 0);
+                        }}
+                        suggestion={Copy}
+                      >
+                        {Icon}
+                        <span>{Copy}</span>
+                      </Suggestion>
+                    ))}
+                  </Suggestions>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Featured Projects Section */}
-          <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
-            <FeaturedProjects isAuthenticated={isAuthenticated} />
-          </div>
-        </main>
-      </div>
+            {/* Featured Projects Section */}
+            <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
+              <FeaturedProjects isAuthenticated={isAuthenticated} />
+            </div>
+          </main>
+        </div>
 
-      {/* Enhancement dialogs */}
-      <PromptEnhancerDialog
-        open={showEnhancer}
-        onOpenChange={setShowEnhancer}
-        initialPrompt={message}
-        onUsePrompt={handleUseEnhancedPrompt}
-      />
+        {/* Enhancement dialogs */}
+        <PromptEnhancerDialog
+          open={showEnhancer}
+          onOpenChange={setShowEnhancer}
+          initialPrompt={message}
+          onUsePrompt={handleUseEnhancedPrompt}
+        />
 
-      <PromptLibraryDialog
-        open={showLibrary}
-        onOpenChange={setShowLibrary}
-        onSelectPrompt={handleUseEnhancedPrompt}
-      />
+        <PromptLibraryDialog
+          open={showLibrary}
+          onOpenChange={setShowLibrary}
+          onSelectPrompt={handleUseEnhancedPrompt}
+        />
 
-      <Leva hidden />
-    </>
-  );
+        <Leva hidden />
+      </>
+    );
+  }
 }

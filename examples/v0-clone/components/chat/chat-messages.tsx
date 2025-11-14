@@ -69,7 +69,7 @@ export function ChatMessages({
           <div className="flex min-h-[500px] items-center justify-center">
             <div className="space-y-4 text-center">
               <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
-                <div className="animate-pulse-subtle absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20" />
+                <div className="animate-pulse-subtle absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 to-purple-500/20" />
                 <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-neutral-200 via-neutral-500 to-neutral-800 p-0.5 shadow-lg">
                   <div className="flex h-full w-full items-center justify-center rounded-full bg-black">
                     <SparklesIcon className="h-8 w-8 text-white" />
@@ -131,7 +131,7 @@ export function ChatMessages({
                             console.error("Streaming error:", error)
                           }
                           components={sharedComponents}
-                          showLoadingIndicator={false}
+                          showLoadingIndicator={true}
                         />
                       </div>
                     ) : isStringContent ? (
@@ -166,15 +166,15 @@ export function ChatMessages({
               <div className="flex items-center gap-2 rounded-lg border border-neutral-200/50 bg-gradient-to-br from-neutral-50/50 to-neutral-100/30 px-4 py-3 backdrop-blur-sm dark:border-neutral-800/50 dark:from-neutral-900/30 dark:to-neutral-800/20">
                 <Loader
                   size={14}
-                  className="text-purple-600 dark:text-purple-400"
+                  className="text-orange-600 dark:text-orange-400"
                 />
                 <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Thinking
                 </span>
                 <div className="flex gap-1">
-                  <span className="size-1 animate-bounce rounded-full bg-purple-500 [animation-delay:-0.3s] dark:bg-purple-400" />
-                  <span className="size-1 animate-bounce rounded-full bg-purple-500 [animation-delay:-0.15s] dark:bg-purple-400" />
-                  <span className="size-1 animate-bounce rounded-full bg-purple-500 dark:bg-purple-400" />
+                  <span className="size-1 animate-bounce rounded-full bg-orange-500 [animation-delay:-0.3s] dark:bg-orange-400" />
+                  <span className="size-1 animate-bounce rounded-full bg-orange-500 [animation-delay:-0.15s] dark:bg-orange-400" />
+                  <span className="size-1 animate-bounce rounded-full bg-orange-500 dark:bg-orange-400" />
                 </div>
               </div>
             </div>

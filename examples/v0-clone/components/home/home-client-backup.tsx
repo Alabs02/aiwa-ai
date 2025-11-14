@@ -19,6 +19,11 @@ import {
   type ImageAttachment
 } from "@/components/ai-elements/prompt-input";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
+import {
+  PromptQualityIndicator,
+  PromptEnhancerDialog,
+  PromptLibraryDialog
+} from "@/components/prompt-enhancement";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatInput } from "@/components/chat/chat-input";
 import { PreviewPanel } from "@/components/chat/preview-panel";
@@ -29,6 +34,11 @@ import { GL } from "@/components/gl";
 import { Leva } from "leva";
 import { suggestions } from "../constants/suggestions";
 import { FeaturedProjects } from "@/components/projects/featured";
+import { Button } from "@/components/ui/button";
+import { Wand2, Library } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const SIDEBAR_STATE_KEY = "aiwa-sidebar-collapsed";
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
@@ -79,6 +89,12 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hovering, setHovering] = useState(false);
+
+  // Prompt enhancement states
+  const [showEnhancer, setShowEnhancer] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
+  const [isCollapsed, setIsCollapsed] = useState(true); // Default to collapsed
 
   const handleReset = () => {
     // Reset all chat-related state
@@ -160,98 +176,9 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     setIsDragOver(false);
   };
 
-  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!message.trim() || isLoading) return;
-
-    const userMessage = message.trim();
-    const currentAttachments = [...attachments];
-
-    // Clear sessionStorage immediately upon submission
-    clearPromptFromStorage();
-
-    setMessage("");
-    setAttachments([]);
-
-    // Immediately show chat interface and add user message
-    setShowChatInterface(true);
-    setChatHistory([
-      {
-        type: "user",
-        content: userMessage
-      }
-    ]);
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          streaming: true,
-          attachments: currentAttachments.map((att) => ({ url: att.dataUrl }))
-        })
-      });
-
-      if (!response.ok) {
-        // Try to get the specific error message from the response
-        let errorMessage =
-          "Sorry, there was an error processing your message. Please try again.";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          } else if (response.status === 429) {
-            errorMessage =
-              "You have exceeded your maximum number of messages for the day. Please try again later.";
-          }
-        } catch (parseError) {
-          console.error("Error parsing error response:", parseError);
-          if (response.status === 429) {
-            errorMessage =
-              "You have exceeded your maximum number of messages for the day. Please try again later.";
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      if (!response.body) {
-        throw new Error("No response body for streaming");
-      }
-
-      setIsLoading(false);
-
-      // Add streaming assistant response
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: [],
-          isStreaming: true,
-          stream: response.body
-        }
-      ]);
-    } catch (error) {
-      console.error("Error creating chat:", error);
-      setIsLoading(false);
-
-      // Use the specific error message if available, otherwise fall back to generic message
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Sorry, there was an error processing your message. Please try again.";
-
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "assistant",
-          content: errorMessage
-        }
-      ]);
-    }
+  // Handle prompt from enhancer or library
+  const handleUseEnhancedPrompt = (enhancedPrompt: string) => {
+    setMessage(enhancedPrompt);
   };
 
   const handleStreamingComplete = () => {
@@ -260,12 +187,16 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   const handleChatData = async (data: { id: string; demo?: string }) => {
     if (!currentChatId && data.id) {
+      // router.prefetch(`/chats/${data.id}`);
       // First time receiving chat ID - set it and navigate
       setCurrentChatId(data.id);
       setCurrentChat(data);
 
       // Update URL to /chats/{chatId}
-      window.history.pushState(null, "", `/chats/${data.id}`);
+      setTimeout(() => {
+        // router.push(`/chats/${data.id}`);
+        window.history.pushState(null, "", `/chats/${data.id}`);
+      }, 500);
 
       console.log("Chat created with ID:", data.id);
 
@@ -385,15 +316,149 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
     }
   };
 
+  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!message.trim() || isLoading) return;
+
+    const userMessage = message.trim();
+    const currentAttachments = [...attachments];
+
+    // Clear sessionStorage immediately upon submission
+    clearPromptFromStorage();
+
+    setMessage("");
+    setAttachments([]);
+
+    // Immediately show chat interface and add user message
+    setShowChatInterface(true);
+    setChatHistory([
+      {
+        type: "user",
+        content: userMessage
+      }
+    ]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          streaming: true,
+          attachments: currentAttachments.map((att) => ({ url: att.dataUrl }))
+        })
+      });
+
+      if (!response.ok) {
+        // Try to get the specific error message from the response
+        let errorMessage =
+          "Sorry, there was an error processing your message. Please try again.";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (response.status === 429) {
+            errorMessage =
+              "You have exceeded your maximum number of messages for the day. Please try again later.";
+          }
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
+          if (response.status === 429) {
+            errorMessage =
+              "You have exceeded your maximum number of messages for the day. Please try again later.";
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body for streaming");
+      }
+
+      setIsLoading(false);
+
+      // Add streaming assistant response
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          type: "assistant",
+          content: [],
+          isStreaming: true,
+          stream: response.body
+        }
+      ]);
+    } catch (error) {
+      console.error("Error creating chat:", error);
+      setIsLoading(false);
+
+      // Use the specific error message if available, otherwise fall back to generic message
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Sorry, there was an error processing your message. Please try again.";
+
+      setChatHistory([
+        {
+          type: "user",
+          content: userMessage
+        },
+        {
+          type: "assistant",
+          content: errorMessage
+        }
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    const savedState = localStorage.getItem(SIDEBAR_STATE_KEY);
+    if (savedState !== null) {
+      setIsCollapsed(savedState === "true");
+    } else {
+      // Set default collapsed state in localStorage
+      localStorage.setItem(SIDEBAR_STATE_KEY, "true");
+    }
+
+    // Listen for changes to sidebar state
+    const handleStorageChange = () => {
+      const newState = localStorage.getItem(SIDEBAR_STATE_KEY);
+      if (newState !== null) {
+        setIsCollapsed(newState === "true");
+      }
+    };
+
+    // Use custom event for same-tab updates
+    window.addEventListener("storage", handleStorageChange);
+
+    // Add a custom event listener for same-tab updates
+    const handleSidebarToggle = (e: CustomEvent) => {
+      setIsCollapsed(e.detail.collapsed);
+    };
+    window.addEventListener(
+      "sidebar-toggle" as any,
+      handleSidebarToggle as any
+    );
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "sidebar-toggle" as any,
+        handleSidebarToggle as any
+      );
+    };
+  }, []);
+
   if (showChatInterface) {
     return (
-      <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-black">
+      <div className="dark:bg-background flex min-h-screen flex-col bg-gray-50">
         {/* Handle search params with Suspense boundary */}
         <Suspense fallback={null}>
           <SearchParamsHandler onReset={handleReset} />
         </Suspense>
 
-        {/* Navbar */}
         <NavBar />
 
         <div className="flex h-[calc(100vh-60px-40px)] flex-col md:h-[calc(100vh-60px)]">
@@ -403,14 +468,22 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
             activePanel={activePanel === "chat" ? "left" : "right"}
             leftPanel={
               <div className="flex h-full flex-col">
-                <div className="flex-1 overflow-y-auto">
+                {/* <AppSidebar /> */}
+
+                <div
+                  className={cn(
+                    "flex-1 overflow-y-auto",
+                    "md:ml-16",
+                    !isCollapsed && "md:ml-64"
+                  )}
+                >
                   <ChatMessages
                     chatHistory={chatHistory}
                     isLoading={isLoading}
                     currentChat={currentChat}
                     onStreamingComplete={handleStreamingComplete}
                     onChatData={handleChatData}
-                    onStreamingStarted={() => setIsLoading(false)}
+                    onStreamingStarted={handleStreamingStarted}
                   />
                 </div>
 
@@ -420,6 +493,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                   onSubmit={handleChatSendMessage}
                   isLoading={isLoading}
                   showSuggestions={false}
+                  className={cn("md:ml-16", !isCollapsed && "md:ml-64")}
                 />
               </div>
             }
@@ -448,7 +522,7 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
 
   return (
     <>
-      <div className="dark:bg-background flex min-h-svh flex-col bg-gray-50">
+      <div className="dark:bg-background flex min-h-[calc(100vh-60px)] flex-col bg-gray-50">
         <GL hovering={hovering} />
 
         {/* Handle search params with Suspense boundary */}
@@ -491,6 +565,17 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                     attachments={attachments}
                     onRemove={handleRemoveAttachment}
                   />
+
+                  {/* Quality indicator positioned above textarea */}
+                  {message.trim().length > 0 && (
+                    <div className="flex justify-end px-3 pt-2">
+                      <PromptQualityIndicator
+                        prompt={message}
+                        onAnalysisChange={setPromptAnalysis}
+                      />
+                    </div>
+                  )}
+
                   <PromptInputTextarea
                     ref={textareaRef}
                     onChange={(e) => setMessage(e.target.value)}
@@ -501,6 +586,30 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
                   />
                   <PromptInputToolbar>
                     <PromptInputTools>
+                      {/* New enhancement tools */}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setShowLibrary(true)}
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white"
+                        title="Browse prompt library"
+                        disabled={isLoading}
+                      >
+                        <Library className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setShowEnhancer(true)}
+                        className="h-8 w-8 p-0 text-white/60 hover:text-white"
+                        title="Enhance prompt"
+                        disabled={isLoading}
+                      >
+                        <Wand2 className="h-4 w-4" />
+                      </Button>
+
                       <PromptInputImageButton
                         onImageSelect={handleImageFiles}
                         disabled={isLoading}
@@ -560,6 +669,20 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
           </div>
         </main>
       </div>
+
+      {/* Enhancement dialogs */}
+      <PromptEnhancerDialog
+        open={showEnhancer}
+        onOpenChange={setShowEnhancer}
+        initialPrompt={message}
+        onUsePrompt={handleUseEnhancedPrompt}
+      />
+
+      <PromptLibraryDialog
+        open={showLibrary}
+        onOpenChange={setShowLibrary}
+        onSelectPrompt={handleUseEnhancedPrompt}
+      />
 
       <Leva hidden />
     </>

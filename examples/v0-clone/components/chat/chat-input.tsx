@@ -23,6 +23,7 @@ import {
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   message: string;
@@ -31,6 +32,7 @@ interface ChatInputProps {
     e: React.FormEvent<HTMLFormElement>,
     attachments?: Array<{ url: string }>
   ) => void;
+  className?: string;
   isLoading: boolean;
   showSuggestions: boolean;
   attachments?: ImageAttachment[];
@@ -42,6 +44,7 @@ export function ChatInput({
   message,
   setMessage,
   onSubmit,
+  className,
   isLoading,
   showSuggestions,
   attachments = [],
@@ -127,7 +130,7 @@ export function ChatInput({
   };
 
   return (
-    <div className="px-4 md:pb-4">
+    <div className={cn("px-4 md:pb-4", className)}>
       <div className="flex gap-2">
         <PromptInput
           onSubmit={handleSubmit}

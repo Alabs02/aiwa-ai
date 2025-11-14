@@ -93,7 +93,7 @@ export function Toolbar({ className = "" }: ToolbarProps) {
           ) : (
             <>
               <Link href="/login" passHref>
-                <RippleButton className="font-medium transition-all duration-300 hover:bg-neutral-800/90">
+                <RippleButton className="font-medium text-neutral-100 transition-all duration-300 hover:bg-neutral-800/90">
                   Sign In
                 </RippleButton>
               </Link>
