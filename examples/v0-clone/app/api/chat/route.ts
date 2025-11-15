@@ -154,6 +154,7 @@ export async function POST(request: NextRequest) {
         chat = await v0.chats.create({
           message,
           responseMode: "experimental_stream",
+          // projectId: "",
           modelConfiguration: {
             thinking: true,
             imageGenerations: true

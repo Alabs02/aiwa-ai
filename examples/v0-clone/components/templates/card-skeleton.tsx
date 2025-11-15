@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProjectCardSkeleton() {
+export function TemplateCardSkeleton() {
   return (
     <div className="block overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900">
       {/* Preview Skeleton */}
@@ -26,11 +26,11 @@ export function ProjectCardSkeleton() {
   );
 }
 
-export function FeaturedProjectsSkeleton({ count = 6 }: { count?: number }) {
+export function FeaturedTemplatesSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <ProjectCardSkeleton key={i} />
+        <TemplateCardSkeleton key={i} />
       ))}
     </div>
   );

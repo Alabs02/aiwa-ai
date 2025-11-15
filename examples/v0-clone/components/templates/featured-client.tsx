@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Search, X } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { ProjectCardSkeleton } from "@/components/projects/card-skeleton";
+import { TemplateCardSkeleton } from "@/components/templates/card-skeleton";
 
 type VisibilityFilter = "all" | "public" | "private" | "team";
 
@@ -218,7 +218,7 @@ export function FeaturedClient({
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <ProjectCardSkeleton key={i} />
+              <TemplateCardSkeleton key={i} />
             ))}
           </div>
         ) : chats.length === 0 ? (
