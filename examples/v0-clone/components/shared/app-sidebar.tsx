@@ -123,9 +123,9 @@ export function AppSidebar({ className }: AppSidebarProps) {
     setIsSearchOpen(true);
   };
 
-  // Handle featured projects navigation
+  // Handle featured templates navigation
   const handleFeaturedProjects = () => {
-    router.push("/projects");
+    router.push("/templates");
   };
 
   // Format chat display name
@@ -238,7 +238,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
               )}
             </Tooltip>
 
-            {/* Featured Projects Button */}
+            {/* Featured Templates Button */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -254,13 +254,13 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 >
                   <Folder className="h-5 w-5 shrink-0" />
                   {!isCollapsed && (
-                    <span className="font-medium">Featured Projects</span>
+                    <span className="font-medium">Featured Templates</span>
                   )}
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
                 <TooltipContent side="right" className="font-medium">
-                  Featured Projects
+                  Featured Templates
                 </TooltipContent>
               )}
             </Tooltip>

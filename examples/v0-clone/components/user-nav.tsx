@@ -16,7 +16,8 @@ import {
   IconLayoutGrid,
   IconMessages,
   IconSettings,
-  IconCreditCard
+  IconCreditCard,
+  IconFolders
 } from "@tabler/icons-react";
 import { Session } from "next-auth";
 
@@ -64,8 +65,14 @@ export function UserNav({ session }: UserNavProps) {
           <>
             <DropdownMenuItem asChild>
               <a href="/projects" className="font-button cursor-pointer">
-                <IconLayoutGrid className="mr-2 size-4 lg:size-5" />
+                <IconFolders className="mr-2 size-4 lg:size-5" />
                 <span>Projects</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/templates" className="font-button cursor-pointer">
+                <IconLayoutGrid className="mr-2 size-4 lg:size-5" />
+                <span>Templates</span>
               </a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>

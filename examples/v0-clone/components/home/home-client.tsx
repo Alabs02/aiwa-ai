@@ -33,7 +33,7 @@ import { NavBar, Toolbar } from "@/components/shared";
 import { GL } from "@/components/gl";
 import { Leva } from "leva";
 import { suggestions } from "../constants/suggestions";
-import { FeaturedProjects } from "@/components/projects/featured";
+import { FeaturedTemplates } from "@/components/templates/featured";
 import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -592,9 +592,9 @@ export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
               </div>
             </div>
 
-            {/* Featured Projects Section */}
+            {/* Featured Templates Section */}
             <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
-              <FeaturedProjects isAuthenticated={isAuthenticated} />
+              <FeaturedTemplates isAuthenticated={isAuthenticated} />
             </div>
           </main>
         </div>

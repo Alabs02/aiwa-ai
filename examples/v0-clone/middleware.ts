@@ -54,7 +54,11 @@ export async function middleware(request: NextRequest) {
     }
 
     // Redirect protected pages to login
-    if (["/chats", "/projects"].some((path) => pathname.startsWith(path))) {
+    if (
+      ["/chats", "/projects", "/templates"].some((path) =>
+        pathname.startsWith(path)
+      )
+    ) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 

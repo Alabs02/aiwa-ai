@@ -1,4 +1,4 @@
-import { FeaturedClient } from "@/components/projects/featured-client";
+import { FeaturedClient } from "@/components/templates/featured-client";
 import { SidebarLayout } from "@/components/shared/sidebar-layout";
 import { NavBar } from "@/components/shared";
 import { Suspense } from "react";

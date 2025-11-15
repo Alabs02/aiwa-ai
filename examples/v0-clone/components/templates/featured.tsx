@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader2, User } from "lucide-react";
-import { FeaturedProjectsSkeleton } from "./card-skeleton";
+import { Loader2 } from "lucide-react";
+import { FeaturedTemplatesSkeleton } from "./card-skeleton";
 
 type VisibilityFilter = "all" | "public" | "private" | "team";
 
@@ -34,7 +34,7 @@ interface FeaturedProjectsProps {
   isAuthenticated?: boolean;
 }
 
-export function FeaturedProjects({
+export function FeaturedTemplates({
   isAuthenticated = false
 }: FeaturedProjectsProps) {
   const [activeFilter, setActiveFilter] = useState<VisibilityFilter>("all");
@@ -117,7 +117,7 @@ export function FeaturedProjects({
       {/* Header */}
       <div className="mb-8">
         <h2 className="font-heading mb-2 text-3xl font-bold text-white md:text-4xl">
-          Featured Projects
+          From the Community
         </h2>
         <p className="font-body text-neutral-400">
           Discover what the community is building with Aiwa
@@ -145,7 +145,7 @@ export function FeaturedProjects({
 
       {/* Loading State with Skeletons */}
       {isLoading ? (
-        <FeaturedProjectsSkeleton count={6} />
+        <FeaturedTemplatesSkeleton count={6} />
       ) : chats.length === 0 ? (
         <div className="py-20 text-center">
           <p className="font-body text-lg text-neutral-400">
@@ -157,7 +157,7 @@ export function FeaturedProjects({
           {/* Grid */}
           <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {chats.map((chat) => (
-              <ProjectCard key={chat.id} chat={chat} />
+              <TemplateCard key={chat.id} chat={chat} />
             ))}
           </div>
 
@@ -234,7 +234,7 @@ function getUserInitials(chat: FeaturedChat): string {
     .slice(0, 2);
 }
 
-function ProjectCard({ chat }: { chat: FeaturedChat }) {
+function TemplateCard({ chat }: { chat: FeaturedChat }) {
   const [imageError, setImageError] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
 

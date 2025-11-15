@@ -75,10 +75,10 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     },
     {
       icon: Folder,
-      label: "Projects",
+      label: "Templates",
       action: () => {
         onOpenChange(false);
-        router.push("/projects");
+        router.push("/templates");
       }
     }
   ];
