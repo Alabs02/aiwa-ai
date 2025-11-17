@@ -10,17 +10,42 @@ import {
   PreviewLoadingAnimation,
   CodeGenerationAnimation
 } from "@/components/ai-elements/preview-loading-animations";
+import { CodeViewer } from "@/components/ai-elements/code-viewer";
+import { StreamingCodePreview } from "@/components/ai-elements/streaming-code-preview";
 import { GitHubExportDialog } from "@/components/chat/github-export-dialog";
 import { RefreshCw, Maximize, Minimize, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useChatStore } from "@/components/home/home-client.store";
 
+// Support both v0 API format and legacy format
+interface V0ApiFile {
+  object: "file";
+  name: string;
+  content: string;
+  locked: boolean;
+}
+
+interface LegacyFileItem {
+  lang: string;
+  meta: {
+    fileName: string;
+  };
+  source: string;
+}
+
+type FileItem = V0ApiFile | LegacyFileItem;
+
 interface Chat {
   id: string;
   demo?: string;
   url?: string;
   title?: string;
+  files?: FileItem[];
+  latestVersion?: {
+    demoUrl?: string;
+    files?: V0ApiFile[];
+  };
 }
 
 interface PreviewPanelProps {
@@ -37,6 +62,23 @@ interface PreviewPanelProps {
   }>;
 }
 
+// Get language from file path for v0 API files
+const getLanguageFromPath = (path: string): string => {
+  const ext = path.split(".").pop()?.toLowerCase() || "";
+  const extMap: Record<string, string> = {
+    ts: "typescript",
+    tsx: "typescriptreact",
+    js: "javascript",
+    jsx: "javascriptreact",
+    py: "python",
+    json: "json",
+    css: "css",
+    html: "html",
+    md: "markdown"
+  };
+  return extMap[ext] || "plaintext";
+};
+
 export function PreviewPanel({
   currentChat,
   isFullscreen,
@@ -46,9 +88,45 @@ export function PreviewPanel({
   isGenerating = false,
   consoleLogs = []
 }: PreviewPanelProps) {
-  const hasContent = !!currentChat?.demo;
+  // Get demo URL from either location
+  const demoUrl = currentChat?.demo || currentChat?.latestVersion?.demoUrl;
+  const hasContent = !!demoUrl;
+
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
   const { getSelectedProject } = useChatStore();
+
+  // Get files - prioritize latestVersion (v0 API format) over root files (legacy)
+  const allFiles: FileItem[] =
+    currentChat?.latestVersion?.files || currentChat?.files || [];
+
+  // Filter code files - check both v0 API and legacy formats
+  const codeFiles = allFiles.filter((file) => {
+    // Handle v0 API format
+    if ("object" in file && file.object === "file") {
+      const v0File = file as V0ApiFile;
+      const ext = v0File.name.split(".").pop()?.toLowerCase() || "";
+      return v0File.name && !ext.match(/^(png|jpg|jpeg|gif|svg|webp|ico)$/i);
+    }
+
+    // Handle legacy format
+    const legacyFile = file as LegacyFileItem;
+    return (
+      legacyFile.meta?.fileName &&
+      !legacyFile.lang.match(/^(png|jpg|jpeg|gif|svg|webp|ico)$/i)
+    );
+  });
+
+  console.log({
+    currentChat,
+    allFilesLength: allFiles.length,
+    codeFilesLength: codeFiles.length,
+    hasV0Files: !!currentChat?.latestVersion?.files,
+    v0FilesCount: currentChat?.latestVersion?.files?.length || 0,
+    hasLegacyFiles: !!currentChat?.files,
+    legacyFilesCount: currentChat?.files?.length || 0,
+    sampleFile: allFiles[0],
+    sampleCodeFile: codeFiles[0]
+  });
 
   const handleDownload = async () => {
     if (!currentChat?.id) return;
@@ -84,8 +162,8 @@ export function PreviewPanel({
   };
 
   const handleOpenExternal = () => {
-    if (!currentChat?.demo) return;
-    window.open(currentChat.demo, "_blank", "noopener,noreferrer");
+    if (!demoUrl) return;
+    window.open(demoUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleGitHubExport = () => {
@@ -123,6 +201,45 @@ export function PreviewPanel({
     </div>
   );
 
+  /**
+   * Determine code content based on generation state
+   * - During generation: Show StreamingCodePreview with current files
+   * - After generation: Show full CodeViewer
+   * - No files: Show empty state
+   */
+  const getCodeContent = () => {
+    // During generation - show streaming preview
+    if (isGenerating && codeFiles.length > 0) {
+      return <StreamingCodePreview files={codeFiles} />;
+    }
+
+    // After generation - show full code viewer
+    if (!isGenerating && codeFiles.length > 0) {
+      return (
+        <CodeViewer
+          files={codeFiles}
+          chatId={currentChat?.id}
+          chatTitle={currentChat?.title}
+        />
+      );
+    }
+
+    // During generation but no files yet - show animation
+    if (isGenerating) {
+      return <CodeGenerationAnimation />;
+      //  <PreviewLoadingAnimation />;
+    }
+
+    // No files available
+    return (
+      <div className="flex h-full items-center justify-center text-white/40">
+        <div className="text-center">
+          <p className="text-sm">No code files available</p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <div
@@ -132,7 +249,7 @@ export function PreviewPanel({
         )}
       >
         <WebPreview
-          defaultUrl={currentChat?.demo || ""}
+          defaultUrl={demoUrl || ""}
           onUrlChange={(url) => {
             console.log("Preview URL changed:", url);
           }}
@@ -157,7 +274,7 @@ export function PreviewPanel({
             <WebPreviewUrl
               readOnly
               placeholder="Your app will appear here..."
-              value={currentChat?.demo || ""}
+              value={demoUrl || ""}
             />
 
             <WebPreviewNavigationButton
@@ -183,19 +300,15 @@ export function PreviewPanel({
 
           <WebPreviewBody
             key={refreshKey}
-            iframeSrc={currentChat?.demo}
+            iframeSrc={demoUrl}
             loading={isGenerating ? <PreviewLoadingAnimation /> : undefined}
-            codeContent={
-              isGenerating ? (
-                <CodeGenerationAnimation />
-              ) : (
-                <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                  Code view will be available soon
-                </div>
-              )
-            }
+            codeContent={getCodeContent()}
           >
-            {!hasContent && !isGenerating ? getEmptyState() : null}
+            {!hasContent && !isGenerating ? (
+              getEmptyState()
+            ) : (
+              <PreviewLoadingAnimation />
+            )}
           </WebPreviewBody>
 
           {hasContent && <WebPreviewConsole logs={consoleLogs} />}

@@ -134,6 +134,7 @@ export const useChatStore = create<ChatStore>()(
         currentChatId: state.currentChatId,
         showChatInterface: state.showChatInterface,
         currentChat: state.currentChat,
+        isLoading: state.isLoading,
         isFullscreen: state.isFullscreen,
         refreshKey: state.refreshKey,
         activePanel: state.activePanel,

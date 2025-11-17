@@ -205,7 +205,7 @@ export function HomeClient() {
         throw new Error("No response body for streaming");
       }
 
-      setIsLoading(false);
+      // setIsLoading(false);
 
       // Add streaming assistant response
       addChatMessage({
@@ -299,7 +299,7 @@ export function HomeClient() {
         throw new Error("No response body for streaming");
       }
 
-      setIsLoading(false);
+      // setIsLoading(false);
 
       // Add streaming response
       addChatMessage({
@@ -366,7 +366,7 @@ export function HomeClient() {
 
   // FIXED: handleStreamingStarted - should set loading to false
   const handleStreamingStarted = () => {
-    setIsLoading(false);
+    setIsLoading(true);
   };
 
   const handleUseEnhancedPrompt = (prompt: string) => {
