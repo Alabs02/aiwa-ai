@@ -6,7 +6,7 @@ import {
   streamObject,
   createGateway
 } from "ai";
-import { getProjectEnvVars } from "@/lib/db/queries";
+import { getProjectEnvVarsByV0Id } from "@/lib/db/queries";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get project env vars
-    const envVars = await getProjectEnvVars({ projectId });
+    const envVars = await getProjectEnvVarsByV0Id({ v0ProjectId: projectId });
     const gatewayKey = envVars.find(
       (v) => v.key === "AI_GATEWAY_API_KEY"
     )?.value;
