@@ -9,8 +9,6 @@ import {
 } from "ai";
 import { getProjectEnvVarsByV0Id } from "@/lib/db/queries";
 
-export const runtime = "edge";
-
 function parsePrimitive(desc: string): z.ZodTypeAny {
   let s = desc.trim();
   const opt = s.endsWith("?");
