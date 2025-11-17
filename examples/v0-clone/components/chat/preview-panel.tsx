@@ -13,7 +13,7 @@ import {
 import { GitHubExportDialog } from "@/components/chat/github-export-dialog";
 import { RefreshCw, Maximize, Minimize, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useChatStore } from "@/components/home/home-client.store";
 
 interface Chat {
@@ -69,10 +69,7 @@ export function PreviewPanel({
         throw new Error("Download failed");
       }
 
-      // Get the blob from the response
       const blob = await response.blob();
-
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -80,12 +77,9 @@ export function PreviewPanel({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Clean up the URL object
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download error:", error);
-      // Optional: Add toast notification for user feedback
     }
   };
 
@@ -166,7 +160,6 @@ export function PreviewPanel({
               value={currentChat?.demo || ""}
             />
 
-            {/* GitHub Export Button */}
             <WebPreviewNavigationButton
               onClick={handleGitHubExport}
               tooltip="Export to GitHub"
@@ -209,7 +202,6 @@ export function PreviewPanel({
         </WebPreview>
       </div>
 
-      {/* GitHub Export Dialog */}
       <GitHubExportDialog
         open={githubDialogOpen}
         onOpenChange={setGithubDialogOpen}
