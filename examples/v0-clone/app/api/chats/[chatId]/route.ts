@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "v0-sdk";
 import { auth } from "@/app/(auth)/auth";
-import { getChatOwnership } from "@/lib/db/queries";
+import {
+  getChatOwnership,
+  updateChatName,
+  deleteChatOwnership
+} from "@/lib/db/queries";
 
 // Create v0 client with custom baseUrl if V0_API_URL is set
 const v0 = createClient(
@@ -59,6 +63,156 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Failed to fetch chat details",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/chats/[chatId] - Rename chat
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ chatId: string }> }
+) {
+  try {
+    const session = await auth();
+
+    // Must be authenticated to update chat
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const { chatId } = await params;
+    const body = await request.json();
+    const { name, privacy } = body;
+
+    // Check if chat exists and user owns it
+    const ownership = await getChatOwnership({ v0ChatId: chatId });
+
+    if (!ownership) {
+      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+    }
+
+    // Verify ownership
+    if (ownership.user_id !== session.user.id) {
+      return NextResponse.json(
+        { error: "You do not have permission to modify this chat" },
+        { status: 403 }
+      );
+    }
+
+    // Update chat using v0 SDK
+    const updateData: { name?: string; privacy?: string } = {};
+    if (name !== undefined) updateData.name = name;
+    if (privacy !== undefined) updateData.privacy = privacy;
+
+    // Validate privacy if provided
+    if (
+      privacy &&
+      !["private", "public", "team", "team-edit", "unlisted"].includes(privacy)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid privacy value" },
+        { status: 400 }
+      );
+    }
+
+    const updatedChat = await v0.chats.update({
+      chatId,
+      ...(name && { name }),
+      ...(privacy && {
+        privacy: privacy as
+          | "private"
+          | "public"
+          | "team"
+          | "team-edit"
+          | "unlisted"
+      })
+    });
+    // Update local database with title if name was changed
+    if (name !== undefined) {
+      await updateChatName({
+        v0ChatId: chatId,
+        title: name
+      });
+    }
+
+    console.log("Chat updated:", {
+      chatId,
+      name,
+      privacy,
+      userId: session.user.id
+    });
+
+    return NextResponse.json(updatedChat);
+  } catch (error) {
+    console.error("Error updating chat:", error);
+
+    return NextResponse.json(
+      {
+        error: "Failed to update chat",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/chats/[chatId] - Delete chat
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ chatId: string }> }
+) {
+  try {
+    const session = await auth();
+
+    // Must be authenticated to delete chat
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const { chatId } = await params;
+
+    // Check if chat exists and user owns it
+    const ownership = await getChatOwnership({ v0ChatId: chatId });
+
+    if (!ownership) {
+      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+    }
+
+    // Verify ownership
+    if (ownership.user_id !== session.user.id) {
+      return NextResponse.json(
+        { error: "You do not have permission to delete this chat" },
+        { status: 403 }
+      );
+    }
+
+    // Delete chat using v0 SDK
+    const result = await v0.chats.delete({ chatId });
+
+    // Delete local database record
+    await deleteChatOwnership({ v0ChatId: chatId });
+
+    console.log("Chat deleted:", {
+      chatId,
+      userId: session.user.id
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error deleting chat:", error);
+
+    return NextResponse.json(
+      {
+        error: "Failed to delete chat",
         details: error instanceof Error ? error.message : "Unknown error"
       },
       { status: 500 }
