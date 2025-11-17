@@ -94,7 +94,32 @@ const DEFAULT_PROVIDER_OPTIONS = {
   }
 };
 
+// CORS headers helper - allows all origins
+function getCorsHeaders(origin: string | null) {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400" // 24 hours
+  };
+}
+
+// Handle OPTIONS preflight request
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: getCorsHeaders(origin)
+    }
+  );
+}
+
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  const corsHeaders = getCorsHeaders(origin);
+
   try {
     const body = await request.json();
     const projectId: string | undefined = body.projectId;
@@ -103,7 +128,7 @@ export async function POST(request: NextRequest) {
     if (!projectId || !options) {
       return NextResponse.json(
         { error: "Missing projectId or options" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
     const envVars = await getProjectEnvVarsByV0Id({ v0ProjectId: projectId });
@@ -113,7 +138,7 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       return NextResponse.json(
         { error: "AI_GATEWAY_API_KEY not configured" },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
     const gateway = createGateway({ apiKey });
@@ -135,7 +160,7 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json(
         { error: "Missing required schema for object generation/streaming" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
     const fallbackModels: string[] =
@@ -165,18 +190,31 @@ export async function POST(request: NextRequest) {
         switch (method) {
           case "generateText": {
             const result = await generateText(requestOptions);
-            return NextResponse.json(result);
+            return NextResponse.json(result, { headers: corsHeaders });
           }
           case "generateObject": {
             const result = await generateObject(requestOptions);
-            return NextResponse.json(result);
+            return NextResponse.json(result, { headers: corsHeaders });
           }
           case "streamText": {
             const streamResult = await streamText(requestOptions);
-            if ((streamResult as any).toTextStreamResponse)
-              return (streamResult as any).toTextStreamResponse();
-            if ((streamResult as any).toUIMessageStreamResponse)
-              return (streamResult as any).toUIMessageStreamResponse();
+            if ((streamResult as any).toTextStreamResponse) {
+              const response = (streamResult as any).toTextStreamResponse();
+              // Add CORS headers to streaming response
+              Object.entries(corsHeaders).forEach(([key, value]) => {
+                response.headers.set(key, value);
+              });
+              return response;
+            }
+            if ((streamResult as any).toUIMessageStreamResponse) {
+              const response = (
+                streamResult as any
+              ).toUIMessageStreamResponse();
+              Object.entries(corsHeaders).forEach(([key, value]) => {
+                response.headers.set(key, value);
+              });
+              return response;
+            }
             const asyncIter: AsyncIterable<string> = (streamResult as any)
               .textStream;
             const rs = new ReadableStream({
@@ -191,15 +229,30 @@ export async function POST(request: NextRequest) {
               }
             });
             return new Response(rs, {
-              headers: { "Content-Type": "text/plain; charset=utf-8" }
+              headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                ...corsHeaders
+              }
             });
           }
           case "streamObject": {
             const streamResult = await streamObject(requestOptions);
-            if ((streamResult as any).toTextStreamResponse)
-              return (streamResult as any).toTextStreamResponse();
-            if ((streamResult as any).toUIMessageStreamResponse)
-              return (streamResult as any).toUIMessageStreamResponse();
+            if ((streamResult as any).toTextStreamResponse) {
+              const response = (streamResult as any).toTextStreamResponse();
+              Object.entries(corsHeaders).forEach(([key, value]) => {
+                response.headers.set(key, value);
+              });
+              return response;
+            }
+            if ((streamResult as any).toUIMessageStreamResponse) {
+              const response = (
+                streamResult as any
+              ).toUIMessageStreamResponse();
+              Object.entries(corsHeaders).forEach(([key, value]) => {
+                response.headers.set(key, value);
+              });
+              return response;
+            }
             const asyncIter: AsyncIterable<any> =
               (streamResult as any).partialObjectStream ??
               (streamResult as any).elementStream;
@@ -217,13 +270,16 @@ export async function POST(request: NextRequest) {
               }
             });
             return new Response(rs, {
-              headers: { "Content-Type": "application/json; charset=utf-8" }
+              headers: {
+                "Content-Type": "application/json; charset=utf-8",
+                ...corsHeaders
+              }
             });
           }
           default:
             return NextResponse.json(
               { error: "Invalid method" },
-              { status: 400 }
+              { status: 400, headers: corsHeaders }
             );
         }
       } catch (error) {
@@ -235,7 +291,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "AI request failed" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
