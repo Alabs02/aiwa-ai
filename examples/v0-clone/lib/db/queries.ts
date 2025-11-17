@@ -965,6 +965,31 @@ export async function getProjectEnvVars({
   }
 }
 
+export async function getProjectEnvVarsByV0Id({
+  v0ProjectId
+}: {
+  v0ProjectId: string;
+}): Promise<ProjectEnvVar[]> {
+  try {
+    const project = await db.query.projects.findFirst({
+      where: eq(projects.v0_project_id, v0ProjectId)
+    });
+
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    return await db
+      .select()
+      .from(project_env_vars)
+      .where(eq(project_env_vars.project_id, project.id))
+      .orderBy(asc(project_env_vars.key));
+  } catch (error) {
+    console.error("Failed to get project env vars by v0 ID:", error);
+    throw error;
+  }
+}
+
 export async function updateProjectEnvVar({
   envVarId,
   value
