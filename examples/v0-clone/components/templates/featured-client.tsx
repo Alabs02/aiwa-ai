@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader, Search, X } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { TemplateCardSkeleton } from "@/components/templates/card-skeleton";
 
@@ -147,12 +147,10 @@ export function FeaturedClient({
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-heading mb-2 text-4xl font-bold text-white md:text-5xl">
-            Projects
+            Templates
           </h1>
           <p className="font-body text-lg text-neutral-400">
-            {isAuthenticated
-              ? "Discover and manage your projects"
-              : "Explore what the community is building"}
+            Explore what the community is building
           </p>
         </div>
 
@@ -254,7 +252,7 @@ export function FeaturedClient({
                 >
                   {isLoadingMore ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       Loading...
                     </>
                   ) : (
@@ -347,7 +345,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
           <div className="[&>iframe]:scrollbar-hide project-iframe-container relative h-full w-full overflow-hidden">
             {!iframeLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
-                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
+                <Loader className="h-6 w-6 animate-spin text-neutral-600" />
               </div>
             )}
             <iframe

@@ -13,7 +13,7 @@ import {
   Clock,
   Folder,
   MessageSquare,
-  Loader2
+  Loader
 } from "lucide-react";
 
 interface Chat {
@@ -210,7 +210,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               autoFocus
             />
             {isLoading && (
-              <Loader2 className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin text-white/40" />
+              <Loader className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin text-white/40" />
             )}
           </div>
         </div>
@@ -310,7 +310,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             {/* Loading State */}
             {isLoading && searchResults.length === 0 && (
               <div className="px-4 py-8 text-center">
-                <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-white/40" />
+                <Loader className="mx-auto mb-3 h-8 w-8 animate-spin text-white/40" />
                 <p className="text-sm text-white/60">Searching...</p>
               </div>
             )}

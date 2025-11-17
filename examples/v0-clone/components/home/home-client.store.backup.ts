@@ -13,19 +13,6 @@ interface CurrentChat {
   demo?: string;
 }
 
-interface Project {
-  id: string;
-  v0_project_id: string;
-  name: string;
-  description?: string | null;
-  icon?: string | null;
-  instructions?: string | null;
-  privacy: string;
-  vercel_project_id?: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 interface ChatState {
   currentChatId: string | null;
   showChatInterface: boolean;
@@ -35,10 +22,6 @@ interface ChatState {
   isFullscreen: boolean;
   refreshKey: number;
   activePanel: "chat" | "preview";
-  selectedProjectId: string | null;
-  projects: Project[];
-  envVarsValid: boolean;
-  showEnvDialog: boolean;
 }
 
 interface ChatActions {
@@ -52,17 +35,12 @@ interface ChatActions {
   setIsFullscreen: (fullscreen: boolean) => void;
   setRefreshKey: (key: number | ((prev: number) => number)) => void;
   setActivePanel: (panel: "chat" | "preview") => void;
-  setSelectedProjectId: (id: string | null) => void;
-  setProjects: (projects: Project[]) => void;
-  setEnvVarsValid: (valid: boolean) => void;
-  setShowEnvDialog: (show: boolean) => void;
   resetChatState: () => void;
 }
 
 interface ChatGetters {
   hasCurrentChatId: () => boolean;
   getCurrentChatId: () => string | null;
-  getSelectedProject: () => Project | null;
 }
 
 type ChatStore = ChatState & ChatActions & ChatGetters;
@@ -75,11 +53,7 @@ const initialState: ChatState = {
   isLoading: false,
   isFullscreen: false,
   refreshKey: 0,
-  activePanel: "chat",
-  selectedProjectId: null,
-  projects: [],
-  envVarsValid: false,
-  showEnvDialog: false
+  activePanel: "chat"
 };
 
 export const useChatStore = create<ChatStore>()(
@@ -87,49 +61,45 @@ export const useChatStore = create<ChatStore>()(
     (set, get) => ({
       ...initialState,
 
+      // Chat ID management
       setCurrentChatId: (chatId) => set({ currentChatId: chatId }),
       clearCurrentChatId: () => set({ currentChatId: null }),
       getCurrentChatId: () => get().currentChatId,
       hasCurrentChatId: () => get().currentChatId !== null,
 
+      // Chat interface management
       setShowChatInterface: (show) => set({ showChatInterface: show }),
 
+      // Chat history management
       setChatHistory: (history) => set({ chatHistory: history }),
       addChatMessage: (message) =>
         set((state) => ({ chatHistory: [...state.chatHistory, message] })),
 
+      // Current chat management
       setCurrentChat: (chat) => set({ currentChat: chat }),
 
+      // Loading state
       setIsLoading: (loading) => set({ isLoading: loading }),
 
+      // Fullscreen state
       setIsFullscreen: (fullscreen) => set({ isFullscreen: fullscreen }),
 
+      // Refresh key
       setRefreshKey: (key) =>
         set((state) => ({
           refreshKey: typeof key === "function" ? key(state.refreshKey) : key
         })),
 
+      // Active panel
       setActivePanel: (panel) => set({ activePanel: panel }),
 
-      setSelectedProjectId: (id) => set({ selectedProjectId: id }),
-
-      setProjects: (projects) => set({ projects }),
-
-      setEnvVarsValid: (valid) => set({ envVarsValid: valid }),
-
-      setShowEnvDialog: (show) => set({ showEnvDialog: show }),
-
-      getSelectedProject: () => {
-        const { selectedProjectId, projects } = get();
-        if (!selectedProjectId) return null;
-        return projects.find((p) => p.id === selectedProjectId) || null;
-      },
-
+      // Reset all chat state
       resetChatState: () => set(initialState)
     }),
     {
       name: "chat-storage",
       storage: createJSONStorage(() => sessionStorage),
+      // Only persist critical state, not streams
       partialize: (state) => ({
         currentChatId: state.currentChatId,
         showChatInterface: state.showChatInterface,
@@ -137,14 +107,12 @@ export const useChatStore = create<ChatStore>()(
         isFullscreen: state.isFullscreen,
         refreshKey: state.refreshKey,
         activePanel: state.activePanel,
-        selectedProjectId: state.selectedProjectId,
-        projects: state.projects,
-        envVarsValid: state.envVarsValid,
+        // Don't persist chatHistory with streams
         chatHistory: state.chatHistory.map((msg) => ({
           type: msg.type,
           content: msg.content,
-          isStreaming: false,
-          stream: null
+          isStreaming: false, // Reset streaming state on persistence
+          stream: null // Don't persist streams
         }))
       })
     }

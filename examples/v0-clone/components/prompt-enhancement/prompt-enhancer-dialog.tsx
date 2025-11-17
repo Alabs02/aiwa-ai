@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   Sparkles,
-  Loader2,
+  Loader,
   Copy,
   Check,
   BookmarkPlus,
@@ -156,8 +156,8 @@ export function PromptEnhancerDialog({
           {/* Header */}
           <div className="border-b border-white/[0.08] p-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-gradient-to-br from-white/20 to-purple-50/20 p-2">
-                <Wand2 className="h-5 w-5 text-white" />
+              <div className="from-primary/20 to-primary-foreground/20 rounded-lg bg-gradient-to-br p-2">
+                <Wand2 className="text-primary-foreground h-5 w-5" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">
@@ -222,11 +222,11 @@ export function PromptEnhancerDialog({
               <Button
                 onClick={handleEnhance}
                 disabled={!prompt.trim() || isEnhancing}
-                className="w-full"
+                className="text-background w-full bg-neutral-100 hover:bg-neutral-200"
               >
                 {isEnhancing ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
                     Enhancing...
                   </>
                 ) : (
@@ -301,7 +301,11 @@ export function PromptEnhancerDialog({
               >
                 Cancel
               </Button>
-              <Button onClick={handleUse} disabled={!prompt.trim()}>
+              <Button
+                className="text-background bg-neutral-100 hover:bg-neutral-200"
+                onClick={handleUse}
+                disabled={!prompt.trim()}
+              >
                 Use Prompt
               </Button>
             </div>

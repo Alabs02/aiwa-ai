@@ -14,7 +14,7 @@ import {
   Trash2,
   Copy,
   Check,
-  Loader2,
+  Loader,
   Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
@@ -180,8 +180,8 @@ export function PromptLibraryDialog({
           {/* Header */}
           <div className="border-b border-white/[0.08] p-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 p-2">
-                <Library className="h-5 w-5 text-purple-400" />
+              <div className="from-primary/20 to-primary-foreground/20 rounded-lg bg-gradient-to-br p-2">
+                <Library className="text-primary-foreground h-5 w-5" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">
@@ -233,7 +233,7 @@ export function PromptLibraryDialog({
               <ScrollArea className="h-[calc(85vh-240px)]">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-white/40" />
+                    <Loader className="h-8 w-8 animate-spin text-white/40" />
                   </div>
                 ) : prompts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center px-4 py-12 text-center">

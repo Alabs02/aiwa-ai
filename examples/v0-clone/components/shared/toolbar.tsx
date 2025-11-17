@@ -6,10 +6,9 @@ import { motion } from "framer-motion";
 
 import Link from "next/link";
 import Image from "next/image";
-import { MobileMenu } from "./mobile-menu";
 import { UserNav } from "@/components/user-nav";
 import { RippleButton } from "@/components/ui/ripple-button";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface ToolbarProps {
   className?: string;
@@ -93,13 +92,13 @@ export function Toolbar({ className = "" }: ToolbarProps) {
           ) : (
             <>
               <Link href="/login" passHref>
-                <RippleButton className="hover:border-primary/35 border-primary-foreground/15 bg-primary/10 hover:bg-primary/15 font-medium transition-all duration-300">
+                <RippleButton className="text-foreground font-medium transition-all duration-300">
                   Sign In
                 </RippleButton>
               </Link>
 
               <Link href="/register" passHref>
-                <RippleButton className="bg-primary hover:bg-primary/90 font-medium text-white transition-all duration-300">
+                <RippleButton className="text-background bg-neutral-100 font-medium transition-all duration-300 hover:bg-neutral-200">
                   Sign Up
                 </RippleButton>
               </Link>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { FeaturedTemplatesSkeleton } from "./card-skeleton";
 
 type VisibilityFilter = "all" | "public" | "private" | "team";
@@ -171,7 +171,7 @@ export function FeaturedTemplates({
               >
                 {isLoadingMore ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                     Loading...
                   </>
                 ) : (
@@ -266,7 +266,7 @@ function TemplateCard({ chat }: { chat: FeaturedChat }) {
           <div className="project-iframe-container relative h-full w-full overflow-hidden">
             {!iframeLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
-                <Loader2 className="h-6 w-6 animate-spin text-neutral-600" />
+                <Loader className="h-6 w-6 animate-spin text-neutral-600" />
               </div>
             )}
             <iframe

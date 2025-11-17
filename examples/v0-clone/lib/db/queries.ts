@@ -21,11 +21,15 @@ import {
   anonymous_chat_logs,
   github_exports,
   prompt_library,
+  projects,
+  project_env_vars,
   type User,
   type ChatOwnership,
   type AnonymousChatLog,
   type GitHubExport,
-  type PromptLibraryItem
+  type PromptLibraryItem,
+  type Project,
+  type ProjectEnvVar
 } from "./schema";
 import { generateUUID } from "../utils";
 import { generateHashedPassword } from "./utils";
@@ -35,6 +39,11 @@ import db from "./connection";
 export type ChatOwnershipWithUser = ChatOwnership & {
   owner_email?: string;
   owner_name?: string;
+};
+
+export type ProjectWithEnvVars = Project & {
+  env_vars: ProjectEnvVar[];
+  chat_count?: number;
 };
 
 // Featured chats queries with user information
@@ -753,6 +762,350 @@ export async function getUserPromptStats({
     };
   } catch (error) {
     console.error("Failed to get user prompt stats");
+    throw error;
+  }
+}
+
+export async function createProject({
+  userId,
+  v0ProjectId,
+  name,
+  description,
+  icon,
+  instructions,
+  privacy,
+  vercelProjectId
+}: {
+  userId: string;
+  v0ProjectId: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  instructions?: string;
+  privacy?: string;
+  vercelProjectId?: string;
+}): Promise<Project> {
+  try {
+    const [result] = await db
+      .insert(projects)
+      .values({
+        user_id: userId,
+        v0_project_id: v0ProjectId,
+        name,
+        description: description || null,
+        icon: icon || null,
+        instructions: instructions || null,
+        privacy: privacy || "private",
+        vercel_project_id: vercelProjectId || null
+      })
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to create project in database");
+    throw error;
+  }
+}
+
+export async function getProjectsByUserId({
+  userId
+}: {
+  userId: string;
+}): Promise<Project[]> {
+  try {
+    return await db
+      .select()
+      .from(projects)
+      .where(eq(projects.user_id, userId))
+      .orderBy(desc(projects.created_at));
+  } catch (error) {
+    console.error("Failed to get user projects from database");
+    throw error;
+  }
+}
+
+export async function getProjectById({
+  projectId,
+  userId
+}: {
+  projectId: string;
+  userId: string;
+}): Promise<Project | undefined> {
+  try {
+    const [result] = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.id, projectId), eq(projects.user_id, userId)));
+
+    return result;
+  } catch (error) {
+    console.error("Failed to get project by ID from database");
+    throw error;
+  }
+}
+
+export async function getProjectByV0Id({
+  v0ProjectId,
+  userId
+}: {
+  v0ProjectId: string;
+  userId: string;
+}): Promise<Project | undefined> {
+  try {
+    const [result] = await db
+      .select()
+      .from(projects)
+      .where(
+        and(
+          eq(projects.v0_project_id, v0ProjectId),
+          eq(projects.user_id, userId)
+        )
+      );
+
+    return result;
+  } catch (error) {
+    console.error("Failed to get project by v0 ID from database");
+    throw error;
+  }
+}
+
+export async function updateProject({
+  projectId,
+  userId,
+  updates
+}: {
+  projectId: string;
+  userId: string;
+  updates: Partial<{
+    name: string;
+    description: string | null;
+    icon: string | null;
+    instructions: string | null;
+    privacy: string;
+    vercel_project_id: string | null;
+  }>;
+}): Promise<Project> {
+  try {
+    const [result] = await db
+      .update(projects)
+      .set({
+        ...updates,
+        updated_at: new Date()
+      })
+      .where(and(eq(projects.id, projectId), eq(projects.user_id, userId)))
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to update project in database");
+    throw error;
+  }
+}
+
+export async function deleteProject({
+  projectId,
+  userId
+}: {
+  projectId: string;
+  userId: string;
+}): Promise<void> {
+  try {
+    await db
+      .delete(projects)
+      .where(and(eq(projects.id, projectId), eq(projects.user_id, userId)));
+  } catch (error) {
+    console.error("Failed to delete project from database");
+    throw error;
+  }
+}
+
+export async function createProjectEnvVar({
+  projectId,
+  v0EnvVarId,
+  key,
+  value
+}: {
+  projectId: string;
+  v0EnvVarId?: string;
+  key: string;
+  value: string;
+}): Promise<ProjectEnvVar> {
+  try {
+    const [result] = await db
+      .insert(project_env_vars)
+      .values({
+        project_id: projectId,
+        v0_env_var_id: v0EnvVarId || null,
+        key,
+        value
+      })
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to create project env var in database");
+    throw error;
+  }
+}
+
+export async function getProjectEnvVars({
+  projectId
+}: {
+  projectId: string;
+}): Promise<ProjectEnvVar[]> {
+  try {
+    return await db
+      .select()
+      .from(project_env_vars)
+      .where(eq(project_env_vars.project_id, projectId))
+      .orderBy(asc(project_env_vars.key));
+  } catch (error) {
+    console.error("Failed to get project env vars from database");
+    throw error;
+  }
+}
+
+export async function updateProjectEnvVar({
+  envVarId,
+  value
+}: {
+  envVarId: string;
+  value: string;
+}): Promise<ProjectEnvVar> {
+  try {
+    const [result] = await db
+      .update(project_env_vars)
+      .set({
+        value,
+        updated_at: new Date()
+      })
+      .where(eq(project_env_vars.id, envVarId))
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to update project env var in database");
+    throw error;
+  }
+}
+
+export async function deleteProjectEnvVar({
+  envVarId
+}: {
+  envVarId: string;
+}): Promise<void> {
+  try {
+    await db.delete(project_env_vars).where(eq(project_env_vars.id, envVarId));
+  } catch (error) {
+    console.error("Failed to delete project env var from database");
+    throw error;
+  }
+}
+
+export async function getProjectWithEnvVars({
+  projectId,
+  userId
+}: {
+  projectId: string;
+  userId: string;
+}): Promise<ProjectWithEnvVars | undefined> {
+  try {
+    const project = await getProjectById({ projectId, userId });
+    if (!project) return undefined;
+
+    const envVars = await getProjectEnvVars({ projectId });
+
+    return {
+      ...project,
+      env_vars: envVars
+    };
+  } catch (error) {
+    console.error("Failed to get project with env vars from database");
+    throw error;
+  }
+}
+
+export async function upsertProjectEnvVar({
+  projectId,
+  key,
+  value,
+  v0EnvVarId
+}: {
+  projectId: string;
+  key: string;
+  value: string;
+  v0EnvVarId?: string;
+}): Promise<ProjectEnvVar> {
+  try {
+    const existingVars = await db
+      .select()
+      .from(project_env_vars)
+      .where(
+        and(
+          eq(project_env_vars.project_id, projectId),
+          eq(project_env_vars.key, key)
+        )
+      );
+
+    if (existingVars.length > 0) {
+      const [result] = await db
+        .update(project_env_vars)
+        .set({
+          value,
+          v0_env_var_id: v0EnvVarId || existingVars[0].v0_env_var_id,
+          updated_at: new Date()
+        })
+        .where(eq(project_env_vars.id, existingVars[0].id))
+        .returning();
+      return result;
+    }
+
+    return await createProjectEnvVar({
+      projectId,
+      v0EnvVarId,
+      key,
+      value
+    });
+  } catch (error) {
+    console.error("Failed to upsert project env var in database");
+    throw error;
+  }
+}
+
+export async function getProjectsWithChatCount({
+  userId
+}: {
+  userId: string;
+}): Promise<ProjectWithEnvVars[]> {
+  try {
+    const userProjects = await getProjectsByUserId({ userId });
+
+    const projectsWithData = await Promise.all(
+      userProjects.map(async (project) => {
+        const envVars = await getProjectEnvVars({ projectId: project.id });
+
+        const [chatCountResult] = await db
+          .select({ count: count(chat_ownerships.id) })
+          .from(chat_ownerships)
+          .leftJoin(projects, eq(chat_ownerships.user_id, projects.user_id))
+          .where(
+            and(
+              eq(projects.id, project.id),
+              eq(chat_ownerships.user_id, userId)
+            )
+          );
+
+        return {
+          ...project,
+          env_vars: envVars,
+          chat_count: chatCountResult?.count || 0
+        };
+      })
+    );
+
+    return projectsWithData;
+  } catch (error) {
+    console.error("Failed to get projects with chat count from database");
     throw error;
   }
 }

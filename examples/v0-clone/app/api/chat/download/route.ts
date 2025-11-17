@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "v0-sdk";
+import { auth } from "@/app/(auth)/auth";
+import { getProjectEnvVars } from "@/lib/db/queries";
+import AdmZip from "adm-zip";
 
 const v0 = createClient(
   process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
@@ -7,9 +10,15 @@ const v0 = createClient(
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const chatId = searchParams.get("chatId");
     const versionId = searchParams.get("versionId");
+    const projectId = searchParams.get("projectId"); // Our internal param
     const format = searchParams.get("format") as "zip" | "tarball" | null;
     const includeDefaultFiles = searchParams.get("includeDefaultFiles");
 
@@ -22,41 +31,60 @@ export async function GET(request: NextRequest) {
 
     let targetVersionId = versionId;
 
-    // If no versionId provided, get the latest version
     if (!targetVersionId) {
       const versions = await v0.chats.findVersions({ chatId });
-
       if (!versions.data || versions.data.length === 0) {
         return NextResponse.json(
           { error: "No versions found for this chat" },
           { status: 404 }
         );
       }
-
-      // Get the latest version (first in the list)
       targetVersionId = versions.data[0].id;
     }
 
-    // Download the version
+    // Download from v0 - only pass supported params
     const downloadBuffer = await v0.chats.downloadVersion({
       chatId,
       versionId: targetVersionId,
-      ...(format && { format }),
+      format: "zip",
       ...(includeDefaultFiles && {
         includeDefaultFiles: includeDefaultFiles === "true"
       })
     });
 
-    // Determine content type and filename
-    const contentType =
-      format === "tarball" ? "application/x-tar" : "application/zip";
+    const zip = new AdmZip(Buffer.from(downloadBuffer as ArrayBuffer));
+
+    // Inject env vars if projectId provided
+    if (projectId) {
+      const envVars = await getProjectEnvVars({ projectId });
+
+      if (envVars.length > 0) {
+        const envLocal = envVars.map((v) => `${v.key}=${v.value}`).join("\n");
+        const envExample = envVars.map((v) => `${v.key}=`).join("\n");
+
+        zip.addFile(".env.local", Buffer.from(envLocal));
+        zip.addFile(".env.example", Buffer.from(envExample));
+
+        const gitignore = zip.getEntry(".gitignore");
+        if (gitignore) {
+          let content = gitignore.getData().toString("utf8");
+          if (!content.includes(".env.local")) {
+            content += "\n.env.local\n.env*.local\n";
+            zip.updateFile(".gitignore", Buffer.from(content));
+          }
+        } else {
+          zip.addFile(".gitignore", Buffer.from(".env.local\n.env*.local\n"));
+        }
+      }
+    }
+
+    const finalBuffer = zip.toBuffer();
     const extension = format === "tarball" ? "tar.gz" : "zip";
     const filename = `app-${chatId}-${targetVersionId}.${extension}`;
 
-    // Return the buffer with appropriate headers
-    return new Response(downloadBuffer as ArrayBuffer, {
+    return new Response(finalBuffer, {
       headers: {
-        "Content-Type": contentType,
+        "Content-Type": "application/zip",
         "Content-Disposition": `attachment; filename="${filename}"`,
         "Cache-Control": "no-cache"
       }

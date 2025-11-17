@@ -13,6 +13,11 @@ import {
 } from "@/lib/entitlements";
 import { ChatSDKError } from "@/lib/errors";
 
+// Create v0 client - will validate API key at runtime
+// const v0 = createClient({
+//   ...(process.env.V0_API_URL && { baseUrl: process.env.V0_API_URL }),
+// })
+
 const v0 = createClient(
   process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
 );
@@ -29,11 +34,13 @@ function getClientIP(request: NextRequest): string {
     return realIP;
   }
 
+  // Fallback to connection remote address or unknown
   return "unknown";
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate V0_API_KEY at runtime
     if (!process.env.V0_API_KEY) {
       return NextResponse.json(
         { error: "V0_API_KEY environment variable is not configured" },
@@ -52,7 +59,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Rate limiting
     if (session?.user?.id) {
+      // Authenticated user rate limiting
       const chatCount = await getChatCountByUserId({
         userId: session.user.id,
         differenceInHours: 24
@@ -67,10 +76,10 @@ export async function POST(request: NextRequest) {
         message,
         chatId,
         streaming,
-        projectId,
         userId: session.user.id
       });
     } else {
+      // Anonymous user rate limiting
       const clientIP = getClientIP(request);
       const chatCount = await getChatCountByIP({
         ipAddress: clientIP,
@@ -85,7 +94,6 @@ export async function POST(request: NextRequest) {
         message,
         chatId,
         streaming,
-        projectId,
         ip: clientIP
       });
     }
@@ -95,7 +103,9 @@ export async function POST(request: NextRequest) {
     let chat;
 
     if (chatId) {
+      // continue existing chat
       if (streaming) {
+        // Return streaming response for existing chat
         console.log("Sending streaming message to existing chat:", {
           chatId,
           message,
@@ -113,6 +123,7 @@ export async function POST(request: NextRequest) {
         });
         console.log("Streaming message sent to existing chat successfully");
 
+        // Return the stream directly
         return new Response(chat as ReadableStream<Uint8Array>, {
           headers: {
             "Content-Type": "text/event-stream",
@@ -121,6 +132,7 @@ export async function POST(request: NextRequest) {
           }
         });
       } else {
+        // Non-streaming response for existing chat
         chat = await v0.chats.sendMessage({
           chatId: chatId,
           message,
@@ -132,16 +144,17 @@ export async function POST(request: NextRequest) {
         });
       }
     } else {
+      // create new chat
       if (streaming) {
+        // Return streaming response
         console.log("Creating streaming chat with params:", {
           message,
-          projectId,
           responseMode: "experimental_stream"
         });
         chat = await v0.chats.create({
           message,
           responseMode: "experimental_stream",
-          ...(projectId && { projectId }),
+          // projectId: "",
           modelConfiguration: {
             thinking: true,
             imageGenerations: true
@@ -150,6 +163,7 @@ export async function POST(request: NextRequest) {
         });
         console.log("Streaming chat created successfully");
 
+        // Return the stream directly
         return new Response(chat as ReadableStream<Uint8Array>, {
           headers: {
             "Content-Type": "text/event-stream",
@@ -158,14 +172,14 @@ export async function POST(request: NextRequest) {
           }
         });
       } else {
+        // Use sync mode
         console.log("Creating sync chat with params:", {
           message,
-          projectId,
           responseMode: "sync"
         });
         chat = await v0.chats.create({
           message,
-          ...(projectId && { projectId }),
+          // projectId: "",
           responseMode: "sync",
           modelConfiguration: {
             thinking: true,
@@ -177,21 +191,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Type guard to ensure we have a ChatDetail and not a stream
     if (chat instanceof ReadableStream) {
       throw new Error("Unexpected streaming response");
     }
 
     const chatDetail = chat as ChatDetail;
 
+    // Create ownership mapping or anonymous log for new chat
     if (!chatId && chatDetail.id) {
       try {
         if (session?.user?.id) {
+          // Authenticated user - create ownership mapping
           await createChatOwnership({
             v0ChatId: chatDetail.id,
             userId: session.user.id
           });
           console.log("Chat ownership created:", chatDetail.id);
         } else {
+          // Anonymous user - log for rate limiting
           const clientIP = getClientIP(request);
           await createAnonymousChatLog({
             ipAddress: clientIP,
@@ -201,6 +219,7 @@ export async function POST(request: NextRequest) {
         }
       } catch (error) {
         console.error("Failed to create chat ownership/log:", error);
+        // Don't fail the request if database save fails
       }
     }
 
@@ -215,6 +234,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("V0 API Error:", error);
 
+    // Log more detailed error information
     if (error instanceof Error) {
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
