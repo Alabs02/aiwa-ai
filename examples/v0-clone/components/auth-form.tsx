@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader, Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps {
   type: "signin" | "signup";
@@ -70,10 +70,10 @@ export function AuthForm({ type }: AuthFormProps) {
 
       <Button
         type="submit"
-        className="!font-button w-full md:h-10"
+        className="!font-button text-background w-full bg-neutral-100 hover:bg-neutral-200 md:h-10"
         disabled={isPending}
       >
-        {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isPending && <Loader className="mr-2 h-4 w-4 animate-spin" />}
         {isPending
           ? type === "signin"
             ? "Signing in..."

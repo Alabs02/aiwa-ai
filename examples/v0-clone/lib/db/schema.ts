@@ -67,7 +67,6 @@ export const github_exports = pgTable("github_exports", {
 
 export type GitHubExport = InferSelectModel<typeof github_exports>;
 
-// Prompt library for saving and managing enhanced prompts
 export const prompt_library = pgTable("prompt_library", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   user_id: uuid("user_id")
@@ -88,3 +87,35 @@ export const prompt_library = pgTable("prompt_library", {
 });
 
 export type PromptLibraryItem = InferSelectModel<typeof prompt_library>;
+
+export const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  v0_project_id: varchar("v0_project_id", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  icon: varchar("icon", { length: 100 }),
+  instructions: text("instructions"),
+  privacy: varchar("privacy", { length: 20 }).notNull().default("private"),
+  vercel_project_id: varchar("vercel_project_id", { length: 255 }),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow()
+});
+
+export type Project = InferSelectModel<typeof projects>;
+
+export const project_env_vars = pgTable("project_env_vars", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  project_id: uuid("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  v0_env_var_id: varchar("v0_env_var_id", { length: 255 }),
+  key: varchar("key", { length: 255 }).notNull(),
+  value: text("value").notNull(),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow()
+});
+
+export type ProjectEnvVar = InferSelectModel<typeof project_env_vars>;

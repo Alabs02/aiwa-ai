@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  MessageSquare,
   MoreHorizontal,
   Edit2,
   Trash2,
@@ -15,6 +14,7 @@ import {
   Users,
   Lock
 } from "lucide-react";
+import { IconMessage } from "@tabler/icons-react";
 import {
   Select,
   SelectContent,
@@ -283,7 +283,7 @@ export function ChatSelector() {
           >
             <SelectValue placeholder="Select chat">
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
+                <IconMessage className="h-4 w-4" />
                 <span className="truncate">
                   {currentChat
                     ? getChatDisplayName(currentChat)
@@ -297,7 +297,7 @@ export function ChatSelector() {
               chats.slice(0, 15).map((chat) => (
                 <SelectItem key={chat.id} value={chat.id}>
                   <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
+                    <IconMessage className="h-4 w-4" />
                     <span className="truncate">{getChatDisplayName(chat)}</span>
                   </div>
                 </SelectItem>

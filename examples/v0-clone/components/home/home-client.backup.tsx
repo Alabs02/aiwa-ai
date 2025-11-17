@@ -30,8 +30,6 @@ import { PreviewPanel } from "@/components/chat/preview-panel";
 import { ResizableLayout } from "@/components/shared/resizable-layout";
 import { BottomToolbar } from "@/components/shared/bottom-toolbar";
 import { NavBar, Toolbar } from "@/components/shared";
-import { ProjectSelector } from "@/components/projects/project-selector";
-import { EnvVariablesDialog } from "@/components/projects/env-variables-dialog";
 import { GL } from "@/components/gl";
 import { Leva } from "leva";
 import { suggestions } from "../constants/suggestions";
@@ -42,16 +40,18 @@ import { cn } from "@/lib/utils";
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import { useSidebarCollapse } from "@/hooks/use-sidebar-collapse";
 import { useChatStore } from "./home-client.store";
-import { useSession } from "next-auth/react";
 
+// Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
 
+  // Reset UI when reset parameter is present
   useEffect(() => {
     const reset = searchParams.get("reset");
     if (reset === "true") {
       onReset();
 
+      // Remove the reset parameter from URL without triggering navigation
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete("reset");
       window.history.replaceState({}, "", newUrl.pathname);
@@ -61,7 +61,12 @@ function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   return null;
 }
 
-export function HomeClient() {
+interface HomeClientProps {
+  isAuthenticated?: boolean;
+}
+
+export function HomeClient({ isAuthenticated = false }: HomeClientProps) {
+  // Get all state and actions from Zustand store
   const {
     currentChatId,
     showChatInterface,
@@ -71,8 +76,6 @@ export function HomeClient() {
     isFullscreen,
     refreshKey,
     activePanel,
-    selectedProjectId,
-    envVarsValid,
     setCurrentChatId,
     setShowChatInterface,
     setChatHistory,
@@ -82,15 +85,12 @@ export function HomeClient() {
     setIsFullscreen,
     setRefreshKey,
     setActivePanel,
-    resetChatState,
-    getSelectedProject
+    resetChatState
   } = useChatStore();
 
-  const { status, data: session } = useSession();
   const { isCollapsed } = useSidebarCollapse();
 
-  const isAuthenticated = status === "authenticated";
-
+  // Local UI state (not critical for persistence)
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<ImageAttachment[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -101,9 +101,31 @@ export function HomeClient() {
 
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const previousChat = useRef<string | null>(null);
 
+  const handleReset = () => {
+    // Reset all chat-related state in store
+    resetChatState();
+
+    // Reset local state
+    setMessage("");
+    setAttachments([]);
+    clearPromptFromStorage();
+
+    // Focus textarea after reset
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
+
+  // Auto-focus textarea and restore from sessionStorage
   useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+
+    // Restore prompt data from sessionStorage
     const storedData = loadPromptFromStorage();
     if (storedData) {
       setMessage(storedData.message);
@@ -116,37 +138,164 @@ export function HomeClient() {
     }
   }, []);
 
+  // Save prompt data to sessionStorage
   useEffect(() => {
-    if (message || attachments.length > 0) {
+    if (message.trim() || attachments.length > 0) {
       savePromptToStorage(message, attachments);
     } else {
       clearPromptFromStorage();
     }
   }, [message, attachments]);
 
-  const handleReset = () => {
-    resetChatState();
-    setMessage("");
-    setAttachments([]);
-    setPromptAnalysis(null);
-    clearPromptFromStorage();
+  // Image attachment handlers
+  const handleImageFiles = async (files: File[]) => {
+    try {
+      const newAttachments = await Promise.all(
+        files.map((file) => createImageAttachment(file))
+      );
+      setAttachments((prev) => [...prev, ...newAttachments]);
+    } catch (error) {
+      console.error("Error processing image files:", error);
+    }
   };
 
-  // FIXED: handleSendMessage - Initial submission from home page
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((att) => att.id !== id));
+  };
+
+  const handleDragOver = () => setIsDragOver(true);
+  const handleDragLeave = () => setIsDragOver(false);
+  const handleDrop = () => setIsDragOver(false);
+
+  // Handle prompt from enhancer or library
+  const handleUseEnhancedPrompt = (enhancedPrompt: string) => {
+    setMessage(enhancedPrompt);
+  };
+
+  const handleStreamingComplete = () => {
+    setIsLoading(false);
+  };
+
+  const handleChatData = async (data: any) => {
+    console.log({ data });
+
+    if (!currentChatId && data.id) {
+      // First time receiving chat ID - set it and navigate
+      setCurrentChatId(data.id);
+      setCurrentChat(data);
+
+      // Update URL to /chats/{chatId}
+      const stateObject = {
+        chatId: data.id,
+        asPath: `/chats/${data.id}`,
+        scroll: false
+      };
+      window.history.pushState(stateObject, "", `/chats/${data.id}`);
+
+      console.log("Chat created with ID:", data.id);
+
+      // Create ownership record for the new chat
+      try {
+        await fetch("/api/chat/ownership", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            chatId: data.id
+          })
+        });
+        console.log("Chat ownership created:", data.id);
+      } catch (error) {
+        console.error("Failed to create chat ownership:", error);
+      }
+    }
+  };
+
+  const handleStreamingStarted = () => {
+    setIsLoading(false);
+  };
+
+  const handleChatSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!message.trim() || isLoading) return;
+
+    const userMessage = message.trim();
+    setMessage("");
+    setIsLoading(true);
+
+    // Add user message to chat history
+    addChatMessage({ type: "user", content: userMessage });
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          chatId: currentChatId,
+          streaming: true
+        })
+      });
+
+      if (!response.ok) {
+        let errorMessage =
+          "Sorry, there was an error processing your message. Please try again.";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (response.status === 429) {
+            errorMessage =
+              "You have exceeded your maximum number of messages for the day. Please try again later.";
+          }
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
+          if (response.status === 429) {
+            errorMessage =
+              "You have exceeded your maximum number of messages for the day. Please try again later.";
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body for streaming");
+      }
+
+      setIsLoading(false);
+
+      // Add streaming response
+      addChatMessage({
+        type: "assistant",
+        content: [],
+        isStreaming: true,
+        stream: response.body
+      });
+    } catch (error) {
+      console.error("Error:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Sorry, there was an error processing your message. Please try again.";
+
+      addChatMessage({
+        type: "assistant",
+        content: errorMessage
+      });
+      setIsLoading(false);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
 
-    if (!isAuthenticated || !envVarsValid) {
-      return;
-    }
-
     const userMessage = message.trim();
     const currentAttachments = [...attachments];
-
-    // Get project info before clearing
-    const selectedProject = getSelectedProject();
-    const projectId = selectedProject?.v0_project_id;
 
     // Clear sessionStorage immediately upon submission
     clearPromptFromStorage();
@@ -173,10 +322,7 @@ export function HomeClient() {
         body: JSON.stringify({
           message: userMessage,
           streaming: true,
-          ...(currentAttachments.length > 0 && {
-            attachments: currentAttachments.map((att) => ({ url: att.dataUrl }))
-          }),
-          ...(projectId && { projectId })
+          attachments: currentAttachments.map((att) => ({ url: att.dataUrl }))
         })
       });
 
@@ -234,176 +380,6 @@ export function HomeClient() {
         }
       ]);
     }
-  };
-
-  // FIXED: handleChatSendMessage - Messages in chat interface
-  const handleChatSendMessage = async (
-    e: React.FormEvent<HTMLFormElement>,
-    attachmentUrls?: Array<{ url: string }>
-  ) => {
-    e.preventDefault();
-
-    if (!message.trim() || isLoading) return;
-
-    if (!envVarsValid) {
-      return;
-    }
-
-    const userMessage = message.trim();
-    setMessage("");
-    setIsLoading(true);
-
-    const selectedProject = getSelectedProject();
-    const projectId = selectedProject?.v0_project_id;
-
-    // Add user message to chat history
-    addChatMessage({ type: "user", content: userMessage });
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          chatId: currentChatId,
-          streaming: true,
-          ...(attachmentUrls && { attachments: attachmentUrls }),
-          ...(projectId && { projectId })
-        })
-      });
-
-      if (!response.ok) {
-        let errorMessage =
-          "Sorry, there was an error processing your message. Please try again.";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          } else if (response.status === 429) {
-            errorMessage =
-              "You have exceeded your maximum number of messages for the day. Please try again later.";
-          }
-        } catch (parseError) {
-          console.error("Error parsing error response:", parseError);
-          if (response.status === 429) {
-            errorMessage =
-              "You have exceeded your maximum number of messages for the day. Please try again later.";
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      if (!response.body) {
-        throw new Error("No response body for streaming");
-      }
-
-      setIsLoading(false);
-
-      // Add streaming response
-      addChatMessage({
-        type: "assistant",
-        content: [],
-        isStreaming: true,
-        stream: response.body
-      });
-    } catch (error) {
-      console.error("Error:", error);
-
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Sorry, there was an error processing your message. Please try again.";
-
-      addChatMessage({
-        type: "assistant",
-        content: errorMessage
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const handleStreamingComplete = () => {
-    setIsLoading(false);
-  };
-
-  const handleChatData = async (data: any) => {
-    console.log({ data });
-
-    if (!currentChatId && data.id) {
-      // First time receiving chat ID - set it and navigate
-      setCurrentChatId(data.id);
-      setCurrentChat(data);
-
-      // Update URL to /chats/{chatId}
-      const stateObject = {
-        chatId: data.id,
-        asPath: `/chats/${data.id}`,
-        scroll: false
-      };
-      window.history.pushState(stateObject, "", `/chats/${data.id}`);
-
-      console.log("Chat created with ID:", data.id);
-
-      // Create ownership record for the new chat
-      try {
-        await fetch("/api/chat/ownership", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            chatId: data.id
-          })
-        });
-        console.log("Chat ownership created:", data.id);
-      } catch (error) {
-        console.error("Failed to create chat ownership:", error);
-      }
-    }
-  };
-
-  // FIXED: handleStreamingStarted - should set loading to false
-  const handleStreamingStarted = () => {
-    setIsLoading(false);
-  };
-
-  const handleUseEnhancedPrompt = (prompt: string) => {
-    setMessage(prompt);
-    textareaRef.current?.focus();
-  };
-
-  const handleImageFiles = async (files: File[]) => {
-    const validImageFiles = Array.from(files).filter((file) =>
-      file.type.startsWith("image/")
-    );
-
-    for (const file of validImageFiles) {
-      const attachment = await createImageAttachment(file);
-      setAttachments((prev) => [...prev, attachment]);
-    }
-  };
-
-  const handleRemoveAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((att) => att.id !== id));
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    handleImageFiles(files);
   };
 
   if (showChatInterface || currentChatId) {
@@ -470,8 +446,6 @@ export function HomeClient() {
             />
           </div>
         </div>
-
-        <EnvVariablesDialog />
       </div>
     );
   } else {
@@ -571,7 +545,6 @@ export function HomeClient() {
                         />
                       </PromptInputTools>
                       <PromptInputTools>
-                        {isAuthenticated && <ProjectSelector />}
                         <PromptInputMicButton
                           onTranscript={(transcript) => {
                             setMessage(
@@ -584,11 +557,7 @@ export function HomeClient() {
                           disabled={isLoading}
                         />
                         <PromptInputSubmit
-                          disabled={
-                            !message.trim() ||
-                            isLoading ||
-                            (isAuthenticated && !envVarsValid)
-                          }
+                          disabled={!message.trim() || isLoading}
                           status={isLoading ? "streaming" : "ready"}
                         />
                       </PromptInputTools>
@@ -643,8 +612,6 @@ export function HomeClient() {
           onOpenChange={setShowLibrary}
           onSelectPrompt={handleUseEnhancedPrompt}
         />
-
-        {isAuthenticated && <EnvVariablesDialog />}
 
         <Leva hidden />
       </>

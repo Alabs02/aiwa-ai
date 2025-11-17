@@ -21,6 +21,7 @@
     "@fontsource/geist-mono": "^5.2.7",
     "@fontsource/geist-sans": "^5.2.5",
     "@fontsource/space-grotesk": "^5.2.10",
+    "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -40,6 +41,7 @@
     "@uiw/react-markdown-preview": "^5.1.5",
     "@v0-sdk/react": "workspace:*",
     "@vercel/postgres": "^0.10.0",
+    "adm-zip": "^0.5.16",
     "ai": "^5.0.89",
     "bcrypt-ts": "^7.1.0",
     "class-variance-authority": "^0.7.1",
@@ -76,6 +78,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/adm-zip": "^0.5.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

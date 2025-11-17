@@ -13,14 +13,14 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  Plus,
-  Search,
-  Folder,
-  MessageSquare,
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+  IconFolders,
+  IconLayoutGrid,
+  IconMessages,
+  IconMessage,
+  IconSearch
+} from "@tabler/icons-react";
 import { SearchDialog } from "../dialogs/search-dialog";
 
 // LocalStorage key for sidebar state
@@ -124,8 +124,12 @@ export function AppSidebar({ className }: AppSidebarProps) {
   };
 
   // Handle featured templates navigation
-  const handleFeaturedProjects = () => {
+  const handleFeaturedTemplates = () => {
     router.push("/templates");
+  };
+
+  const handleProjects = () => {
+    router.push("/projects");
   };
 
   // Format chat display name
@@ -227,7 +231,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     isCollapsed && "justify-center px-0"
                   )}
                 >
-                  <Search className="h-5 w-5 shrink-0" />
+                  <IconSearch className="h-5 w-5 shrink-0" />
                   {!isCollapsed && <span className="font-medium">Search</span>}
                 </Button>
               </TooltipTrigger>
@@ -238,12 +242,12 @@ export function AppSidebar({ className }: AppSidebarProps) {
               )}
             </Tooltip>
 
-            {/* Featured Templates Button */}
+            {/* Projects Button */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  onClick={handleFeaturedProjects}
+                  onClick={handleProjects}
                   className={cn(
                     "w-full justify-start gap-3",
                     "text-white/80 hover:text-white",
@@ -252,7 +256,34 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     isCollapsed && "justify-center px-0"
                   )}
                 >
-                  <Folder className="h-5 w-5 shrink-0" />
+                  <IconFolders className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && (
+                    <span className="font-medium">Projects</span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              {isCollapsed && (
+                <TooltipContent side="right" className="font-medium">
+                  Projects
+                </TooltipContent>
+              )}
+            </Tooltip>
+
+            {/* Featured Templates Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  onClick={handleFeaturedTemplates}
+                  className={cn(
+                    "w-full justify-start gap-3",
+                    "text-white/80 hover:text-white",
+                    "hover:bg-white/[0.08]",
+                    "transition-all duration-200",
+                    isCollapsed && "justify-center px-0"
+                  )}
+                >
+                  <IconLayoutGrid className="h-5 w-5 shrink-0" />
                   {!isCollapsed && (
                     <span className="font-medium">Featured Templates</span>
                   )}
@@ -296,7 +327,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                           isActive && "bg-white/[0.12] text-white"
                         )}
                       >
-                        <MessageSquare className="h-4 w-4 shrink-0" />
+                        <IconMessage className="h-4 w-4 shrink-0" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">
                             {getChatDisplayName(chat)}
@@ -335,7 +366,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                             isActive && "bg-white/[0.12] text-white"
                           )}
                         >
-                          <MessageSquare className="h-5 w-5" />
+                          <IconMessage className="h-5 w-5" />
                         </Link>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="max-w-xs">

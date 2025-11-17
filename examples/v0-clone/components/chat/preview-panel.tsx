@@ -14,6 +14,7 @@ import { GitHubExportDialog } from "@/components/chat/github-export-dialog";
 import { RefreshCw, Maximize, Minimize, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useChatStore } from "@/components/home/home-client.store";
 
 interface Chat {
   id: string;
@@ -47,15 +48,19 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   const hasContent = !!currentChat?.demo;
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
+  const { getSelectedProject } = useChatStore();
 
   const handleDownload = async () => {
     if (!currentChat?.id) return;
 
     try {
+      const selectedProject = getSelectedProject();
+
       const params = new URLSearchParams({
         chatId: currentChat.id,
         format: "zip",
-        includeDefaultFiles: "true"
+        includeDefaultFiles: "true",
+        ...(selectedProject?.id && { projectId: selectedProject.id })
       });
 
       const response = await fetch(`/api/chat/download?${params}`);

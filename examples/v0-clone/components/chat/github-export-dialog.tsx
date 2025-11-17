@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Github, Loader2, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Github, Loader, ExternalLink, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GitHubExportDialogProps {
@@ -211,7 +211,7 @@ export function GitHubExportDialog({
               >
                 {isConnecting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
                     Connecting...
                   </>
                 ) : (
@@ -313,7 +313,7 @@ export function GitHubExportDialog({
               >
                 {isExporting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
                     Exporting...
                   </>
                 ) : (
