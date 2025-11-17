@@ -62,6 +62,12 @@ export function ChatDetailClient() {
     return handleSendMessage(e, attachmentUrls);
   };
 
+  useEffect(() => {
+    console.group("Chat Details");
+    console.log({ isLoading, isStreaming });
+    console.groupEnd();
+  }, []);
+
   // Handle fullscreen keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

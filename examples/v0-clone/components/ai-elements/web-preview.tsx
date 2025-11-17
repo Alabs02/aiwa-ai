@@ -404,15 +404,20 @@ export const WebPreviewBody = ({
           )}
         >
           {src ? (
-            <>
+            <div className="relative h-full w-full">
               <iframe
                 className="size-full bg-white dark:bg-gray-950"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
                 src={src}
                 title="Preview"
               />
-              {loading}
-            </>
+
+              {loading ? (
+                <div className="absolute inset-0 grid size-full place-items-center">
+                  {loading}
+                </div>
+              ) : null}
+            </div>
           ) : (
             children
           )}
