@@ -66,9 +66,110 @@ Examples
 
 Response:
 {
-  "text": "...generated text...",
-  "usage": { ... }
+  "steps": [
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "...generated text..."
+        }
+      ],
+      "finishReason": "stop",
+      "usage": {
+        "inputTokens": 75,
+        "outputTokens": 18,
+        "totalTokens": 93
+      },
+      "warnings": [],
+      "request": {
+        "body": {
+          "prompt": [
+            {
+              "role": "system",
+              "content": "You are a helpful assistant..."
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Write a short poem."
+                }
+              ]
+            }
+          ],
+          "providerOptions": {
+            "gateway": {
+              "order": ["google", "openai", "anthropic", "xai", "mistral"],
+              "models": [...]
+            }
+          },
+          "headers": {
+            "user-agent": "ai/5.0.89"
+          }
+        }
+      },
+      "response": {
+        "id": "aitxt-...",
+        "timestamp": "2025-11-17T12:16:28.027Z",
+        "modelId": "google/gemini-2.0-flash",
+        "headers": {...},
+        "body": {
+          "content": [
+            {
+              "type": "text",
+              "text": "...generated text..."
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 75,
+            "outputTokens": 18,
+            "totalTokens": 93
+          },
+          "warnings": [],
+          "providerMetadata": {...}
+        },
+        "messages": [
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "text",
+                "text": "...generated text..."
+              }
+            ]
+          }
+        ]
+      },
+      "providerMetadata": {
+        "google": {
+          "usageMetadata": {
+            "promptTokenCount": 75,
+            "candidatesTokenCount": 18,
+            "totalTokenCount": 93
+          }
+        },
+        "gateway": {
+          "routing": {
+            "originalModelId": "google/gemini-2.0-flash",
+            "resolvedProvider": "google",
+            "finalProvider": "google",
+            "attempts": [...]
+          },
+          "cost": "0.0000147",
+          "marketCost": "0.0000147",
+          "generationId": "gen_..."
+        }
+      }
+    }
+  ]
 }
+
+To extract the generated text:
+const response = await fetch('/api/ai-proxy', {...});
+const data = await response.json();
+const generatedText = data.steps[0].content[0].text;
 
 2. Generate Object
 {
