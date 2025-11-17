@@ -13,7 +13,7 @@ const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+    projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
     method: 'generateText',
     options: { prompt: 'Your prompt here' }
   })
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
       method: 'generateText',
       options: {
         prompt: message,
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
       method: 'generateObject',
       options: {
         prompt: \`Extract person details: \${text}\`,
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
       method: 'streamText',
       options: {
         prompt,
@@ -180,7 +180,7 @@ export async function POST(req: Request) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
       method: 'streamObject',
       options: {
         prompt: query,
@@ -200,7 +200,7 @@ const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+    projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
     method: 'generateText',
     options: {
       prompt: 'What is the weather in San Francisco?',
@@ -228,7 +228,7 @@ const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+    projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
     method: 'generateText',
     options: {
       messages: [
@@ -252,7 +252,7 @@ NEXT_PUBLIC_PROJECT_ID=${PROJECT_ID_PLACEHOLDER}
 
 Access in your code:
 \`\`\`typescript
-const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+const projectId = \`${PROJECT_ID_PLACEHOLDER}\`;
 \`\`\`
 
 ## Model Fallback Chain
