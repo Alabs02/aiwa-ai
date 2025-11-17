@@ -337,17 +337,6 @@ export async function getChatIdsByUserId({
   }
 }
 
-export async function deleteChatOwnership({ v0ChatId }: { v0ChatId: string }) {
-  try {
-    return await db
-      .delete(chat_ownerships)
-      .where(eq(chat_ownerships.v0_chat_id, v0ChatId));
-  } catch (error) {
-    console.error("Failed to delete chat ownership from database");
-    throw error;
-  }
-}
-
 export async function getChatCountByUserId({
   userId,
   differenceInHours
@@ -1131,6 +1120,36 @@ export async function getProjectsWithChatCount({
     return projectsWithData;
   } catch (error) {
     console.error("Failed to get projects with chat count from database");
+    throw error;
+  }
+}
+
+export async function updateChatName({
+  v0ChatId,
+  title
+}: {
+  v0ChatId: string;
+  title: string;
+}) {
+  try {
+    return await db
+      .update(chat_ownerships)
+      .set({ title })
+      .where(eq(chat_ownerships.v0_chat_id, v0ChatId))
+      .returning();
+  } catch (error) {
+    console.error("Failed to update chat name in database");
+    throw error;
+  }
+}
+
+export async function deleteChatOwnership({ v0ChatId }: { v0ChatId: string }) {
+  try {
+    await db
+      .delete(chat_ownerships)
+      .where(eq(chat_ownerships.v0_chat_id, v0ChatId));
+  } catch (error) {
+    console.error("Failed to delete chat ownership from database");
     throw error;
   }
 }
