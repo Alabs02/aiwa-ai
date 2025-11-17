@@ -1,158 +1,138 @@
 export const PROJECT_ID_PLACEHOLDER = "{{PROJECT_ID}}";
 
-export const AIWA_CLOUD_DOCS = `# AIWA Cloud - AI Gateway Documentation
+export const AIWA_CLOUD_DOCS = `
+SERVICE NAME: AIWA Cloud
+AI Proxy Usage Instructions
 
-AIWA Cloud provides serverless AI capabilities with automatic fallbacks across multiple providers (Google Gemini, OpenAI, Anthropic, xAI, Mistral).
+Core Concepts:
+- All AI requests must be sent to the /api/ai-proxy endpoint.
+- The proxy automatically injects provider routing fallbacks.
+- The proxy automatically assigns a default model if none is provided.
+- schemaDefinition is supported and is automatically converted into Zod schemas.
+- System prompts and user prompts are both supported.
+- All object generation and streaming require a schema.
 
-## Quick Start
+Default Model:
+- google/gemini-2.0-flash
 
-All AI requests go through AIWA's proxy with your project ID:
+Default Fallback Chain:
+Models attempted in order:
+1. google/gemini-2.0-flash
+2. openai/gpt-5
+3. anthropic/claude-3.7-sonnet
+4. xai/grok-beta
+5. mistral/mistral-large
 
-\`\`\`typescript
-const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
-    method: 'generateText',
-    options: { prompt: 'Your prompt here' }
-  })
-});
+API Reference
+Endpoint BaseURL: https://aiwa-v0-sdk.vercel.app
+Endpoint:
+POST https://aiwa-v0-sdk.vercel.app/api/ai-proxy
 
-const result = await response.json();
-\`\`\`
-
-## API Reference
-
-### Endpoint
-\`POST https://aiwa-v0-sdk.vercel.app/api/ai-proxy\`
-
-### Request Body
-\`\`\`typescript
+Request Body:
 {
-  projectId: string;           // Required: Your project identifier
-  method: string;              // Required: 'generateText' | 'generateObject' | 'streamText' | 'streamObject'
-  options: {                   // Required: Vercel AI SDK options
-    prompt: string;            // Required for text generation
-    schema?: ZodSchema;        // Required for generateObject/streamObject (server-side only)
-    system?: string;           // Optional: System prompt
-    messages?: Array<Message>; // Optional: Chat messages
-    maxTokens?: number;        // Optional: Max response tokens
-    temperature?: number;      // Optional: 0-2, controls randomness
+  "projectId": \`${PROJECT_ID_PLACEHOLDER}\`,
+  "method": "generateText | generateObject | streamText | streamObject",
+  "options": {
+    "model": "optional: gateway('provider/model')",
+    "system": "optional system prompt",
+    "prompt": "string",
+    "messages": [
+      { "role": "system|user|assistant", "content": "..." }
+    ],
+    "schema": "Zod schema (for object methods only)",
+    "schemaDefinition": {
+      "field": "string | number | boolean | string[] | number[] | enum:val1,val2 | nested object"
+    }
   }
 }
-\`\`\`
 
-**CRITICAL:** Zod schemas cannot be serialized. Always define schemas server-side in API routes, never pass from client.
+Behavior:
+- If model is not provided, default model is injected.
+- If providerOptions.gateway is not provided, fallback routing is injected.
+- If schemaDefinition is provided, it is converted to a Zod schema.
+- stream responses return streaming bodies.
 
-## Method: generateText
+Examples
 
-\`\`\`typescript
-// app/api/chat/route.ts
-export async function POST(req: Request) {
-  const { message } = await req.json();
-  
-  const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
-      method: 'generateText',
-      options: {
-        prompt: message,
-        system: 'You are a helpful assistant',
-        maxTokens: 1000,
-        temperature: 0.7
-      }
-    })
-  });
-  
-  const result = await response.json();
-  return Response.json({ text: result.text });
+1. Generate Text
+{
+  "projectId": \`${PROJECT_ID_PLACEHOLDER}\`,
+  "method": "generateText",
+  "options": {
+    "system": "You are a helpful assistant.",
+    "prompt": "Write a short poem."
+  }
 }
-\`\`\`
 
-## Method: generateObject
-
-**Important:** Define schemas in your API route, not client-side.
-
-\`\`\`typescript
-import { z } from 'zod';
-
-// app/api/recipe/route.ts
-export async function POST(req: Request) {
-  const { dishName } = await req.json();
-  
-  // Define schema server-side
-  const recipeSchema = z.object({
-    description: z.string(),
-    prepTime: z.string(),
-    cookTime: z.string(),
-    servings: z.number(),
-    ingredients: z.array(z.string()),
-    steps: z.array(z.string())
-  });
-  
-  const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
-      method: 'generateObject',
-      options: {
-        prompt: \`Generate a detailed recipe for \${dishName}\`,
-        schema: recipeSchema
-      }
-    })
-  });
-  
-  const result = await response.json();
-  return Response.json(result.object);
+Response:
+{
+  "text": "...generated text...",
+  "usage": { ... }
 }
-\`\`\`
 
-## Method: streamText
-
-\`\`\`typescript
-// app/api/generate/route.ts
-export async function POST(req: Request) {
-  const { prompt } = await req.json();
-  
-  const response = await fetch('https://aiwa-v0-sdk.vercel.app/api/ai-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      projectId: \`${PROJECT_ID_PLACEHOLDER}\`,
-      method: 'streamText',
-      options: { prompt }
-    })
-  });
-  
-  return response;
+2. Generate Object
+{
+  "projectId": \`${PROJECT_ID_PLACEHOLDER}\`,
+  "method": "generateObject",
+  "options": {
+    "prompt": "Generate a recipe.",
+    "schemaDefinition": {
+      "title": "string",
+      "ingredients": "string[]",
+      "steps": "string[]"
+    }
+  }
 }
-\`\`\`
 
-## Environment Setup
+Response:
+{
+  "object": {
+    "title": "...",
+    "ingredients": ["..."],
+    "steps": ["..."]
+  },
+  "usage": { ... }
+}
 
-\`NEXT_PUBLIC_PROJECT_ID\` is auto-added to \`.env.local\` on export:
+3. streamText
+{
+  "projectId": \`${PROJECT_ID_PLACEHOLDER}\`,
+  "method": "streamText",
+  "options": {
+    "prompt": "Explain quantum computing simply."
+  }
+}
 
-\`\`\`
-NEXT_PUBLIC_PROJECT_ID=${PROJECT_ID_PLACEHOLDER}
-\`\`\`
+Response:
+<streaming text chunks>
+
+4. streamObject
+{
+  "projectId": \`${PROJECT_ID_PLACEHOLDER}\`,
+  "method": "streamObject",
+  "options": {
+    "prompt": "Generate step-by-step reasoning.",
+    "schemaDefinition": {
+      "step": "string",
+      "explanation": "string"
+    }
+  }
+}
+
+Response:
+<streamed JSON lines>
+
+Guidelines for Generated Apps:
+- Always send projectId.
+- Always include system prompts when needed.
+- Prefer messages[] for multi-turn conversations.
+- Use schemaDefinition when generating structured data.
+- All requests must target /api/ai-proxy.
 
 Access in your code:
 \`\`\`typescript
 const projectId = \`${PROJECT_ID_PLACEHOLDER}\`;
 \`\`\`
 
-## Model Fallback Chain
-
-1. Google Gemini 2.0 Flash (default)
-2. OpenAI GPT-5
-3. Anthropic Claude 3.5 Sonnet
-4. xAI Grok
-5. Mistral Large
-
----
-
-**PROJECT ID:** \`${PROJECT_ID_PLACEHOLDER}\``;
+**PROJECT ID:** \`${PROJECT_ID_PLACEHOLDER}\`
+`;
