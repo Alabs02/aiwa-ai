@@ -111,12 +111,8 @@
           "name": "chat_ownerships_user_id_users_id_fk",
           "tableFrom": "chat_ownerships",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -126,9 +122,7 @@
         "chat_ownerships_v0_chat_id_unique": {
           "name": "chat_ownerships_v0_chat_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "v0_chat_id"
-          ]
+          "columns": ["v0_chat_id"]
         }
       },
       "policies": {},
@@ -191,12 +185,8 @@
           "name": "github_exports_user_id_users_id_fk",
           "tableFrom": "github_exports",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -263,12 +253,8 @@
           "name": "project_env_vars_project_id_projects_id_fk",
           "tableFrom": "project_env_vars",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -360,12 +346,8 @@
           "name": "projects_user_id_users_id_fk",
           "tableFrom": "projects",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -375,9 +357,7 @@
         "projects_v0_project_id_unique": {
           "name": "projects_v0_project_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "v0_project_id"
-          ]
+          "columns": ["v0_project_id"]
         }
       },
       "policies": {},
@@ -473,12 +453,8 @@
           "name": "prompt_library_user_id_users_id_fk",
           "tableFrom": "prompt_library",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
