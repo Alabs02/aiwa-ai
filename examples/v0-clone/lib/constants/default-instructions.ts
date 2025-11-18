@@ -24,9 +24,9 @@ Models attempted in order:
 5. mistral/mistral-large
 
 API Reference
-Endpoint BaseURL: https://aiwa-v0-sdk.vercel.app
+Endpoint BaseURL: https://aiwa.codes
 Endpoint:
-POST https://aiwa-v0-sdk.vercel.app/api/ai-proxy
+POST https://aiwa.codes/api/ai-proxy
 
 Request Body:
 {
