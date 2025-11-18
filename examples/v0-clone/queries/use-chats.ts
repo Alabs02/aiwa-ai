@@ -31,6 +31,6 @@ export function useChats() {
   return {
     chats,
     isLoading,
-    refetch: fetchChats,
+    refetch: fetchChats
   };
 }

@@ -92,13 +92,13 @@ const getPrivacyDisplayName = (privacy: string) => {
 export function ChatSelector() {
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Use the custom hook for fetching chats
   const { chats, isLoading } = useChats();
-  
+
   // Use the store for updating chats
   const { updateChat, deleteChat: deleteChatFromStore } = useChatsStore();
-  
+
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
@@ -264,17 +264,18 @@ export function ChatSelector() {
             <SelectValue placeholder="Select a chat">
               {currentChat ? (
                 <div className="flex items-center gap-2">
-                  <IconMessage className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{getChatDisplayName(currentChat)}</span>
-                  {currentChat.privacy &&
-                    currentChat.privacy !== "private" && (
-                      <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted-foreground">
-                        {getPrivacyIcon(currentChat.privacy)}
-                      </div>
-                    )}
+                  <IconMessage className="text-muted-foreground h-4 w-4" />
+                  <span className="truncate">
+                    {getChatDisplayName(currentChat)}
+                  </span>
+                  {currentChat.privacy && currentChat.privacy !== "private" && (
+                    <div className="text-muted-foreground flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs">
+                      {getPrivacyIcon(currentChat.privacy)}
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-2">
                   <IconMessage className="h-4 w-4" />
                   <span>Select a chat</span>
                 </div>
@@ -283,17 +284,17 @@ export function ChatSelector() {
           </SelectTrigger>
           <SelectContent className="max-h-[300px] overflow-y-auto">
             {chats.length === 0 ? (
-              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground px-2 py-4 text-center text-sm">
                 {isLoading ? "Loading chats..." : "No chats yet"}
               </div>
             ) : (
               chats.map((chat) => (
                 <SelectItem key={chat.id} value={chat.id}>
                   <div className="flex items-center gap-2">
-                    <IconMessage className="h-4 w-4 text-muted-foreground" />
+                    <IconMessage className="text-muted-foreground h-4 w-4" />
                     <span className="truncate">{getChatDisplayName(chat)}</span>
                     {chat.privacy && chat.privacy !== "private" && (
-                      <div className="ml-auto flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground ml-auto flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs">
                         {getPrivacyIcon(chat.privacy)}
                       </div>
                     )}
@@ -460,7 +461,7 @@ export function ChatSelector() {
               variant="destructive"
               onClick={handleDeleteChat}
               disabled={isDeletingChat}
-              className="bg-neutral-100 hover:bg-neutral-200 text-background"
+              className="text-background bg-neutral-100 hover:bg-neutral-200"
             >
               {isDeletingChat ? "Deleting..." : "Delete Chat"}
             </Button>
@@ -489,7 +490,11 @@ export function ChatSelector() {
             >
               Cancel
             </Button>
-            <Button onClick={handleDuplicateChat} disabled={isDuplicatingChat} className="bg-neutral-100 hover:bg-neutral-200 text-background">
+            <Button
+              onClick={handleDuplicateChat}
+              disabled={isDuplicatingChat}
+              className="text-background bg-neutral-100 hover:bg-neutral-200"
+            >
               {isDuplicatingChat ? "Duplicating..." : "Duplicate Chat"}
             </Button>
           </DialogFooter>
@@ -592,7 +597,7 @@ export function ChatSelector() {
             <Button
               onClick={handleChangeVisibility}
               disabled={isChangingVisibility}
-              className="bg-neutral-100 hover:bg-neutral-200 text-background"
+              className="text-background bg-neutral-100 hover:bg-neutral-200"
             >
               {isChangingVisibility ? "Changing..." : "Change Visibility"}
             </Button>

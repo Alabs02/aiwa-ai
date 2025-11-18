@@ -35,7 +35,7 @@ import { EnvVariablesDialog } from "@/components/projects/env-variables-dialog";
 import { GL } from "@/components/gl";
 import { Leva } from "leva";
 import { suggestions } from "../constants/suggestions";
-import { FeaturedTemplates } from "@/components/templates/featured";
+import { FeaturedTemplates } from "@/components/templates/featured-templates";
 import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,6 +45,7 @@ import { useChatStore } from "./home-client.store";
 import { useSession } from "next-auth/react";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { useChatsStore } from "@/components/shared/chat-selector.store";
+import { UserTemplates } from "../templates/user-templates";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -88,7 +89,7 @@ export function HomeClient() {
     getSelectedProject
   } = useChatStore();
 
-  const {  setChats, setIsLoading: setIsLoadingChats } = useChatsStore();
+  const { setChats, setIsLoading: setIsLoadingChats } = useChatsStore();
 
   const { status, data: session } = useSession();
   const { isCollapsed } = useSidebarCollapse();
@@ -332,7 +333,6 @@ export function HomeClient() {
     setIsLoading(false);
   };
 
-
   const handleFetchChats = async () => {
     if (!session?.user?.id) return;
 
@@ -348,7 +348,7 @@ export function HomeClient() {
     } finally {
       setIsLoadingChats(false);
     }
-  }
+  };
 
   const handleChatData = async (data: any) => {
     console.log({ data });
@@ -381,7 +381,7 @@ export function HomeClient() {
           })
         });
         console.log("Chat ownership created:", data.id);
-        
+
         handleFetchChats();
       } catch (error) {
         console.error("Failed to create chat ownership:", error);
@@ -429,6 +429,14 @@ export function HomeClient() {
 
     const files = Array.from(e.dataTransfer.files);
     handleImageFiles(files);
+  };
+
+  const getFirstOrLast = (): string | undefined => {
+    if (!session?.user?.name) return undefined;
+
+    const nameParts = session.user.name.trim().split(/\s+/);
+    // Return first name if available, otherwise return last name, otherwise undefined
+    return nameParts[0] || nameParts[nameParts.length - 1] || undefined;
   };
 
   if (showChatInterface || currentChatId) {
@@ -522,10 +530,14 @@ export function HomeClient() {
                   Vibe. Build. Deploy.
                 </h2>
 
-                <p className="relative font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
+                <p className="font-body bg-background/65 relative mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
                   Vibe-code your imagination. Bring it to life with Aiwa.
-
-                  <BorderBeam duration={10} size={100} colorFrom="#f6821f" colorTo="#ad46ff" />
+                  <BorderBeam
+                    duration={10}
+                    size={100}
+                    colorFrom="#f6821f"
+                    colorTo="#ad46ff"
+                  />
                 </p>
 
                 {/* Prompt Input */}
@@ -629,7 +641,9 @@ export function HomeClient() {
                     {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
                       <Suggestion
                         key={`${Copy}-${idx}`}
-                        disabled={isLoading || (isAuthenticated && !envVarsValid)}
+                        disabled={
+                          isLoading || (isAuthenticated && !envVarsValid)
+                        }
                         onClick={() => {
                           setMessage(Prompt);
                           // Submit after setting message
@@ -652,9 +666,18 @@ export function HomeClient() {
             </div>
 
             {/* Featured Templates Section */}
-            <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
+            {/* <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
               <FeaturedTemplates isAuthenticated={isAuthenticated} />
-            </div>
+            </div> */}
+
+            {isAuthenticated && (
+              <UserTemplates
+                userName={getFirstOrLast() ?? undefined}
+                userEmail={session?.user?.email ?? undefined}
+              />
+            )}
+
+            <FeaturedTemplates />
           </main>
         </div>
 

@@ -29,25 +29,25 @@ export const useChatsStore = create<ChatStore>((set) => ({
 
   // Actions
   setChats: (chats) => set({ chats }),
-  
+
   setIsLoading: (loading) => set({ isLoading: loading }),
-  
+
   addChat: (chat) =>
     set((state) => ({
-      chats: [chat, ...state.chats],
+      chats: [chat, ...state.chats]
     })),
-  
+
   updateChat: (chatId, updates) =>
     set((state) => ({
       chats: state.chats.map((chat) =>
         chat.id === chatId ? { ...chat, ...updates } : chat
-      ),
+      )
     })),
-  
+
   deleteChat: (chatId) =>
     set((state) => ({
-      chats: state.chats.filter((chat) => chat.id !== chatId),
+      chats: state.chats.filter((chat) => chat.id !== chatId)
     })),
-  
-  resetChats: () => set({ chats: [], isLoading: false }),
+
+  resetChats: () => set({ chats: [], isLoading: false })
 }));

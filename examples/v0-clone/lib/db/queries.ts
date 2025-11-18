@@ -1153,3 +1153,148 @@ export async function deleteChatOwnership({ v0ChatId }: { v0ChatId: string }) {
     throw error;
   }
 }
+
+export async function getUserChats({
+  userId,
+  visibility = "all",
+  sortBy = "last_edited",
+  orderBy = "desc",
+  limit = 12,
+  offset = 0,
+  searchQuery
+}: {
+  userId: string;
+  visibility?: "all" | "private" | "team";
+  sortBy?: "last_edited" | "date_created" | "alphabetical";
+  orderBy?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
+  searchQuery?: string;
+}): Promise<ChatOwnershipWithUser[]> {
+  try {
+    let conditions: SQL[] = [eq(chat_ownerships.user_id, userId)];
+
+    // Apply visibility filter
+    if (visibility === "private") {
+      conditions.push(eq(chat_ownerships.visibility, "private"));
+    } else if (visibility === "team") {
+      conditions.push(eq(chat_ownerships.visibility, "team"));
+    } else if (visibility === "all") {
+      conditions.push(
+        or(
+          eq(chat_ownerships.visibility, "private"),
+          eq(chat_ownerships.visibility, "team"),
+          eq(chat_ownerships.visibility, "public")
+        )!
+      );
+    }
+
+    const whereClause = and(...conditions);
+
+    let query = db
+      .select({
+        id: chat_ownerships.id,
+        v0_chat_id: chat_ownerships.v0_chat_id,
+        user_id: chat_ownerships.user_id,
+        visibility: chat_ownerships.visibility,
+        title: chat_ownerships.title,
+        description: chat_ownerships.description,
+        preview_url: chat_ownerships.preview_url,
+        demo_url: chat_ownerships.demo_url,
+        created_at: chat_ownerships.created_at,
+        owner_email: users.email
+      })
+      .from(chat_ownerships)
+      .leftJoin(users, eq(chat_ownerships.user_id, users.id))
+      .where(whereClause);
+
+    // Apply search filter
+    if (searchQuery && searchQuery.trim()) {
+      const searchPattern = `%${searchQuery.trim()}%`;
+      const searchConditions = or(
+        ilike(chat_ownerships.title, searchPattern),
+        ilike(chat_ownerships.description, searchPattern)
+      );
+
+      if (searchConditions) {
+        query = query.where(and(whereClause, searchConditions)) as any;
+      }
+    }
+
+    // Apply sorting
+    const orderFn = orderBy === "asc" ? asc : desc;
+
+    if (sortBy === "alphabetical") {
+      query = query.orderBy(orderFn(chat_ownerships.title)) as any;
+    } else if (sortBy === "date_created") {
+      query = query.orderBy(orderFn(chat_ownerships.created_at)) as any;
+    } else {
+      // last_edited - default (using created_at as proxy for now)
+      query = query.orderBy(orderFn(chat_ownerships.created_at)) as any;
+    }
+
+    const chatsWithUsers = await query.limit(limit).offset(offset);
+
+    return chatsWithUsers as ChatOwnershipWithUser[];
+  } catch (error) {
+    console.error("Failed to get user chats from database");
+    throw error;
+  }
+}
+
+// Get count of user's chats
+export async function getUserChatsCount({
+  userId,
+  visibility = "all",
+  searchQuery
+}: {
+  userId: string;
+  visibility?: "all" | "private" | "team";
+  searchQuery?: string;
+}): Promise<number> {
+  try {
+    let conditions: SQL[] = [eq(chat_ownerships.user_id, userId)];
+
+    // Apply visibility filter
+    if (visibility === "private") {
+      conditions.push(eq(chat_ownerships.visibility, "private"));
+    } else if (visibility === "team") {
+      conditions.push(eq(chat_ownerships.visibility, "team"));
+    } else if (visibility === "all") {
+      conditions.push(
+        or(
+          eq(chat_ownerships.visibility, "private"),
+          eq(chat_ownerships.visibility, "team"),
+          eq(chat_ownerships.visibility, "public")
+        )!
+      );
+    }
+
+    const whereClause = and(...conditions);
+
+    let query = db
+      .select({ count: count(chat_ownerships.id) })
+      .from(chat_ownerships)
+      .where(whereClause);
+
+    // Apply search filter
+    if (searchQuery && searchQuery.trim()) {
+      const searchPattern = `%${searchQuery.trim()}%`;
+      const searchConditions = or(
+        ilike(chat_ownerships.title, searchPattern),
+        ilike(chat_ownerships.description, searchPattern)
+      );
+
+      if (searchConditions) {
+        query = query.where(and(whereClause, searchConditions)) as any;
+      }
+    }
+
+    const [result] = await query;
+
+    return result?.count || 0;
+  } catch (error) {
+    console.error("Failed to get user chats count from database");
+    throw error;
+  }
+}
