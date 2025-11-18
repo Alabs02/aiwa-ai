@@ -180,7 +180,7 @@ export function PromptLibraryDialog({
           {/* Header */}
           <div className="border-b border-white/[0.08] p-6">
             <div className="flex items-center gap-3">
-              <div className="from-primary/20 to-primary-foreground/20 rounded-lg bg-gradient-to-br p-2">
+              <div className="from-primary/20 to-purple-500/20 rounded-lg bg-gradient-to-br p-2">
                 <Library className="text-primary-foreground h-5 w-5" />
               </div>
               <div>
