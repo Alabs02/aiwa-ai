@@ -5,7 +5,10 @@ import {
   generateObject,
   streamText,
   streamObject,
-  createGateway
+  createGateway,
+  experimental_generateImage as generateImage,
+  experimental_generateSpeech as generateSpeech,
+  experimental_transcribe as transcribe
 } from "ai";
 import { getProjectEnvVarsByV0Id } from "@/lib/db/queries";
 
@@ -275,6 +278,74 @@ export async function POST(request: NextRequest) {
                 ...corsHeaders
               }
             });
+          }
+          case "generateImage": {
+            const result = await generateImage(requestOptions);
+            // Handle both single image and multiple images
+            const responseData = result.images
+              ? {
+                  images: result.images.map((img: any) => ({
+                    base64: img.base64,
+                    uint8Array: Array.from(img.uint8Array), // Convert to array for JSON serialization
+                    mediaType: img.mediaType || "image/png"
+                  })),
+                  warnings: result.warnings,
+                  providerMetadata: result.providerMetadata
+                }
+              : {
+                  image: {
+                    base64: result.image.base64,
+                    uint8Array: Array.from(result.image.uint8Array),
+                    mediaType: result.image.mediaType || "image/png"
+                  },
+                  warnings: result.warnings,
+                  providerMetadata: result.providerMetadata
+                };
+            return NextResponse.json(responseData, { headers: corsHeaders });
+          }
+          case "generateSpeech": {
+            const result = await generateSpeech(requestOptions);
+            const responseData = {
+              audio: {
+                base64: result.audio.base64,
+                uint8Array: Array.from(result.audio.uint8Array), // Convert Uint8Array to array for JSON serialization
+                mediaType: result.audio.mediaType,
+                format: result.audio.format
+              },
+              warnings: result.warnings,
+              responses: result.responses,
+              providerMetadata: result.providerMetadata
+            };
+            return NextResponse.json(responseData, { headers: corsHeaders });
+          }
+          case "transcribe": {
+            // Handle audio input - can be base64 string, Uint8Array, or URL
+            let audioInput = options.audio;
+            if (
+              typeof audioInput === "string" &&
+              audioInput.startsWith("data:")
+            ) {
+              // If it's a base64 data URL, extract the base64 part
+              const base64Data = audioInput.split(",")[1];
+              audioInput = Buffer.from(base64Data, "base64");
+            } else if (Array.isArray(audioInput)) {
+              // If it's an array (from JSON serialization), convert to Uint8Array
+              audioInput = new Uint8Array(audioInput);
+            }
+            const result = await transcribe({
+              ...requestOptions,
+              audio: audioInput
+            });
+            const responseData = {
+              text: result.text,
+              segments: result.segments,
+              language: result.language,
+              durationInSeconds: result.durationInSeconds,
+              warnings: result.warnings,
+              responses: result.responses,
+              providerMetadata: result.providerMetadata
+            };
+            return NextResponse.json(responseData, { headers: corsHeaders });
           }
           default:
             return NextResponse.json(
