@@ -666,10 +666,6 @@ export function HomeClient() {
             </div>
 
             {/* Featured Templates Section */}
-            {/* <div className="w-full border-t border-neutral-800 bg-black/30 backdrop-blur-sm">
-              <FeaturedTemplates isAuthenticated={isAuthenticated} />
-            </div> */}
-
             {isAuthenticated && (
               <UserTemplates
                 userName={getFirstOrLast() ?? undefined}

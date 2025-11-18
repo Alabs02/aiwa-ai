@@ -27,7 +27,7 @@ import { SearchDialog } from "../dialogs/search-dialog";
 const SIDEBAR_STATE_KEY = "aiwa-sidebar-collapsed";
 
 // Maximum recent chats to display
-const MAX_RECENT_CHATS = 7;
+const MAX_RECENT_CHATS = 5;
 const MAX_COLLAPSED_CHATS = 5;
 
 interface Chat {
