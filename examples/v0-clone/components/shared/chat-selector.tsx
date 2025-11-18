@@ -14,6 +14,7 @@ import {
   Lock
 } from "lucide-react";
 import { IconMessage } from "@tabler/icons-react";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -122,7 +123,10 @@ export function ChatSelector() {
   };
 
   const handleRenameChat = async () => {
-    if (!renameChatName.trim() || !currentChatId) return;
+    if (!renameChatName.trim() || !currentChatId) {
+      toast.warning("Please enter a valid chat name");
+      return;
+    }
 
     setIsRenamingChat(true);
     try {
@@ -137,7 +141,8 @@ export function ChatSelector() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to rename chat");
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to rename chat");
       }
 
       const updatedChat = await response.json();
@@ -145,11 +150,22 @@ export function ChatSelector() {
       // Update the chat in the store
       updateChat(currentChatId, { name: updatedChat.name });
 
+      // Show success toast
+      toast.success("Chat renamed successfully", {
+        description: `Your chat has been renamed to "${updatedChat.name}"`
+      });
+
       // Close dialog and reset form
       setIsRenameDialogOpen(false);
       setRenameChatName("");
     } catch (error) {
       console.error("Error renaming chat:", error);
+      toast.error("Failed to rename chat", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again."
+      });
     } finally {
       setIsRenamingChat(false);
     }
@@ -165,17 +181,31 @@ export function ChatSelector() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete chat");
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to delete chat");
       }
 
       // Remove the chat from the store
       deleteChatFromStore(currentChatId);
+
+      // Show success toast
+      toast.success("Chat deleted", {
+        description: "Your chat has been permanently deleted"
+      });
 
       // Close dialog and navigate to home
       setIsDeleteDialogOpen(false);
       router.push("/");
     } catch (error) {
       console.error("Error deleting chat:", error);
+      toast.error("Failed to delete chat", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again."
+      });
+
+      // Keep dialog open on error so user can retry
     } finally {
       setIsDeletingChat(false);
     }
@@ -185,6 +215,12 @@ export function ChatSelector() {
     if (!currentChatId) return;
 
     setIsDuplicatingChat(true);
+
+    // Show loading toast
+    const loadingToast = toast.loading("Duplicating chat...", {
+      description: "This may take a moment"
+    });
+
     try {
       const response = await fetch("/api/chat/fork", {
         method: "POST",
@@ -195,16 +231,38 @@ export function ChatSelector() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to duplicate chat");
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to duplicate chat");
       }
 
       const result = await response.json();
 
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success("Chat duplicated successfully", {
+        description: "Redirecting to your new chat..."
+      });
+
       // Close dialog and navigate to the new forked chat
       setIsDuplicateDialogOpen(false);
-      router.push(`/chats/${result.id}`);
+
+      // Small delay to show success message before navigation
+      setTimeout(() => {
+        router.push(`/chats/${result.id}`);
+      }, 500);
     } catch (error) {
       console.error("Error duplicating chat:", error);
+
+      // Dismiss loading toast and show error
+      toast.dismiss(loadingToast);
+      toast.error("Failed to duplicate chat", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again."
+      });
+
+      // Keep dialog open on error so user can retry
     } finally {
       setIsDuplicatingChat(false);
     }
@@ -212,6 +270,16 @@ export function ChatSelector() {
 
   const handleChangeVisibility = async () => {
     if (!currentChatId) return;
+
+    // Get current chat to check if visibility is actually changing
+    const currentChat = chats.find((c) => c.id === currentChatId);
+    if (currentChat && currentChat.privacy === selectedVisibility) {
+      toast.info("No changes made", {
+        description: `Chat is already set to ${getPrivacyDisplayName(selectedVisibility)}`
+      });
+      setIsVisibilityDialogOpen(false);
+      return;
+    }
 
     setIsChangingVisibility(true);
     try {
@@ -224,7 +292,8 @@ export function ChatSelector() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to change chat visibility");
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to change chat visibility");
       }
 
       const updatedChat = await response.json();
@@ -232,10 +301,23 @@ export function ChatSelector() {
       // Update the chat in the store
       updateChat(currentChatId, { privacy: updatedChat.privacy });
 
+      // Show success toast with privacy level
+      toast.success("Visibility updated", {
+        description: `Your chat is now ${getPrivacyDisplayName(updatedChat.privacy).toLowerCase()}`
+      });
+
       // Close dialog
       setIsVisibilityDialogOpen(false);
     } catch (error) {
       console.error("Error changing chat visibility:", error);
+      toast.error("Failed to update visibility", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again."
+      });
+
+      // Keep dialog open on error so user can retry
     } finally {
       setIsChangingVisibility(false);
     }
@@ -255,63 +337,60 @@ export function ChatSelector() {
   return (
     <>
       <div className="flex w-full items-center gap-2">
-        <Select
-          value={currentChatId || ""}
-          onValueChange={handleValueChange}
-          disabled={isLoading}
-        >
-          <SelectTrigger className="h-9 w-full border-white/8 bg-white/3 hover:bg-white/5 focus:bg-white/8 focus:ring-0 focus:ring-offset-0">
-            <SelectValue placeholder="Select a chat">
-              {currentChat ? (
-                <div className="flex items-center gap-2">
-                  <IconMessage className="text-muted-foreground h-4 w-4" />
-                  <span className="truncate">
-                    {getChatDisplayName(currentChat)}
-                  </span>
-                  {currentChat.privacy && currentChat.privacy !== "private" && (
-                    <div className="text-muted-foreground flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs">
-                      {getPrivacyIcon(currentChat.privacy)}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-muted-foreground flex items-center gap-2">
-                  <IconMessage className="h-4 w-4" />
+        {isLoading ? (
+          <div className="h-10 flex-1 animate-pulse rounded-lg bg-white/5" />
+        ) : chats.length === 0 ? (
+          <div className="text-muted-foreground flex h-10 flex-1 items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm">
+            <IconMessage className="h-4 w-4" />
+            <span>No chats yet</span>
+          </div>
+        ) : (
+          <Select value={currentChatId || ""} onValueChange={handleValueChange}>
+            <SelectTrigger className="flex-1 border-white/10 bg-white/5 transition-colors hover:bg-white/8">
+              <SelectValue placeholder="Select a chat">
+                {currentChat ? (
+                  <div className="flex items-center gap-2">
+                    <IconMessage className="h-4 w-4" />
+                    <span className="truncate">
+                      {getChatDisplayName(currentChat)}
+                    </span>
+                    {currentChat.privacy && (
+                      <span className="text-muted-foreground">
+                        {getPrivacyIcon(currentChat.privacy)}
+                      </span>
+                    )}
+                  </div>
+                ) : (
                   <span>Select a chat</span>
-                </div>
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent className="max-h-[300px] overflow-y-auto">
-            {chats.length === 0 ? (
-              <div className="text-muted-foreground px-2 py-4 text-center text-sm">
-                {isLoading ? "Loading chats..." : "No chats yet"}
-              </div>
-            ) : (
-              chats.map((chat) => (
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {chats.map((chat) => (
                 <SelectItem key={chat.id} value={chat.id}>
                   <div className="flex items-center gap-2">
-                    <IconMessage className="text-muted-foreground h-4 w-4" />
+                    <IconMessage className="h-4 w-4" />
                     <span className="truncate">{getChatDisplayName(chat)}</span>
-                    {chat.privacy && chat.privacy !== "private" && (
-                      <div className="text-muted-foreground ml-auto flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs">
+                    {chat.privacy && (
+                      <span className="text-muted-foreground">
                         {getPrivacyIcon(chat.privacy)}
-                      </div>
+                      </span>
                     )}
                   </div>
                 </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
-        {currentChatId && currentChat && (
+        {/* Chat Actions Dropdown */}
+        {currentChat && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 shrink-0 border-white/8 bg-white/3 hover:bg-white/5"
+                className="h-10 w-10 border-white/10 bg-white/5 hover:bg-white/8"
                 disabled={
                   isRenamingChat ||
                   isDeletingChat ||
@@ -320,10 +399,9 @@ export function ChatSelector() {
                 }
               >
                 <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">More options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
+            <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={handleOpenVisibilityDialog}
                 disabled={
@@ -336,20 +414,24 @@ export function ChatSelector() {
                 {getPrivacyIcon(currentChat.privacy || "private")}
                 <span className="ml-2">Change Visibility</span>
               </DropdownMenuItem>
-              {currentChat.url && (
-                <DropdownMenuItem
-                  onClick={() => window.open(currentChat.url, "_blank")}
-                  disabled={
-                    isRenamingChat ||
-                    isDeletingChat ||
-                    isDuplicatingChat ||
-                    isChangingVisibility
+              <DropdownMenuItem
+                onClick={() => {
+                  if (currentChat.url) {
+                    window.open(currentChat.url, "_blank");
                   }
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Open in New Tab
-                </DropdownMenuItem>
-              )}
+                }}
+                disabled={
+                  !currentChat.url ||
+                  isRenamingChat ||
+                  isDeletingChat ||
+                  isDuplicatingChat ||
+                  isChangingVisibility
+                }
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open in New Tab
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => setIsDuplicateDialogOpen(true)}
                 disabled={

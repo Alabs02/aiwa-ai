@@ -197,7 +197,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "hover:bg-white/[0.08]",
                     "transition-all duration-200",
                     "group",
-                    isCollapsed && "justify-center px-0 size-9"
+                    isCollapsed && "size-9 justify-center px-0"
                   )}
                 >
                   <Plus className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:rotate-90" />
@@ -207,7 +207,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   New Chat
                 </TooltipContent>
               )}
@@ -239,7 +242,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Search (⌘K)
                 </TooltipContent>
               )}
@@ -270,7 +276,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Workspace
                 </TooltipContent>
               )}
@@ -298,7 +307,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Projects
                 </TooltipContent>
               )}
@@ -326,7 +338,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Templates
                 </TooltipContent>
               )}
@@ -456,7 +471,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     </TooltipTrigger>
-                    <TooltipContent side="right" className="font-medium">
+                    <TooltipContent
+                      side="right"
+                      className="text-background font-medium"
+                    >
                       View All Chats
                     </TooltipContent>
                   </Tooltip>
