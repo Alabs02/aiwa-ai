@@ -195,7 +195,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "w-full justify-start gap-3",
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
-                    "transition-all duration-200",
+                    "w-[calc(100%-14px)] transition-all duration-200",
                     "group",
                     isCollapsed && "size-9 justify-center px-0"
                   )}
@@ -226,7 +226,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "w-full justify-start gap-3",
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
-                    "transition-all duration-200",
+                    "w-[calc(100%-14px)] transition-all duration-200",
                     isCollapsed && "size-9 justify-center px-0"
                   )}
                 >
@@ -264,7 +264,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "w-full justify-start gap-3",
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
-                    "transition-all duration-200",
+                    "w-[calc(100%-14px)] transition-all duration-200",
                     pathname === "/workspace" && "bg-white/[0.12] text-white",
                     isCollapsed && "size-9 justify-center px-0"
                   )}
@@ -295,7 +295,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "w-full justify-start gap-3",
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
-                    "transition-all duration-200",
+                    "w-[calc(100%-14px)] transition-all duration-200",
                     pathname === "/projects" && "bg-white/[0.12] text-white",
                     isCollapsed && "size-9 justify-center px-0"
                   )}
@@ -326,7 +326,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                     "w-full justify-start gap-3",
                     "text-white/80 hover:text-white",
                     "hover:bg-white/[0.08]",
-                    "transition-all duration-200",
+                    "w-[calc(100%-14px)] transition-all duration-200",
                     pathname === "/templates" && "bg-white/[0.12] text-white",
                     isCollapsed && "size-9 justify-center px-0"
                   )}
@@ -375,7 +375,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
                             "text-sm text-white/70 hover:text-white",
                             "hover:bg-white/[0.08]",
                             "transition-all duration-200",
-                            "group",
+                            "group w-[calc(100%-14px)]",
                             isActive && "bg-white/[0.12] text-white"
                           )}
                         >
