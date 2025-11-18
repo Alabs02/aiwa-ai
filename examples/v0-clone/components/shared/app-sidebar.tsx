@@ -207,7 +207,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium text-background">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   New Chat
                 </TooltipContent>
               )}
@@ -239,7 +242,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium text-background">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Search (⌘K)
                 </TooltipContent>
               )}
@@ -270,7 +276,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium text-background">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Workspace
                 </TooltipContent>
               )}
@@ -298,7 +307,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium text-background">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Projects
                 </TooltipContent>
               )}
@@ -326,7 +338,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
                 </Button>
               </TooltipTrigger>
               {isCollapsed && (
-                <TooltipContent side="right" className="font-medium text-background">
+                <TooltipContent
+                  side="right"
+                  className="text-background font-medium"
+                >
                   Templates
                 </TooltipContent>
               )}
