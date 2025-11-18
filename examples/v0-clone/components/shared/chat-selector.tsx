@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import {
   MoreHorizontal,
   Edit2,
@@ -39,6 +38,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useChats } from "@/queries/use-chats";
+import { useChatsStore } from "./chat-selector.store";
 
 interface Chat {
   id: string;
@@ -91,9 +92,13 @@ const getPrivacyDisplayName = (privacy: string) => {
 export function ChatSelector() {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Use the custom hook for fetching chats
+  const { chats, isLoading } = useChats();
+  
+  // Use the store for updating chats
+  const { updateChat, deleteChat: deleteChatFromStore } = useChatsStore();
+  
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
@@ -111,28 +116,6 @@ export function ChatSelector() {
   const currentChatId = pathname?.startsWith("/chats/")
     ? pathname.split("/")[2]
     : null;
-
-  // Fetch user's chats
-  useEffect(() => {
-    if (!session?.user?.id) return;
-
-    const fetchChats = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/chats");
-        if (response.ok) {
-          const data = await response.json();
-          setChats(data.data || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch chats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchChats();
-  }, [session?.user?.id]);
 
   const handleValueChange = (chatId: string) => {
     router.push(`/chats/${chatId}`);
@@ -159,12 +142,8 @@ export function ChatSelector() {
 
       const updatedChat = await response.json();
 
-      // Update the chat in the list
-      setChats((prev) =>
-        prev.map((c) =>
-          c.id === currentChatId ? { ...c, name: updatedChat.name } : c
-        )
-      );
+      // Update the chat in the store
+      updateChat(currentChatId, { name: updatedChat.name });
 
       // Close dialog and reset form
       setIsRenameDialogOpen(false);
@@ -189,8 +168,8 @@ export function ChatSelector() {
         throw new Error("Failed to delete chat");
       }
 
-      // Remove the chat from the list
-      setChats((prev) => prev.filter((c) => c.id !== currentChatId));
+      // Remove the chat from the store
+      deleteChatFromStore(currentChatId);
 
       // Close dialog and navigate to home
       setIsDeleteDialogOpen(false);
@@ -250,12 +229,8 @@ export function ChatSelector() {
 
       const updatedChat = await response.json();
 
-      // Update the chat in the list
-      setChats((prev) =>
-        prev.map((c) =>
-          c.id === currentChatId ? { ...c, privacy: updatedChat.privacy } : c
-        )
-      );
+      // Update the chat in the store
+      updateChat(currentChatId, { privacy: updatedChat.privacy });
 
       // Close dialog
       setIsVisibilityDialogOpen(false);
@@ -266,58 +241,76 @@ export function ChatSelector() {
     }
   };
 
-  // Don't show if user is not authenticated
-  if (!session?.user?.id) return null;
+  const handleOpenVisibilityDialog = () => {
+    const currentChat = chats.find((c) => c.id === currentChatId);
+    if (currentChat) {
+      setSelectedVisibility(currentChat.privacy || "private");
+    }
+    setIsVisibilityDialogOpen(true);
+  };
 
-  const currentChat = currentChatId
-    ? chats.find((c) => c.id === currentChatId)
-    : null;
+  // Find current chat
+  const currentChat = chats.find((c) => c.id === currentChatId);
 
   return (
     <>
-      <div className="flex items-center gap-1">
-        <Select value={currentChatId || ""} onValueChange={handleValueChange}>
-          <SelectTrigger
-            className="w-fit max-w-[250px] min-w-[150px]"
-            size="sm"
-          >
-            <SelectValue placeholder="Select chat">
-              <div className="flex items-center gap-2">
-                <IconMessage className="h-4 w-4" />
-                <span className="truncate">
-                  {currentChat
-                    ? getChatDisplayName(currentChat)
-                    : "Select chat"}
-                </span>
-              </div>
+      <div className="flex w-full items-center gap-2">
+        <Select
+          value={currentChatId || ""}
+          onValueChange={handleValueChange}
+          disabled={isLoading}
+        >
+          <SelectTrigger className="h-9 w-full border-white/8 bg-white/3 hover:bg-white/5 focus:bg-white/8 focus:ring-0 focus:ring-offset-0">
+            <SelectValue placeholder="Select a chat">
+              {currentChat ? (
+                <div className="flex items-center gap-2">
+                  <IconMessage className="h-4 w-4 text-muted-foreground" />
+                  <span className="truncate">{getChatDisplayName(currentChat)}</span>
+                  {currentChat.privacy &&
+                    currentChat.privacy !== "private" && (
+                      <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted-foreground">
+                        {getPrivacyIcon(currentChat.privacy)}
+                      </div>
+                    )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <IconMessage className="h-4 w-4" />
+                  <span>Select a chat</span>
+                </div>
+              )}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent>
-            {chats.length > 0 ? (
-              chats.slice(0, 15).map((chat) => (
+          <SelectContent className="max-h-[300px] overflow-y-auto">
+            {chats.length === 0 ? (
+              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                {isLoading ? "Loading chats..." : "No chats yet"}
+              </div>
+            ) : (
+              chats.map((chat) => (
                 <SelectItem key={chat.id} value={chat.id}>
                   <div className="flex items-center gap-2">
-                    <IconMessage className="h-4 w-4" />
+                    <IconMessage className="h-4 w-4 text-muted-foreground" />
                     <span className="truncate">{getChatDisplayName(chat)}</span>
+                    {chat.privacy && chat.privacy !== "private" && (
+                      <div className="ml-auto flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted-foreground">
+                        {getPrivacyIcon(chat.privacy)}
+                      </div>
+                    )}
                   </div>
                 </SelectItem>
               ))
-            ) : (
-              <div className="text-muted-foreground px-2 py-1.5 text-sm">
-                No chats yet
-              </div>
             )}
           </SelectContent>
         </Select>
 
-        {/* Chat Context Menu */}
-        {currentChat && (
+        {currentChatId && currentChat && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
+                size="icon"
+                className="h-9 w-9 shrink-0 border-white/8 bg-white/3 hover:bg-white/5"
                 disabled={
                   isRenamingChat ||
                   isDeletingChat ||
@@ -326,22 +319,36 @@ export function ChatSelector() {
                 }
               >
                 <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Chat options</span>
+                <span className="sr-only">More options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {/* <DropdownMenuItem asChild>
-                <a
-                  href={`https://v0.app/chat/${currentChatId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center"
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem
+                onClick={handleOpenVisibilityDialog}
+                disabled={
+                  isRenamingChat ||
+                  isDeletingChat ||
+                  isDuplicatingChat ||
+                  isChangingVisibility
+                }
+              >
+                {getPrivacyIcon(currentChat.privacy || "private")}
+                <span className="ml-2">Change Visibility</span>
+              </DropdownMenuItem>
+              {currentChat.url && (
+                <DropdownMenuItem
+                  onClick={() => window.open(currentChat.url, "_blank")}
+                  disabled={
+                    isRenamingChat ||
+                    isDeletingChat ||
+                    isDuplicatingChat ||
+                    isChangingVisibility
+                  }
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  View on v0.dev
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator /> */}
+                  Open in New Tab
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => setIsDuplicateDialogOpen(true)}
                 disabled={
@@ -353,21 +360,6 @@ export function ChatSelector() {
               >
                 <Copy className="mr-2 h-4 w-4" />
                 Duplicate Chat
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelectedVisibility(currentChat.privacy || "private");
-                  setIsVisibilityDialogOpen(true);
-                }}
-                disabled={
-                  isRenamingChat ||
-                  isDeletingChat ||
-                  isDuplicatingChat ||
-                  isChangingVisibility
-                }
-              >
-                {getPrivacyIcon(currentChat.privacy || "private")}
-                <span className="ml-2">Change Visibility</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
@@ -468,6 +460,7 @@ export function ChatSelector() {
               variant="destructive"
               onClick={handleDeleteChat}
               disabled={isDeletingChat}
+              className="bg-neutral-100 hover:bg-neutral-200 text-background"
             >
               {isDeletingChat ? "Deleting..." : "Delete Chat"}
             </Button>
@@ -496,7 +489,7 @@ export function ChatSelector() {
             >
               Cancel
             </Button>
-            <Button onClick={handleDuplicateChat} disabled={isDuplicatingChat}>
+            <Button onClick={handleDuplicateChat} disabled={isDuplicatingChat} className="bg-neutral-100 hover:bg-neutral-200 text-background">
               {isDuplicatingChat ? "Duplicating..." : "Duplicate Chat"}
             </Button>
           </DialogFooter>
@@ -585,17 +578,6 @@ export function ChatSelector() {
                     </div>
                   </div>
                 </SelectItem>
-                {/* <SelectItem value="unlisted">
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    <div>
-                      <div>Unlisted</div>
-                      <div className="text-xs text-muted-foreground">
-                        Only people with the link can see this chat
-                      </div>
-                    </div>
-                  </div>
-                </SelectItem> */}
               </SelectContent>
             </Select>
           </div>
@@ -610,6 +592,7 @@ export function ChatSelector() {
             <Button
               onClick={handleChangeVisibility}
               disabled={isChangingVisibility}
+              className="bg-neutral-100 hover:bg-neutral-200 text-background"
             >
               {isChangingVisibility ? "Changing..." : "Change Visibility"}
             </Button>

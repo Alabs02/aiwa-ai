@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   PromptInput,
@@ -43,6 +43,8 @@ import { AppSidebar } from "@/components/shared/app-sidebar";
 import { useSidebarCollapse } from "@/hooks/use-sidebar-collapse";
 import { useChatStore } from "./home-client.store";
 import { useSession } from "next-auth/react";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { useChatsStore } from "@/components/shared/chat-selector.store";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -85,6 +87,8 @@ export function HomeClient() {
     resetChatState,
     getSelectedProject
   } = useChatStore();
+
+  const {  setChats, setIsLoading: setIsLoadingChats } = useChatsStore();
 
   const { status, data: session } = useSession();
   const { isCollapsed } = useSidebarCollapse();
@@ -328,6 +332,24 @@ export function HomeClient() {
     setIsLoading(false);
   };
 
+
+  const handleFetchChats = async () => {
+    if (!session?.user?.id) return;
+
+    setIsLoadingChats(true);
+    try {
+      const response = await fetch("/api/chats");
+      if (response.ok) {
+        const data = await response.json();
+        setChats(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch chats:", error);
+    } finally {
+      setIsLoadingChats(false);
+    }
+  }
+
   const handleChatData = async (data: any) => {
     console.log({ data });
 
@@ -342,6 +364,7 @@ export function HomeClient() {
         asPath: `/chats/${data.id}`,
         scroll: false
       };
+
       window.history.pushState(stateObject, "", `/chats/${data.id}`);
 
       console.log("Chat created with ID:", data.id);
@@ -358,6 +381,8 @@ export function HomeClient() {
           })
         });
         console.log("Chat ownership created:", data.id);
+        
+        handleFetchChats();
       } catch (error) {
         console.error("Failed to create chat ownership:", error);
       }
@@ -497,8 +522,10 @@ export function HomeClient() {
                   Vibe. Build. Deploy.
                 </h2>
 
-                <p className="font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
+                <p className="relative font-body bg-background/65 mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
                   Vibe-code your imagination. Bring it to life with Aiwa.
+
+                  <BorderBeam duration={10} size={100} colorFrom="#f6821f" colorTo="#ad46ff" />
                 </p>
 
                 {/* Prompt Input */}
@@ -602,6 +629,7 @@ export function HomeClient() {
                     {suggestions.map(({ Copy, Icon, Prompt }, idx) => (
                       <Suggestion
                         key={`${Copy}-${idx}`}
+                        disabled={isLoading || (isAuthenticated && !envVarsValid)}
                         onClick={() => {
                           setMessage(Prompt);
                           // Submit after setting message

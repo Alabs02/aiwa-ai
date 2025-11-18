@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Loader } from "lucide-react";
 import { FeaturedTemplatesSkeleton } from "./card-skeleton";
+import { MagicCard } from "@/components/ui/magic-card";
 
 type VisibilityFilter = "all" | "public" | "private" | "team";
 
@@ -250,10 +251,13 @@ function TemplateCard({ chat }: { chat: FeaturedChat }) {
   return (
     <Link
       href={`/chats/${chat.id}`}
-      className="group block overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600 hover:shadow-xl hover:shadow-neutral-900/50"
+      prefetch
+      passHref
     >
+    <MagicCard gradientFrom="#9E7AFF" gradientTo="#f9a862" className="rounded-lg p-0.5">
+
       {/* Preview/Thumbnail */}
-      <div className="relative aspect-video overflow-hidden bg-neutral-800">
+      <div className="relative aspect-video overflow-hidden rounded-t-lg bg-neutral-800">
         {hasPreview ? (
           <Image
             src={chat.preview_url!}
@@ -329,6 +333,8 @@ function TemplateCard({ chat }: { chat: FeaturedChat }) {
           </span>
         </div>
       </div>
+    </MagicCard>
     </Link>
+
   );
 }

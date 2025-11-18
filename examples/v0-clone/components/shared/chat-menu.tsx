@@ -151,7 +151,7 @@ export function ChatMenu({ chatId }: ChatMenuProps) {
             >
               Cancel
             </Button>
-            <Button onClick={handleDuplicateChat} disabled={isLoading}>
+            <Button onClick={handleDuplicateChat} disabled={isLoading} className="bg-neutral-100 text-background hover:bg-neutral-200">
               {isLoading ? "Duplicating..." : "Duplicate Chat"}
             </Button>
           </DialogFooter>
@@ -180,6 +180,7 @@ export function ChatMenu({ chatId }: ChatMenuProps) {
               variant="destructive"
               onClick={handleDeleteChat}
               disabled={isLoading}
+              className="bg-neutral-100 hover:bg-neutral-200 text-background"
             >
               {isLoading ? "Deleting..." : "Delete Chat"}
             </Button>
