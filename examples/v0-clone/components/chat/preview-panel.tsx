@@ -224,10 +224,8 @@ export function PreviewPanel({
       );
     }
 
-    // During generation but no files yet - show animation
     if (isGenerating) {
       return <CodeGenerationAnimation />;
-      //  <PreviewLoadingAnimation />;
     }
 
     // No files available

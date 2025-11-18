@@ -72,7 +72,7 @@ export function ChatsClient() {
               </div>
 
               <Link href="/" passHref>
-                <Button>
+                <Button className="text-background bg-neutral-100 hover:bg-neutral-200">
                   <Plus className="size-4" />
                   <span>New Chat</span>
                 </Button>

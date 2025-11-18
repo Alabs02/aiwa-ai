@@ -9,6 +9,7 @@ import Image from "next/image";
 import { UserNav } from "@/components/user-nav";
 import { RippleButton } from "@/components/ui/ripple-button";
 import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface ToolbarProps {
   className?: string;
@@ -57,7 +58,10 @@ export function Toolbar({ className = "" }: ToolbarProps) {
       </Suspense>
 
       <motion.nav
-        className="sticky top-0 z-50 flex h-[60px] w-full items-center justify-between border-none px-5 md:px-4"
+        className={cn(
+          "sticky top-0 z-50 flex h-[60px] w-full items-center justify-between px-5 md:px-4",
+          className
+        )}
         animate={{
           backgroundColor: isScrolled
             ? "rgba(0, 0, 0, 0.5)"

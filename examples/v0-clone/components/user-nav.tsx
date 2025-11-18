@@ -13,11 +13,11 @@ import {
 import {
   IconLogout,
   IconUserSquareRounded,
-  IconLayoutGrid,
-  IconMessages,
+  IconTemplate,
   IconSettings,
   IconCreditCard,
-  IconFolders
+  IconFolders,
+  IconLayoutDashboard
 } from "@tabler/icons-react";
 import { Session } from "next-auth";
 
@@ -64,6 +64,12 @@ export function UserNav({ session }: UserNavProps) {
         {!isSignedOut && !isGuest && (
           <>
             <DropdownMenuItem asChild>
+              <a href="/workspace" className="font-button cursor-pointer">
+                <IconLayoutDashboard className="mr-2 size-4 lg:size-5" />
+                <span>Workspace</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <a href="/projects" className="font-button cursor-pointer">
                 <IconFolders className="mr-2 size-4 lg:size-5" />
                 <span>Projects</span>
@@ -71,14 +77,8 @@ export function UserNav({ session }: UserNavProps) {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="/templates" className="font-button cursor-pointer">
-                <IconLayoutGrid className="mr-2 size-4 lg:size-5" />
+                <IconTemplate className="mr-2 size-4 lg:size-5" />
                 <span>Templates</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="/chats" className="font-button cursor-pointer">
-                <IconMessages className="mr-2 size-4 lg:size-5" />
-                <span>All Chats</span>
               </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -116,7 +116,6 @@ export function UserNav({ session }: UserNavProps) {
         {!isSignedOut && (
           <DropdownMenuItem
             onClick={async () => {
-              // Clear any local session data first
               await signOut({ callbackUrl: "/", redirect: true });
             }}
             className="font-button cursor-pointer"
