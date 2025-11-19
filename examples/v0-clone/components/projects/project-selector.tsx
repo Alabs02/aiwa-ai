@@ -27,6 +27,8 @@ interface Project {
   updated_at: string;
 }
 
+const MASKED_VALUE = "••••••••••••••••••••••••••••••••";
+
 export function ProjectSelector() {
   const [isLoading, setIsLoading] = useState(true);
   const {
@@ -35,7 +37,8 @@ export function ProjectSelector() {
     setSelectedProjectId,
     setProjects,
     setEnvVarsValid,
-    setShowEnvDialog
+    setShowEnvDialog,
+    setIsAutoProvisioning
   } = useChatStore();
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export function ProjectSelector() {
         if (data.data && data.data.length > 0) {
           const firstProject = data.data[0];
           setSelectedProjectId(firstProject.id);
-          await checkEnvVars(firstProject.id);
+          await checkAndProvisionEnvVars(firstProject.id);
         }
       } else {
         toast.error("Failed to load projects");
@@ -66,33 +69,124 @@ export function ProjectSelector() {
     }
   };
 
-  const checkEnvVars = async (projectId: string) => {
+  const checkAndProvisionEnvVars = async (projectId: string) => {
     try {
       const response = await fetch(`/api/projects/${projectId}/env-vars`);
-      if (response.ok) {
-        const data = await response.json();
-        const envVars = data.data || [];
+      if (!response.ok) {
+        setEnvVarsValid(false);
+        return;
+      }
 
-        const hasV0ApiKey = envVars.some((v: any) => v.key === "V0_API_KEY");
-        const hasGatewayKey = envVars.some(
-          (v: any) => v.key === "AI_GATEWAY_API_KEY"
-        );
+      const data = await response.json();
+      const envVars = data.data || [];
 
-        const isValid = hasV0ApiKey && hasGatewayKey;
-        setEnvVarsValid(isValid);
+      // Check for required env vars - ONLY AI_GATEWAY_API_KEY now
+      const hasGatewayKey = envVars.some(
+        (v: any) => v.key === "AI_GATEWAY_API_KEY"
+      );
+      const hasProjectId = envVars.some(
+        (v: any) => v.key === "NEXT_PUBLIC_PROJECT_ID"
+      );
 
-        if (!isValid) {
-          setTimeout(() => setShowEnvDialog(true), 500);
-        }
+      // If missing required keys, try to auto-provision
+      if (!hasGatewayKey || !hasProjectId) {
+        await autoProvisionMissingKeys(projectId, envVars);
+      } else {
+        // All required keys present
+        setEnvVarsValid(true);
       }
     } catch (error) {
       console.error("Failed to check env vars:", error);
+      setEnvVarsValid(false);
+    }
+  };
+
+  const autoProvisionMissingKeys = async (
+    projectId: string,
+    existingVars: any[]
+  ) => {
+    try {
+      // Start auto-provisioning state
+      setIsAutoProvisioning(true);
+
+      const varsToCreate: Array<{ key: string; value: string }> = [];
+
+      // Check if NEXT_PUBLIC_PROJECT_ID is missing
+      if (!existingVars.some((v) => v.key === "NEXT_PUBLIC_PROJECT_ID")) {
+        varsToCreate.push({
+          key: "NEXT_PUBLIC_PROJECT_ID",
+          value: projectId
+        });
+      }
+
+      // Check if AI_GATEWAY_API_KEY is missing
+      if (!existingVars.some((v) => v.key === "AI_GATEWAY_API_KEY")) {
+        // Try to get system AI_GATEWAY_API_KEY
+        const systemKeyResponse = await fetch(
+          "/api/system/ai-gateway-key-status"
+        );
+
+        if (systemKeyResponse.ok) {
+          const { available } = await systemKeyResponse.json();
+
+          if (available) {
+            // System key is available, use special marker to tell backend to use it
+            varsToCreate.push({
+              key: "AI_GATEWAY_API_KEY",
+              value: "__USE_SYSTEM_KEY__"
+            });
+          } else {
+            // System key not available, show dialog for user input
+            setIsAutoProvisioning(false);
+            setEnvVarsValid(false);
+            setTimeout(() => setShowEnvDialog(true), 500);
+            return;
+          }
+        } else {
+          // Can't check system key status, show dialog
+          setIsAutoProvisioning(false);
+          setEnvVarsValid(false);
+          setTimeout(() => setShowEnvDialog(true), 500);
+          return;
+        }
+      }
+
+      // Create the missing env vars
+      if (varsToCreate.length > 0) {
+        const createResponse = await fetch(
+          `/api/projects/${projectId}/env-vars`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              environmentVariables: varsToCreate,
+              upsert: true
+            })
+          }
+        );
+
+        if (createResponse.ok) {
+          setEnvVarsValid(true);
+          toast.success("Environment configured successfully");
+        } else {
+          throw new Error("Failed to create env vars");
+        }
+      } else {
+        // All keys present
+        setEnvVarsValid(true);
+      }
+    } catch (error) {
+      console.error("Auto-provisioning failed:", error);
+      setEnvVarsValid(false);
+      setTimeout(() => setShowEnvDialog(true), 500);
+    } finally {
+      setIsAutoProvisioning(false);
     }
   };
 
   const handleProjectChange = async (projectId: string) => {
     setSelectedProjectId(projectId);
-    await checkEnvVars(projectId);
+    await checkAndProvisionEnvVars(projectId);
   };
 
   const truncateName = (name: string) => {
