@@ -154,7 +154,7 @@ export function PromptEnhancerDialog({
 
   const handleUse = () => {
     const promptToUse = enhancedPrompt || prompt;
-    onUsePrompt(promptToUse);
+    onUsePrompt(cleanLlmOutput(promptToUse));
     onOpenChange(false);
     toast.success("Prompt ready to use");
   };

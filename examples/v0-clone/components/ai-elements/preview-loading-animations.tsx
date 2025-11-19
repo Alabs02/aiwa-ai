@@ -228,35 +228,22 @@ export function PreviewLoadingAnimation({
                         style={{ animationDelay: "100ms" }}
                       />
                       <div
-                        className="animate-pulse-refined h-32 w-full rounded-lg border border-white/[0.10] bg-white/[0.10] shadow-sm"
+                        className="animate-pulse-refined h-12 w-[40%] rounded-lg bg-gradient-to-r from-orange-500/35 to-orange-500/25 shadow-lg shadow-orange-500/20"
                         style={{ animationDelay: "200ms" }}
-                      />
-                      <div
-                        className="animate-pulse-refined h-12 w-[45%] rounded-xl bg-gradient-to-r from-orange-500/35 to-orange-500/25 shadow-lg shadow-orange-500/20"
-                        style={{ animationDelay: "300ms" }}
                       />
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Enhanced shimmer effect */}
-              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
-                <div className="animate-shimmer absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced progress bar with no step counter */}
-        <div className="w-full max-w-lg">
-          <div className="relative h-1.5 overflow-hidden rounded-full border border-white/[0.12] bg-white/[0.04] shadow-inner">
-            {/* Background track glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/5 to-transparent" />
-
-            {/* Progress fill with enhanced effects */}
+        {/* Enhanced progress bar with better visibility */}
+        <div className="relative w-64">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.10]">
             <div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 shadow-[0_0_16px_rgba(251,146,60,0.6),0_0_4px_rgba(251,146,60,0.8)] transition-all duration-500 ease-out"
+              className="relative h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500 ease-out"
               style={{
                 width: `${((currentStage + 1) / generationStages.length) * 100}%`
               }}
@@ -374,29 +361,84 @@ export function PreviewLoadingAnimation({
 
 interface CodeGenerationAnimationProps {
   className?: string;
+  files?: Array<{
+    name: string;
+    content: string;
+  }>;
 }
 
 export function CodeGenerationAnimation({
-  className
+  className,
+  files = []
 }: CodeGenerationAnimationProps) {
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [lines, setLines] = useState<string[]>([]);
+  const [isComplete, setIsComplete] = useState(false);
 
-  const codeLines = [
-    "import { useState } from 'react'",
-    "",
-    "export default function App() {",
-    "  const [count, setCount] = useState(0)",
-    "",
-    "  return (",
-    '    <div className="container">',
-    "      <h1>Your App</h1>",
-    "      <button onClick={() => setCount(count + 1)}>",
-    "        Count: {count}",
-    "      </button>",
-    "    </div>",
-    "  )",
-    "}"
+  // Default fallback files if none provided
+  const defaultFiles = [
+    {
+      name: "app/page.tsx",
+      content: `import { useState } from 'react'
+
+export default function App() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <div className="container">
+      <h1>Your App</h1>
+      <button onClick={() => setCount(count + 1)}>
+        Count: {count}
+      </button>
+    </div>
+  )
+}`
+    },
+    {
+      name: "app/layout.tsx",
+      content: `import type { Metadata } from 'next'
+import './globals.css'
+
+export const metadata: Metadata = {
+  title: 'My App',
+  description: 'Created with v0',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}`
+    },
+    {
+      name: "components/button.tsx",
+      content: `interface ButtonProps {
+  onClick: () => void
+  children: React.ReactNode
+}
+
+export function Button({ onClick, children }: ButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-4 py-2 bg-blue-500 text-white rounded"
+    >
+      {children}
+    </button>
+  )
+}`
+    }
   ];
+
+  const actualFiles = files.length > 0 ? files : defaultFiles;
+  const currentFile = actualFiles[currentFileIndex];
+  const codeLines = currentFile?.content.split("\n") || [];
 
   useEffect(() => {
     let currentIndex = 0;
@@ -405,13 +447,18 @@ export function CodeGenerationAnimation({
         setLines((prev) => [...prev, codeLines[currentIndex]]);
         currentIndex++;
       } else {
-        setLines([]);
-        currentIndex = 0;
+        // File complete, move to next after brief pause
+        setIsComplete(true);
+        setTimeout(() => {
+          setCurrentFileIndex((prev) => (prev + 1) % actualFiles.length);
+          setLines([]);
+          setIsComplete(false);
+        }, 800);
       }
-    }, 150);
+    }, 80);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentFileIndex, codeLines.length, actualFiles.length]);
 
   return (
     <div
@@ -424,12 +471,21 @@ export function CodeGenerationAnimation({
           <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
           <div className="h-3 w-3 rounded-full bg-green-500/80" />
         </div>
-        <span className="ml-2 font-mono text-sm text-white/40">
-          app/page.tsx
+        <span className="ml-2 font-mono text-sm text-white/60">
+          {currentFile?.name || "generating..."}
         </span>
         <div className="ml-auto flex items-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-orange-500" />
-          <span className="text-xs text-white/30">Generating...</span>
+          {isComplete ? (
+            <>
+              <div className="h-2 w-2 rounded-full bg-green-500" />
+              <span className="text-xs text-green-400/80">Complete</span>
+            </>
+          ) : (
+            <>
+              <div className="h-2 w-2 animate-pulse rounded-full bg-orange-500" />
+              <span className="text-xs text-white/30">Generating...</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -437,17 +493,19 @@ export function CodeGenerationAnimation({
       <div className="flex-1 overflow-auto bg-black p-4 font-mono text-sm">
         {lines.map((line, index) => (
           <div
-            key={index}
+            key={`${currentFileIndex}-${index}`}
             className="animate-fade-in-line"
-            style={{ animationDelay: `${index * 30}ms` }}
+            style={{ animationDelay: `${index * 20}ms` }}
           >
-            <span className="mr-4 inline-block w-6 text-right text-white/20 select-none">
+            <span className="mr-4 inline-block w-8 text-right text-white/20 select-none">
               {(index + 1).toString().padStart(2, " ")}
             </span>
             <span className="text-white/70">{line || " "}</span>
           </div>
         ))}
-        <div className="animate-blink mt-1 inline-block h-4 w-2 bg-orange-500" />
+        {!isComplete && (
+          <div className="animate-blink mt-1 inline-block h-4 w-2 bg-orange-500" />
+        )}
       </div>
 
       <style jsx>{`

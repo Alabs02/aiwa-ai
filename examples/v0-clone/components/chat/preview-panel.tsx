@@ -79,6 +79,29 @@ const getLanguageFromPath = (path: string): string => {
   return extMap[ext] || "plaintext";
 };
 
+// Transform FileItem to format expected by CodeGenerationAnimation
+const transformFilesForAnimation = (
+  files: FileItem[]
+): Array<{ name: string; content: string }> => {
+  return files.map((file) => {
+    // Handle v0 API format
+    if ("object" in file && file.object === "file") {
+      const v0File = file as V0ApiFile;
+      return {
+        name: v0File.name,
+        content: v0File.content
+      };
+    }
+
+    // Handle legacy format
+    const legacyFile = file as LegacyFileItem;
+    return {
+      name: legacyFile.meta.fileName,
+      content: legacyFile.source
+    };
+  });
+};
+
 export function PreviewPanel({
   currentChat,
   isFullscreen,
@@ -224,8 +247,14 @@ export function PreviewPanel({
       );
     }
 
+    // During generation but no files yet - show code generation animation
     if (isGenerating) {
-      return <CodeGenerationAnimation />;
+      const animationFiles =
+        codeFiles.length > 0
+          ? transformFilesForAnimation(codeFiles)
+          : undefined;
+
+      return <CodeGenerationAnimation files={animationFiles} />;
     }
 
     // No files available
