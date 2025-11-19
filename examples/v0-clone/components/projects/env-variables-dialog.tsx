@@ -29,14 +29,13 @@ interface EnvVar {
   key: string;
   value: string;
   showValue?: boolean;
+  is_system_key?: boolean; // NEW: Flag for system-provided keys
 }
 
-const REQUIRED_VARS = [
-  "V0_API_KEY",
-  "AI_GATEWAY_API_KEY",
-  "NEXT_PUBLIC_PROJECT_ID"
-];
+// UPDATED: Removed V0_API_KEY from required vars
+const REQUIRED_VARS = ["AI_GATEWAY_API_KEY", "NEXT_PUBLIC_PROJECT_ID"];
 const PROTECTED_VARS = ["NEXT_PUBLIC_PROJECT_ID"];
+const MASKED_VALUE = "••••••••••••••••••••••••••••••••"; // For system keys
 
 export function EnvVariablesDialog() {
   const {
@@ -46,7 +45,7 @@ export function EnvVariablesDialog() {
     setEnvVarsValid
   } = useChatStore();
   const [envVars, setEnvVars] = useState<EnvVar[]>([
-    { key: "V0_API_KEY", value: "", showValue: false },
+    // UPDATED: Only AI_GATEWAY_API_KEY is pre-added
     { key: "AI_GATEWAY_API_KEY", value: "", showValue: false }
   ]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -75,7 +74,9 @@ export function EnvVariablesDialog() {
           setEnvVars(
             existing.map((v: any) => ({
               ...v,
-              showValue: false
+              showValue: false,
+              // System keys come back masked from API
+              is_system_key: v.value === MASKED_VALUE
             }))
           );
         }
@@ -88,20 +89,25 @@ export function EnvVariablesDialog() {
   };
 
   const handleSave = async () => {
-    const hasV0Key = envVars.some((v) => v.key === "V0_API_KEY" && v.value);
+    // UPDATED: Only check for AI_GATEWAY_API_KEY
     const hasGatewayKey = envVars.some(
-      (v) => v.key === "AI_GATEWAY_API_KEY" && v.value
+      (v) =>
+        v.key === "AI_GATEWAY_API_KEY" && v.value && v.value !== MASKED_VALUE
     );
 
-    if (!hasV0Key || !hasGatewayKey) {
-      toast.error("V0_API_KEY and AI_GATEWAY_API_KEY are required");
+    if (!hasGatewayKey) {
+      toast.error("AI_GATEWAY_API_KEY is required");
       return;
     }
 
     setIsSaving(true);
     try {
-      // Filter out protected vars - backend will handle them
-      const varsToSave = envVars.filter((v) => !PROTECTED_VARS.includes(v.key));
+      // Filter out protected vars and system keys that weren't changed
+      const varsToSave = envVars.filter(
+        (v) =>
+          !PROTECTED_VARS.includes(v.key) &&
+          !(v.is_system_key && v.value === MASKED_VALUE)
+      );
 
       const response = await fetch(
         `/api/projects/${selectedProjectId}/env-vars`,
@@ -166,16 +172,31 @@ export function EnvVariablesDialog() {
     }
     const newVars = [...envVars];
     newVars[index].value = value;
+    // If user changes a system key, it's no longer a system key
+    if (envVar.is_system_key) {
+      newVars[index].is_system_key = false;
+    }
     setEnvVars(newVars);
   };
 
   const toggleShowValue = (index: number) => {
+    const envVar = envVars[index];
+    // Don't allow showing system keys
+    if (envVar.is_system_key && envVar.value === MASKED_VALUE) {
+      toast.info("System-provided key values cannot be viewed");
+      return;
+    }
     const newVars = [...envVars];
     newVars[index].showValue = !newVars[index].showValue;
     setEnvVars(newVars);
   };
 
   const handleCopy = async (value: string, key: string) => {
+    // Don't allow copying masked system keys
+    if (value === MASKED_VALUE) {
+      toast.info("System-provided key values cannot be copied");
+      return;
+    }
     try {
       await navigator.clipboard.writeText(value);
       setCopiedKey(key);
@@ -213,6 +234,8 @@ export function EnvVariablesDialog() {
           const existing = parsed.findIndex((v) => v.key === cleanKey);
           if (existing >= 0) {
             parsed[existing].value = cleanValue;
+            // Mark as user-provided
+            parsed[existing].is_system_key = false;
           } else {
             parsed.push({ key: cleanKey, value: cleanValue, showValue: false });
           }
@@ -233,20 +256,29 @@ export function EnvVariablesDialog() {
   );
 
   const isProtected = (key: string) => PROTECTED_VARS.includes(key);
+  const isSystemProvided = (envVar: EnvVar) =>
+    envVar.is_system_key && envVar.value === MASKED_VALUE;
 
   return (
-    <Dialog open={showEnvDialog} onOpenChange={() => {}}>
+    <Dialog
+      open={showEnvDialog}
+      onOpenChange={(open) => {
+        // Don't allow closing if required vars are missing
+        if (!open && !hasRequiredVars) {
+          toast.error("Please configure required environment variables");
+          return;
+        }
+        setShowEnvDialog(open);
+      }}
+    >
       <DialogContent
         className={cn(
           "glass border-white/[0.12]",
-          "flex h-[85vh] max-h-[85vh] w-full max-w-2xl flex-col",
+          "flex h-[85vh] max-h-[85vh] max-w-2xl flex-col",
           "shadow-[0_20px_60px_rgba(0,0,0,0.5)]",
           "p-0"
         )}
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        {/* <div className="flex h-full flex-col"> */}
         <div className="shrink-0 border-b border-white/[0.08] p-6">
           <div className="flex items-center gap-3">
             <div className="from-primary/20 rounded-lg bg-gradient-to-br to-purple-500/20 p-2">
@@ -270,8 +302,7 @@ export function EnvVariablesDialog() {
                   Required variables missing
                 </p>
                 <p className="mt-1 text-xs text-red-400/80">
-                  V0_API_KEY and AI_GATEWAY_API_KEY must be set before you can
-                  continue
+                  AI_GATEWAY_API_KEY must be set before you can continue
                 </p>
               </div>
             </div>
@@ -322,6 +353,7 @@ export function EnvVariablesDialog() {
               {envVars.map((envVar, index) => {
                 const isRequired = REQUIRED_VARS.includes(envVar.key);
                 const isLocked = isProtected(envVar.key);
+                const isSystemKey = isSystemProvided(envVar);
 
                 return (
                   <div
@@ -330,7 +362,9 @@ export function EnvVariablesDialog() {
                       "space-y-3 rounded-lg border p-4",
                       isLocked
                         ? "border-blue-500/20 bg-blue-500/5"
-                        : "border-white/10 bg-white/5"
+                        : isSystemKey
+                          ? "border-purple-500/20 bg-purple-500/5"
+                          : "border-white/10 bg-white/5"
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -350,6 +384,12 @@ export function EnvVariablesDialog() {
                                 Auto-managed
                               </span>
                             )}
+                            {isSystemKey && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] text-purple-400">
+                                <Key className="h-2.5 w-2.5" />
+                                System Default
+                              </span>
+                            )}
                           </div>
                           <Input
                             value={envVar.key}
@@ -362,7 +402,9 @@ export function EnvVariablesDialog() {
                               "border-white/10 font-mono text-sm text-white",
                               isLocked
                                 ? "cursor-not-allowed bg-blue-500/10"
-                                : "bg-white/5",
+                                : isSystemKey
+                                  ? "cursor-not-allowed bg-purple-500/10"
+                                  : "bg-white/5",
                               isRequired &&
                                 !isLocked &&
                                 "cursor-not-allowed opacity-60"
@@ -371,6 +413,12 @@ export function EnvVariablesDialog() {
                           {isLocked && (
                             <p className="text-[11px] leading-tight text-blue-400/80">
                               Set to your project ID for AIWA Cloud
+                            </p>
+                          )}
+                          {isSystemKey && (
+                            <p className="text-[11px] leading-tight text-purple-400/80">
+                              Using AIWA Cloud default key. You can replace this
+                              with your own.
                             </p>
                           )}
                         </div>
@@ -385,20 +433,30 @@ export function EnvVariablesDialog() {
                           </Label>
                           <div className="relative">
                             <Input
-                              type={envVar.showValue ? "text" : "password"}
+                              type={
+                                envVar.showValue && !isSystemKey
+                                  ? "text"
+                                  : "password"
+                              }
                               value={envVar.value}
                               onChange={(e) =>
                                 handleValueChange(index, e.target.value)
                               }
                               placeholder={
-                                isLocked ? "Auto-generated" : "Enter value"
+                                isLocked
+                                  ? "Auto-generated"
+                                  : isSystemKey
+                                    ? "System-provided"
+                                    : "Enter value"
                               }
                               disabled={isLocked}
                               className={cn(
                                 "border-white/10 pr-20 font-mono text-sm text-white",
                                 isLocked
                                   ? "cursor-not-allowed bg-blue-500/10"
-                                  : "bg-white/5"
+                                  : isSystemKey
+                                    ? "bg-purple-500/10"
+                                    : "bg-white/5"
                               )}
                             />
                             <div className="absolute top-1/2 right-1 flex -translate-y-1/2 gap-1">
@@ -406,8 +464,13 @@ export function EnvVariablesDialog() {
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => toggleShowValue(index)}
-                                disabled={isLocked}
+                                disabled={isLocked || isSystemKey}
                                 className="h-7 w-7 p-0 hover:bg-white/10"
+                                title={
+                                  isSystemKey
+                                    ? "System key values cannot be viewed"
+                                    : undefined
+                                }
                               >
                                 {envVar.showValue ? (
                                   <EyeOff className="h-3.5 w-3.5" />
@@ -421,7 +484,13 @@ export function EnvVariablesDialog() {
                                 onClick={() =>
                                   handleCopy(envVar.value, envVar.key)
                                 }
+                                disabled={isSystemKey}
                                 className="h-7 w-7 p-0 hover:bg-white/10"
+                                title={
+                                  isSystemKey
+                                    ? "System key values cannot be copied"
+                                    : undefined
+                                }
                               >
                                 {copiedKey === envVar.key ? (
                                   <Check className="h-3.5 w-3.5 text-green-500" />
@@ -474,7 +543,6 @@ export function EnvVariablesDialog() {
             </Button>
           </div>
         </div>
-        {/* </div> */}
       </DialogContent>
     </Dialog>
   );

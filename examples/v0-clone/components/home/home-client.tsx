@@ -46,6 +46,7 @@ import { useSession } from "next-auth/react";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { useChatsStore } from "@/components/shared/chat-selector.store";
 import { UserTemplates } from "../templates/user-templates";
+import { Loader } from "lucide-react";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -64,6 +65,31 @@ function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   return null;
 }
 
+function AutoProvisioningOverlay() {
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="glass relative overflow-hidden rounded-2xl border border-white/[0.12] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="from-primary/20 relative rounded-full bg-gradient-to-br to-purple-500/20 p-4">
+            <Loader className="text-primary-foreground h-8 w-8 animate-spin" />
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-white">
+              Getting things ready...
+            </h3>
+            <p className="mt-2 text-sm text-white/60">
+              Setting up your project environment
+            </p>
+          </div>
+        </div>
+
+        {/* Animated gradient border */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-500/0 to-purple-500/0 opacity-0 transition-opacity duration-200" />
+      </div>
+    </div>
+  );
+}
+
 export function HomeClient() {
   const {
     currentChatId,
@@ -76,6 +102,7 @@ export function HomeClient() {
     activePanel,
     selectedProjectId,
     envVarsValid,
+    isAutoProvisioning, // NEW
     setCurrentChatId,
     setShowChatInterface,
     setChatHistory,
@@ -504,6 +531,8 @@ export function HomeClient() {
           </div>
         </div>
 
+        {isAuthenticated && isAutoProvisioning && <AutoProvisioningOverlay />}
+
         <EnvVariablesDialog />
       </div>
     );
@@ -690,6 +719,8 @@ export function HomeClient() {
           onOpenChange={setShowLibrary}
           onSelectPrompt={handleUseEnhancedPrompt}
         />
+
+        {isAuthenticated && isAutoProvisioning && <AutoProvisioningOverlay />}
 
         {isAuthenticated && <EnvVariablesDialog />}
 

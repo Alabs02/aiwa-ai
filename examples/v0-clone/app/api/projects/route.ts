@@ -16,6 +16,8 @@ const v0 = createClient(
   process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
 );
 
+const SYSTEM_KEY_MARKER = "__USE_SYSTEM_KEY__";
+
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -52,20 +54,42 @@ export async function GET(request: NextRequest) {
         instructions
       });
 
-      // Ensure NEXT_PUBLIC_PROJECT_ID env var exists
-      await createProjectEnvVar({
-        projectId: newProject.id,
+      // Auto-provision environment variables
+      const envVarsToCreate = [];
+
+      // Always add NEXT_PUBLIC_PROJECT_ID
+      envVarsToCreate.push({
         key: "NEXT_PUBLIC_PROJECT_ID",
         value: newProject.id
       });
 
-      // Sync with v0
-      await v0.projects.createEnvVars({
+      // Add AI_GATEWAY_API_KEY if system key is available
+      const systemKey = process.env.AI_GATEWAY_API_KEY;
+      if (systemKey && systemKey.trim().length > 0) {
+        envVarsToCreate.push({
+          key: "AI_GATEWAY_API_KEY",
+          value: SYSTEM_KEY_MARKER // Store marker, not actual key
+        });
+      }
+
+      // Create env vars in v0
+      const v0EnvResponse = await v0.projects.createEnvVars({
         projectId: v0Project.id,
-        environmentVariables: [
-          { key: "NEXT_PUBLIC_PROJECT_ID", value: newProject.id }
-        ]
+        environmentVariables: envVarsToCreate
       });
+
+      // Create env vars locally
+      for (let i = 0; i < envVarsToCreate.length; i++) {
+        const envVar = envVarsToCreate[i];
+        const v0EnvVar = v0EnvResponse.data[i];
+
+        await createProjectEnvVar({
+          projectId: newProject.id,
+          v0EnvVarId: v0EnvVar?.id,
+          key: envVar.key,
+          value: envVar.value
+        });
+      }
 
       return NextResponse.json({ data: [newProject] });
     }
@@ -139,9 +163,27 @@ export async function POST(request: NextRequest) {
       vercelProjectId
     });
 
+    // Process environment variables
+    let processedEnvVars = environmentVariables || [];
+
+    // Auto-add AI_GATEWAY_API_KEY if not provided and system key is available
+    const hasGatewayKey = processedEnvVars.some(
+      (v: any) => v.key === "AI_GATEWAY_API_KEY"
+    );
+
+    if (!hasGatewayKey) {
+      const systemKey = process.env.AI_GATEWAY_API_KEY;
+      if (systemKey && systemKey.trim().length > 0) {
+        processedEnvVars.push({
+          key: "AI_GATEWAY_API_KEY",
+          value: SYSTEM_KEY_MARKER // Store marker
+        });
+      }
+    }
+
     // Ensure NEXT_PUBLIC_PROJECT_ID is in env vars
     const envVarsWithProjectId = ensureProjectIdEnvVar(
-      environmentVariables || [],
+      processedEnvVars,
       project.id
     );
 
