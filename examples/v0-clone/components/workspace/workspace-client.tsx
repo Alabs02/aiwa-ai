@@ -129,10 +129,10 @@ export function WorkspaceClient() {
             {totalCount !== 1 ? "s" : ""} in your workspace
           </p>
         </div>
-        <Link href="/chat">
+        <Link href="/">
           <Button className="bg-white text-black hover:bg-neutral-200">
             <Plus className="mr-2 h-4 w-4" />
-            New Project
+            New Vibe
           </Button>
         </Link>
       </div>
@@ -249,7 +249,7 @@ export function WorkspaceClient() {
             <Link href="/chat">
               <Button className="bg-white text-black hover:bg-neutral-200">
                 <Plus className="mr-2 h-4 w-4" />
-                Create Your First Project
+                Create Your First App/Website
               </Button>
             </Link>
           )}

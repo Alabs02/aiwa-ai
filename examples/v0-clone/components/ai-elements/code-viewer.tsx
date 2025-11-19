@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ReactElement } from "react";
 import { cn } from "@/lib/utils";
 import {
   ChevronRight,
@@ -20,6 +20,120 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui/tooltip";
+
+// Syntax highlighting component
+function SyntaxHighlightedCode({ code, lang }: { code: string; lang: string }) {
+  const highlightCode = (text: string, language: string) => {
+    // Simple token-based highlighting
+    const patterns: Record<string, { pattern: RegExp; className: string }[]> = {
+      typescript: [
+        {
+          pattern:
+            /(import|export|from|const|let|var|function|return|if|else|for|while|class|interface|type|extends|implements|async|await|try|catch|throw|new)\b/g,
+          className: "text-purple-400"
+        },
+        { pattern: /('.*?'|".*?"|`.*?`)/g, className: "text-green-400" },
+        { pattern: /\/\/.*/g, className: "text-gray-500 italic" },
+        { pattern: /\/\*[\s\S]*?\*\//g, className: "text-gray-500 italic" },
+        { pattern: /\b(\d+)\b/g, className: "text-orange-400" },
+        {
+          pattern: /\b(true|false|null|undefined)\b/g,
+          className: "text-orange-400"
+        }
+      ],
+      typescriptreact: [
+        {
+          pattern:
+            /(import|export|from|const|let|var|function|return|if|else|for|while|class|interface|type|extends|implements|async|await|try|catch|throw|new)\b/g,
+          className: "text-purple-400"
+        },
+        { pattern: /('.*?'|".*?"|`.*?`)/g, className: "text-green-400" },
+        { pattern: /\/\/.*/g, className: "text-gray-500 italic" },
+        { pattern: /\/\*[\s\S]*?\*\//g, className: "text-gray-500 italic" },
+        { pattern: /<\/?[\w\s="/.':;#-\/\?]+>/gi, className: "text-blue-400" },
+        { pattern: /\b(\d+)\b/g, className: "text-orange-400" },
+        {
+          pattern: /\b(true|false|null|undefined)\b/g,
+          className: "text-orange-400"
+        }
+      ],
+      css: [
+        { pattern: /([.#][\w-]+)/g, className: "text-yellow-400" },
+        { pattern: /([\w-]+):/g, className: "text-blue-400" },
+        { pattern: /('.*?'|".*?")/g, className: "text-green-400" },
+        { pattern: /\/\*[\s\S]+?\*\//g, className: "text-gray-500 italic" }
+      ],
+      json: [
+        { pattern: /"(\\.|[^"\\])*"/g, className: "text-green-400" },
+        { pattern: /\b(\d+)\b/g, className: "text-orange-400" },
+        { pattern: /\b(true|false|null)\b/g, className: "text-orange-400" }
+      ]
+    };
+
+    const langPatterns = patterns[language] || patterns.typescript;
+    let highlighted = text;
+    const tokens: Array<{
+      start: number;
+      end: number;
+      className: string;
+      text: string;
+    }> = [];
+
+    // Find all matches
+    langPatterns.forEach(({ pattern, className }) => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach((match) => {
+        if (match.index !== undefined) {
+          tokens.push({
+            start: match.index,
+            end: match.index + match[0].length,
+            className,
+            text: match[0]
+          });
+        }
+      });
+    });
+
+    // Sort tokens by start position
+    tokens.sort((a, b) => a.start - b.start);
+
+    // Build highlighted output
+    const parts: ReactElement[] = [];
+    let lastIndex = 0;
+
+    tokens.forEach((token, i) => {
+      // Skip overlapping tokens
+      if (token.start < lastIndex) return;
+
+      // Add text before token
+      if (token.start > lastIndex) {
+        parts.push(
+          <span key={`text-${i}`}>
+            {text.substring(lastIndex, token.start)}
+          </span>
+        );
+      }
+
+      // Add highlighted token
+      parts.push(
+        <span key={`token-${i}`} className={token.className}>
+          {token.text}
+        </span>
+      );
+
+      lastIndex = token.end;
+    });
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(<span key="text-end">{text.substring(lastIndex)}</span>);
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
+
+  return <>{highlightCode(code, lang)}</>;
+}
 
 // Support both v0 API format and legacy format
 interface V0ApiFile {
@@ -137,12 +251,15 @@ const buildFileTree = (files: NormalizedFile[]): FileNode[] => {
     let currentLevel = root;
 
     parts.forEach((part, index) => {
+      const isFile = index === parts.length - 1;
+      const path = parts.slice(0, index + 1).join("/");
+
       if (!currentLevel[part]) {
-        if (index === parts.length - 1) {
+        if (isFile) {
           // It's a file
           currentLevel[part] = {
             name: part,
-            path: file.fileName,
+            path,
             type: "file",
             file
           };
@@ -150,27 +267,33 @@ const buildFileTree = (files: NormalizedFile[]): FileNode[] => {
           // It's a folder
           currentLevel[part] = {
             name: part,
-            path: parts.slice(0, index + 1).join("/"),
+            path,
             type: "folder",
             children: []
           };
         }
       }
 
-      if (currentLevel[part].type === "folder" && index < parts.length - 1) {
+      // Navigate deeper for folders
+      if (!isFile && currentLevel[part].type === "folder") {
+        // Get or create children map
         if (!currentLevel[part].children) {
           currentLevel[part].children = [];
         }
+
+        // Convert children array to map for next iteration
         const childrenMap: Record<string, FileNode> = {};
         currentLevel[part].children!.forEach((child) => {
           childrenMap[child.name] = child;
         });
+
+        // Update current level to this folder's children
         currentLevel = childrenMap;
       }
     });
   });
 
-  // Convert to array and sort
+  // Convert root object to sorted array
   const sortNodes = (nodes: FileNode[]): FileNode[] => {
     return nodes.sort((a, b) => {
       if (a.type !== b.type) {
@@ -180,26 +303,60 @@ const buildFileTree = (files: NormalizedFile[]): FileNode[] => {
     });
   };
 
-  const flatten = (obj: Record<string, FileNode>): FileNode[] => {
+  // Recursively convert object structure to arrays and sort
+  const convertToArray = (obj: Record<string, FileNode>): FileNode[] => {
     return Object.values(obj).map((node) => {
-      if (node.children && node.children.length > 0) {
-        node.children = sortNodes(
-          flatten(
-            node.children.reduce(
-              (acc, child) => {
-                acc[child.name] = child;
-                return acc;
-              },
-              {} as Record<string, FileNode>
-            )
-          )
-        );
+      if (node.type === "folder" && node.children) {
+        // Build children map from the folder structure
+        const buildChildrenMap = (
+          folderPath: string
+        ): Record<string, FileNode> => {
+          const childMap: Record<string, FileNode> = {};
+
+          codeFiles.forEach((file) => {
+            if (file.fileName.startsWith(folderPath + "/")) {
+              const relativePath = file.fileName.substring(
+                folderPath.length + 1
+              );
+              const nextPart = relativePath.split("/")[0];
+              const isDirectChild = !relativePath
+                .substring(nextPart.length + 1)
+                .includes("/");
+              const childPath = folderPath + "/" + nextPart;
+
+              if (!childMap[nextPart]) {
+                if (isDirectChild && relativePath === nextPart) {
+                  // Direct file child
+                  childMap[nextPart] = {
+                    name: nextPart,
+                    path: childPath,
+                    type: "file",
+                    file
+                  };
+                } else {
+                  // Subfolder
+                  childMap[nextPart] = {
+                    name: nextPart,
+                    path: childPath,
+                    type: "folder",
+                    children: []
+                  };
+                }
+              }
+            }
+          });
+
+          return childMap;
+        };
+
+        const childrenMap = buildChildrenMap(node.path);
+        node.children = sortNodes(convertToArray(childrenMap));
       }
       return node;
     });
   };
 
-  return sortNodes(flatten(root));
+  return sortNodes(convertToArray(root));
 };
 
 // File Tree Node Component
@@ -444,15 +601,13 @@ export function CodeViewer({
               </div>
 
               {/* Code Content */}
-              <ScrollArea className="flex-1 shrink-0 overflow-y-auto">
+              <ScrollArea className="h-full flex-1">
                 <pre className="p-4 font-mono text-sm leading-relaxed">
-                  <code
-                    className={cn(
-                      "text-white/80",
-                      getLanguageClass(selectedFile.file.lang)
-                    )}
-                  >
-                    {selectedFile.file.content}
+                  <code className="text-white/80">
+                    <SyntaxHighlightedCode
+                      code={selectedFile.file.content}
+                      lang={selectedFile.file.lang}
+                    />
                   </code>
                 </pre>
               </ScrollArea>

@@ -37,6 +37,23 @@ interface PromptLibraryDialogProps {
   onSelectPrompt: (prompt: string) => void;
 }
 
+function cleanLlmOutput(llmText: string): string {
+  const trimmedText = llmText.trim();
+
+  if (trimmedText.startsWith("```") && trimmedText.endsWith("```")) {
+    const lines = trimmedText.split("\n");
+
+    // Remove the first and last lines (fences)
+    const contentLines = lines.slice(1, -1);
+
+    let cleanedContent = contentLines.join("\n");
+
+    return cleanedContent.trim();
+  }
+
+  return trimmedText;
+}
+
 export function PromptLibraryDialog({
   open,
   onOpenChange,
@@ -138,7 +155,8 @@ export function PromptLibraryDialog({
 
   const handleUsePrompt = async (prompt: PromptLibraryItem) => {
     const textToUse = prompt.enhanced_prompt || prompt.prompt_text;
-    onSelectPrompt(textToUse);
+
+    onSelectPrompt(cleanLlmOutput(textToUse));
     onOpenChange(false);
 
     // Increment usage count
