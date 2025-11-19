@@ -530,7 +530,7 @@ export function HomeClient() {
                   Vibe. Build. Deploy.
                 </h2>
 
-                <p className="font-body bg-background/65 relative mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
+                <div className="font-body bg-background/65 relative mt-4 inline-block w-auto rounded-full border px-4 py-2 text-center text-base text-neutral-300/95 sm:text-lg md:text-xl">
                   Vibe-code your imagination. Bring it to life with Aiwa.
                   <BorderBeam
                     duration={10}
@@ -538,7 +538,7 @@ export function HomeClient() {
                     colorFrom="#f6821f"
                     colorTo="#ad46ff"
                   />
-                </p>
+                </div>
 
                 {/* Prompt Input */}
                 <div
