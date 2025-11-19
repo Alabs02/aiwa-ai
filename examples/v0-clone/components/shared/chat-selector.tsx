@@ -185,6 +185,8 @@ export function ChatSelector() {
         throw new Error(error.message || "Failed to delete chat");
       }
 
+      router.prefetch("/");
+
       // Remove the chat from the store
       deleteChatFromStore(currentChatId);
 
@@ -195,7 +197,7 @@ export function ChatSelector() {
 
       // Close dialog and navigate to home
       setIsDeleteDialogOpen(false);
-      router.push("/");
+      router.push("/?reset=true");
     } catch (error) {
       console.error("Error deleting chat:", error);
       toast.error("Failed to delete chat", {

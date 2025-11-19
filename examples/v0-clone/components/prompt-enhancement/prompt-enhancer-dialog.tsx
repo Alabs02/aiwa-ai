@@ -43,6 +43,23 @@ const PROJECT_TYPES = [
   { value: "custom", label: "Custom" }
 ];
 
+function cleanLlmOutput(llmText: string): string {
+  const trimmedText = llmText.trim();
+
+  if (trimmedText.startsWith("```") && trimmedText.endsWith("```")) {
+    const lines = trimmedText.split("\n");
+
+    // Remove the first and last lines (fences)
+    const contentLines = lines.slice(1, -1);
+
+    let cleanedContent = contentLines.join("\n");
+
+    return cleanedContent.trim();
+  }
+
+  return trimmedText;
+}
+
 export function PromptEnhancerDialog({
   open,
   onOpenChange,
@@ -283,8 +300,9 @@ export function PromptEnhancerDialog({
                       </Button>
                     </div>
                   </div>
+
                   <p className="text-sm leading-relaxed whitespace-pre-wrap text-white/80">
-                    <MarkdownPreview doc={enhancedPrompt} />
+                    <MarkdownPreview doc={cleanLlmOutput(enhancedPrompt)} />
                   </p>
                 </div>
               )}
