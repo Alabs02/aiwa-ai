@@ -4,13 +4,5 @@
       "path": "/api/cron/reset-credits",
       "schedule": "0 0 * * *"
     }
-  ],
-  "products": [
-    {
-      "type": "integration",
-      "protocol": "storage",
-      "productSlug": "neon",
-      "integrationSlug": "neon"
-    }
   ]
 }
