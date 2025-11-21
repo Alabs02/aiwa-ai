@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatInput } from "@/components/chat/chat-input";
 import { PreviewPanel } from "@/components/chat/preview-panel";
 import { ResizableLayout } from "@/components/shared/resizable-layout";
 import { BottomToolbar } from "@/components/shared/bottom-toolbar";
+import { CreditWarningBanner } from "@/components/shared/credit-warning-banner";
 import { useChat } from "@/hooks/use-chat";
 import { useStreaming } from "@/contexts/streaming-context";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,10 @@ export function ChatDetailClient() {
       timestamp: Date;
     }>
   >([]);
+  const [creditWarning, setCreditWarning] = useState({
+    show: false,
+    remaining: 0
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { handoff } = useStreaming();
@@ -42,33 +47,41 @@ export function ChatDetailClient() {
     isStreaming,
     chatHistory,
     isLoadingChat,
-    handleSendMessage,
+    handleSendMessage: originalHandleSendMessage,
     handleStreamingComplete,
     handleChatData
   } = useChat(chatId);
 
-  // Determine if generation is happening (loading or streaming)
   const isGenerating = isLoading || isStreaming;
 
-  // Wrapper function to handle attachments
-  const handleSubmitWithAttachments = (
-    e: React.FormEvent<HTMLFormElement>,
-    attachmentUrls?: Array<{ url: string }>
-  ) => {
-    // Clear sessionStorage immediately upon submission
-    clearPromptFromStorage();
-    // Clear attachments after sending
-    setAttachments([]);
-    return handleSendMessage(e, attachmentUrls);
-  };
+  const handleSubmitWithAttachments = useCallback(
+    async (
+      e: React.FormEvent<HTMLFormElement>,
+      attachmentUrls?: Array<{ url: string }>
+    ) => {
+      clearPromptFromStorage();
+      setAttachments([]);
+      await originalHandleSendMessage(e, attachmentUrls);
+    },
+    [originalHandleSendMessage]
+  );
+
+  // Add effect to watch for credit warnings
+  useEffect(() => {
+    if (currentChat && (currentChat as any).credits_remaining !== undefined) {
+      const remaining = (currentChat as any).credits_remaining || 0;
+      if ((currentChat as any).low_credit_warning) {
+        setCreditWarning({ show: true, remaining });
+      }
+    }
+  }, [currentChat]);
 
   useEffect(() => {
     console.group("Chat Details");
     console.log({ isLoading, isStreaming });
     console.groupEnd();
-  }, []);
+  }, [isLoading, isStreaming]);
 
-  // Handle fullscreen keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isFullscreen) {
@@ -80,17 +93,14 @@ export function ChatDetailClient() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
 
-  // Auto-focus the textarea on page load
   useEffect(() => {
     if (textareaRef.current && !isLoadingChat) {
       textareaRef.current.focus();
     }
   }, [isLoadingChat]);
 
-  // Simulate console logs (in a real app, these would come from the iframe)
   useEffect(() => {
     if (currentChat?.demo && consoleLogs.length === 0) {
-      // Add some sample console logs
       setConsoleLogs([
         {
           level: "log",
@@ -121,6 +131,10 @@ export function ChatDetailClient() {
           leftPanel={
             <div className="flex h-full flex-col">
               <div className="flex-1 overflow-y-auto">
+                <CreditWarningBanner
+                  creditsRemaining={creditWarning.remaining}
+                  show={creditWarning.show}
+                />
                 <ChatMessages
                   chatHistory={chatHistory}
                   isLoading={isLoading}

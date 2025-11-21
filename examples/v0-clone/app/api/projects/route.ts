@@ -11,6 +11,8 @@ import {
   ensureAIWAInstructions,
   ensureProjectIdEnvVar
 } from "@/lib/utils/project-instructions";
+import { getUserSubscription } from "@/lib/db/billing-queries";
+import { getFeatureAccess } from "@/lib/feature-access";
 
 const v0 = createClient(
   process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
@@ -113,6 +115,35 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const subscription = await getUserSubscription(session.user.id);
+    if (!subscription) {
+      return NextResponse.json(
+        { error: "No subscription found" },
+        { status: 403 }
+      );
+    }
+
+    const access = getFeatureAccess(subscription.plan as any);
+    const existingProjects = await getProjectsByUserId({
+      userId: session.user.id
+    });
+
+    // Check if user has reached project limit (-1 means unlimited)
+    if (
+      access.maxProjects !== -1 &&
+      existingProjects.length >= access.maxProjects
+    ) {
+      return NextResponse.json(
+        {
+          error: "project_limit_reached",
+          message: `Your ${subscription.plan} plan allows ${access.maxProjects} project(s). Upgrade to create more.`,
+          current: existingProjects.length,
+          max: access.maxProjects
+        },
+        { status: 402 }
+      );
     }
 
     const body = await request.json();

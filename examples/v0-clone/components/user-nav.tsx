@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -10,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
 import {
   IconLogout,
   IconUserSquareRounded,
@@ -19,23 +21,50 @@ import {
   IconFolders,
   IconLayoutDashboard
 } from "@tabler/icons-react";
+import { Sparkles } from "lucide-react";
 import { Session } from "next-auth";
+import Link from "next/link";
 
 interface UserNavProps {
   session: Session | null;
 }
 
 export function UserNav({ session }: UserNavProps) {
+  const [credits, setCredits] = useState({ remaining: 0, total: 0 });
+  const [loading, setLoading] = useState(true);
+
   const initials =
     session?.user?.email?.split("@")[0]?.slice(0, 2)?.toUpperCase() || "U";
 
   const isGuest = session?.user?.type === "guest";
   const isSignedOut = !session;
 
+  useEffect(() => {
+    if (!isSignedOut && !isGuest) {
+      fetch("/api/billing/subscription")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data && !data.error) {
+            setCredits({
+              remaining: data.credits_remaining || 0,
+              total: data.credits_total || 0
+            });
+          }
+        })
+        .catch((err) => console.error("Failed to fetch credits:", err))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [isSignedOut, isGuest]);
+
+  const creditsPercent =
+    credits.total > 0 ? (credits.remaining / credits.total) * 100 : 0;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="size-full skew-2 !border">
+        <Avatar className="size-full skew-2 cursor-pointer !border">
           <AvatarFallback className="font-button !-skew-2 bg-transparent text-white">
             {isSignedOut ? (
               <IconUserSquareRounded className="size-4 lg:size-5" />
@@ -60,39 +89,66 @@ export function UserNav({ session }: UserNavProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
+        {/* Credits Section - Only for authenticated non-guest users */}
+        {!isSignedOut && !isGuest && (
+          <>
+            <div className="px-2 py-2">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1 text-xs font-medium">
+                  <Sparkles className="h-3 w-3" />
+                  Credits
+                </span>
+                <span className="text-xs font-semibold">
+                  {loading ? "..." : `${credits.remaining}/${credits.total}`}
+                </span>
+              </div>
+              {!loading && (
+                <Progress value={creditsPercent} className="h-1.5" />
+              )}
+              <Link
+                href="/billing"
+                className="text-primary mt-1.5 block text-xs hover:underline"
+              >
+                Manage Credits
+              </Link>
+            </div>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
         {/* Navigation Links - Only for authenticated users */}
         {!isSignedOut && !isGuest && (
           <>
             <DropdownMenuItem asChild>
-              <a href="/workspace" className="font-button cursor-pointer">
+              <Link href="/workspace" className="font-button cursor-pointer">
                 <IconLayoutDashboard className="mr-2 size-4 lg:size-5" />
                 <span>Workspace</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/projects" className="font-button cursor-pointer">
+              <Link href="/projects" className="font-button cursor-pointer">
                 <IconFolders className="mr-2 size-4 lg:size-5" />
                 <span>Projects</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/templates" className="font-button cursor-pointer">
+              <Link href="/templates" className="font-button cursor-pointer">
                 <IconTemplate className="mr-2 size-4 lg:size-5" />
                 <span>Templates</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <a href="/settings" className="font-button cursor-pointer">
+            <DropdownMenuItem disabled asChild>
+              <Link href="/settings" className="font-button cursor-pointer">
                 <IconSettings className="mr-2 size-4 lg:size-5" />
                 <span>Settings</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/pricing" className="font-button cursor-pointer">
+              <Link href="/billing" className="font-button cursor-pointer">
                 <IconCreditCard className="mr-2 size-4 lg:size-5" />
                 <span>Billing</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
@@ -101,14 +157,14 @@ export function UserNav({ session }: UserNavProps) {
         {(isGuest || isSignedOut) && (
           <>
             <DropdownMenuItem asChild>
-              <a href="/register" className="font-button cursor-pointer">
+              <Link href="/register" className="font-button cursor-pointer">
                 <span>Create Account</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/login" className="font-button cursor-pointer">
+              <Link href="/login" className="font-button cursor-pointer">
                 <span>Sign In</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
             {!isSignedOut && <DropdownMenuSeparator />}
           </>

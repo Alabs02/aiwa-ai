@@ -10,9 +10,12 @@ import {
   gte,
   inArray,
   lt,
+  lte,
+  sum,
   type SQL,
   or,
-  ilike
+  ilike,
+  sql
 } from "drizzle-orm";
 
 import {

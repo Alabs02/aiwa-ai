@@ -8,10 +8,16 @@ import {
   getChatCountByIP
 } from "@/lib/db/queries";
 import {
+  getUserSubscription,
+  createUsageEvent,
+  ensureUserSubscription
+} from "@/lib/db/billing-queries";
+import {
   entitlementsByUserType,
   anonymousEntitlements
 } from "@/lib/entitlements";
 import { ChatSDKError } from "@/lib/errors";
+import { parseV0Response, getV0UsageFromReport } from "@/lib/v0-token-parser";
 
 const v0 = createClient(
   process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
@@ -53,6 +59,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (session?.user?.id) {
+      // Ensure user has a subscription
+      await ensureUserSubscription(session.user.id);
+
+      // Check rate limits
       const chatCount = await getChatCountByUserId({
         userId: session.user.id,
         differenceInHours: 24
@@ -63,12 +73,34 @@ export async function POST(request: NextRequest) {
         return new ChatSDKError("rate_limit:chat").toResponse();
       }
 
+      // Check credits
+      const subscription = await getUserSubscription(session.user.id);
+
+      if (!subscription) {
+        return NextResponse.json(
+          { error: "No subscription found. Please set up billing." },
+          { status: 403 }
+        );
+      }
+
+      if (subscription.credits_remaining <= 0) {
+        return NextResponse.json(
+          {
+            error: "insufficient_credits",
+            message: "You've run out of credits. Purchase more to continue.",
+            credits_remaining: 0
+          },
+          { status: 402 }
+        );
+      }
+
       console.log("API request:", {
         message,
         chatId,
         streaming,
         projectId,
-        userId: session.user.id
+        userId: session.user.id,
+        credits_remaining: subscription.credits_remaining
       });
     } else {
       const clientIP = getClientIP(request);
@@ -183,6 +215,7 @@ export async function POST(request: NextRequest) {
 
     const chatDetail = chat as ChatDetail;
 
+    // Create ownership/log for new chats
     if (!chatId && chatDetail.id) {
       try {
         if (session?.user?.id) {
@@ -204,13 +237,76 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Track usage for authenticated users
+    if (session?.user?.id && chatDetail) {
+      let tokenUsage = parseV0Response(chatDetail);
+
+      // If tokens not in response, fetch from usage report (async)
+      if (tokenUsage.totalTokens === 0) {
+        setTimeout(async () => {
+          try {
+            const reportUsage = await getV0UsageFromReport(
+              chatDetail.id,
+              chatDetail.messages?.[chatDetail.messages.length - 1]?.id || ""
+            );
+
+            if (reportUsage && reportUsage.totalTokens > 0) {
+              await createUsageEvent({
+                userId: session.user.id,
+                eventType: "chat_generation",
+                v0ChatId: chatDetail.id,
+                v0MessageId:
+                  chatDetail.messages?.[chatDetail.messages.length - 1]?.id,
+                inputTokens: reportUsage.inputTokens,
+                outputTokens: reportUsage.outputTokens,
+                model: "v0-gpt-5",
+                status: "completed"
+              });
+            }
+          } catch (usageError) {
+            console.error("Failed to track usage from report:", usageError);
+          }
+        }, 5000);
+      } else {
+        // Track immediately if tokens available
+        try {
+          await createUsageEvent({
+            userId: session.user.id,
+            eventType: "chat_generation",
+            v0ChatId: chatDetail.id,
+            v0MessageId:
+              chatDetail.messages?.[chatDetail.messages.length - 1]?.id,
+            inputTokens: tokenUsage.inputTokens,
+            outputTokens: tokenUsage.outputTokens,
+            model: "v0-gpt-5",
+            status: "completed"
+          });
+        } catch (usageError) {
+          console.error("Failed to track usage:", usageError);
+        }
+      }
+    }
+
+    // Get updated subscription for response
+    let creditsInfo = { credits_remaining: 0, low_credit_warning: false };
+    if (session?.user?.id) {
+      const updatedSubscription = await getUserSubscription(session.user.id);
+      if (updatedSubscription) {
+        creditsInfo = {
+          credits_remaining: updatedSubscription.credits_remaining,
+          low_credit_warning: updatedSubscription.credits_remaining < 10
+        };
+      }
+    }
+
     return NextResponse.json({
       id: chatDetail.id,
       demo: chatDetail.demo,
       messages: chatDetail.messages?.map((msg) => ({
         ...msg,
         experimental_content: (msg as any).experimental_content
-      }))
+      })),
+      ...creditsInfo
     });
   } catch (error) {
     console.error("V0 API Error:", error);

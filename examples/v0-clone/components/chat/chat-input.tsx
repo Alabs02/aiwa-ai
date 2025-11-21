@@ -24,6 +24,8 @@ import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
+import { getFeatureAccess } from "@/lib/feature-access";
 
 interface ChatInputProps {
   message: string;
@@ -55,6 +57,16 @@ export function ChatInput({
   const [showEnhancer, setShowEnhancer] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
+  const [userPlan, setUserPlan] = useState<string>("free");
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [blockedFeature, setBlockedFeature] = useState("");
+
+  useEffect(() => {
+    fetch("/api/billing/subscription")
+      .then((r) => r.json())
+      .then((data) => setUserPlan(data?.plan || "free"))
+      .catch(() => setUserPlan("free"));
+  }, []);
 
   const handleImageFiles = useCallback(
     async (files: File[]) => {
@@ -80,17 +92,9 @@ export function ChatInput({
     [attachments, onAttachmentsChange]
   );
 
-  const handleDragOver = useCallback(() => {
-    setIsDragOver(true);
-  }, []);
-
-  const handleDragLeave = useCallback(() => {
-    setIsDragOver(false);
-  }, []);
-
-  const handleDrop = useCallback(() => {
-    setIsDragOver(false);
-  }, []);
+  const handleDragOver = useCallback(() => setIsDragOver(true), []);
+  const handleDragLeave = useCallback(() => setIsDragOver(false), []);
+  const handleDrop = useCallback(() => setIsDragOver(false), []);
 
   useEffect(() => {
     if (message.trim() || attachments.length > 0) {
@@ -118,7 +122,6 @@ export function ChatInput({
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       clearPromptFromStorage();
-
       const attachmentUrls = attachments.map((att) => ({ url: att.dataUrl }));
       onSubmit(e, attachmentUrls.length > 0 ? attachmentUrls : undefined);
     },
@@ -127,6 +130,26 @@ export function ChatInput({
 
   const handleUseEnhancedPrompt = (enhancedPrompt: string) => {
     setMessage(enhancedPrompt);
+  };
+
+  const handleOpenEnhancer = () => {
+    const access = getFeatureAccess(userPlan as any);
+    if (!access.canUsePromptEnhancer) {
+      setBlockedFeature("Prompt Enhancer");
+      setShowUpgradeDialog(true);
+      return;
+    }
+    setShowEnhancer(true);
+  };
+
+  const handleOpenLibrary = () => {
+    const access = getFeatureAccess(userPlan as any);
+    if (!access.canUsePromptLibrary) {
+      setBlockedFeature("Prompt Library");
+      setShowUpgradeDialog(true);
+      return;
+    }
+    setShowLibrary(true);
   };
 
   return (
@@ -146,7 +169,6 @@ export function ChatInput({
             onRemove={handleRemoveAttachment}
           />
 
-          {/* Quality indicator positioned above textarea */}
           {message.trim().length > 0 && (
             <div className="flex justify-end px-3 pt-2">
               <PromptQualityIndicator
@@ -166,12 +188,11 @@ export function ChatInput({
 
           <PromptInputToolbar>
             <PromptInputTools>
-              {/* New enhancement tools */}
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                onClick={() => setShowLibrary(true)}
+                onClick={handleOpenLibrary}
                 className="h-8 w-8 p-0 text-white/60 hover:text-white"
                 title="Browse prompt library"
               >
@@ -181,7 +202,7 @@ export function ChatInput({
                 type="button"
                 size="sm"
                 variant="ghost"
-                onClick={() => setShowEnhancer(true)}
+                onClick={handleOpenEnhancer}
                 className="h-8 w-8 p-0 text-white/60 hover:text-white"
                 title="Enhance prompt"
               >
@@ -211,107 +232,31 @@ export function ChatInput({
       {showSuggestions && (
         <div className="mx-auto mt-2 max-w-2xl">
           <Suggestions>
-            <Suggestion
-              onClick={() => {
-                setMessage("Landing page");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Landing page"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("Todo app");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Todo app"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("Dashboard");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Dashboard"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("Blog");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Blog"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("E-commerce");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="E-commerce"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("Portfolio");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Portfolio"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("Chat app");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Chat app"
-            />
-            <Suggestion
-              onClick={() => {
-                setMessage("Calculator");
-                setTimeout(() => {
-                  const form = textareaRef?.current?.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                }, 0);
-              }}
-              suggestion="Calculator"
-            />
+            {[
+              "Landing page",
+              "Todo app",
+              "Dashboard",
+              "Blog",
+              "E-commerce",
+              "Portfolio",
+              "Chat app",
+              "Calculator"
+            ].map((suggestion) => (
+              <Suggestion
+                key={suggestion}
+                onClick={() => {
+                  setMessage(suggestion);
+                  setTimeout(() => {
+                    textareaRef?.current?.form?.requestSubmit();
+                  }, 0);
+                }}
+                suggestion={suggestion}
+              />
+            ))}
           </Suggestions>
         </div>
       )}
 
-      {/* Enhancement dialogs */}
       <PromptEnhancerDialog
         open={showEnhancer}
         onOpenChange={setShowEnhancer}
@@ -323,6 +268,12 @@ export function ChatInput({
         open={showLibrary}
         onOpenChange={setShowLibrary}
         onSelectPrompt={handleUseEnhancedPrompt}
+      />
+
+      <UpgradePromptDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        feature={blockedFeature}
       />
     </div>
   );

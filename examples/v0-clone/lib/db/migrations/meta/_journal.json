@@ -57,6 +57,13 @@
       "when": 1763195194304,
       "tag": "0007_outgoing_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1763695019622,
+      "tag": "0008_tricky_wither",
+      "breakpoints": true
     }
   ]
 }

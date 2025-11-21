@@ -16,10 +16,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  /*
-   * Playwright starts the dev server and requires a 200 status to
-   * begin the tests, so this ensures that the tests can start
-   */
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
   }
@@ -42,6 +38,34 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment
   });
 
+  // Protect admin routes
+  if (pathname.startsWith("/studio")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    try {
+      const roleResponse = await fetch(
+        `${request.nextUrl.origin}/api/user/role`,
+        {
+          headers: { Cookie: request.headers.get("cookie") || "" }
+        }
+      );
+
+      if (roleResponse.ok) {
+        const { role } = await roleResponse.json();
+        if (role !== "admin") {
+          return NextResponse.redirect(new URL("/", request.url));
+        }
+      } else {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    } catch (error) {
+      console.error("Failed to check admin role:", error);
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (!token) {
     // Allow API routes to proceed without authentication for anonymous chat creation
     if (pathname.startsWith("/api/")) {
@@ -55,9 +79,14 @@ export async function middleware(request: NextRequest) {
 
     // Redirect protected pages to login
     if (
-      ["/chats", "/projects", "/templates"].some((path) =>
-        pathname.startsWith(path)
-      )
+      [
+        "/chats",
+        "/projects",
+        "/templates",
+        "/billing",
+        "/settings",
+        "/workspace"
+      ].some((path) => pathname.startsWith(path))
     ) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -82,12 +111,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - Public files (all static assets)
-     */
     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot)).*)"
   ]
 };

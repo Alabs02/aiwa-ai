@@ -47,6 +47,9 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { useChatsStore } from "@/components/shared/chat-selector.store";
 import { UserTemplates } from "../templates/user-templates";
 import { Loader } from "lucide-react";
+import { CreditWarningBanner } from "@/components/shared/credit-warning-banner";
+import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
+import { getFeatureAccess } from "@/lib/feature-access";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -131,9 +134,27 @@ export function HomeClient() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
 
+  const [userPlan, setUserPlan] = useState<string>("free");
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [blockedFeature, setBlockedFeature] = useState("");
+
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previousChat = useRef<string | null>(null);
+
+  const [creditWarning, setCreditWarning] = useState({
+    show: false,
+    remaining: 0
+  });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch("/api/billing/subscription")
+        .then((r) => r.json())
+        .then((data) => setUserPlan(data?.plan || "free"))
+        .catch(() => setUserPlan("free"));
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const storedData = loadPromptFromStorage();
@@ -155,6 +176,15 @@ export function HomeClient() {
       clearPromptFromStorage();
     }
   }, [message, attachments]);
+
+  useEffect(() => {
+    if (currentChat && (currentChat as any).credits_remaining !== undefined) {
+      const remaining = (currentChat as any).credits_remaining || 0;
+      if ((currentChat as any).low_credit_warning) {
+        setCreditWarning({ show: true, remaining });
+      }
+    }
+  }, [currentChat]);
 
   const handleReset = () => {
     resetChatState();
@@ -458,6 +488,26 @@ export function HomeClient() {
     handleImageFiles(files);
   };
 
+  const handleOpenEnhancer = () => {
+    const access = getFeatureAccess(userPlan as any);
+    if (!access.canUsePromptEnhancer) {
+      setBlockedFeature("Prompt Enhancer");
+      setShowUpgradeDialog(true);
+      return;
+    }
+    setShowEnhancer(true);
+  };
+
+  const handleOpenLibrary = () => {
+    const access = getFeatureAccess(userPlan as any);
+    if (!access.canUsePromptLibrary) {
+      setBlockedFeature("Prompt Library");
+      setShowUpgradeDialog(true);
+      return;
+    }
+    setShowLibrary(true);
+  };
+
   const getFirstOrLast = (): string | undefined => {
     if (!session?.user?.name) return undefined;
 
@@ -491,6 +541,11 @@ export function HomeClient() {
             leftPanel={
               <div className="flex h-full flex-col">
                 <div className={cn("flex-1 overflow-y-auto")}>
+                  <CreditWarningBanner
+                    creditsRemaining={creditWarning.remaining}
+                    show={creditWarning.show}
+                  />
+
                   <ChatMessages
                     chatHistory={chatHistory}
                     isLoading={isLoading}
@@ -614,7 +669,7 @@ export function HomeClient() {
                           type="button"
                           size="sm"
                           variant="ghost"
-                          onClick={() => setShowLibrary(true)}
+                          onClick={handleOpenLibrary}
                           className="h-8 w-8 p-0 text-white/60 hover:text-white"
                           title="Browse prompt library"
                           disabled={isLoading}
@@ -625,7 +680,7 @@ export function HomeClient() {
                           type="button"
                           size="sm"
                           variant="ghost"
-                          onClick={() => setShowEnhancer(true)}
+                          onClick={handleOpenEnhancer}
                           className="h-8 w-8 p-0 text-white/60 hover:text-white"
                           title="Enhance prompt"
                           disabled={isLoading}
@@ -725,6 +780,12 @@ export function HomeClient() {
         {isAuthenticated && <EnvVariablesDialog />}
 
         <Leva hidden />
+
+        <UpgradePromptDialog
+          open={showUpgradeDialog}
+          onOpenChange={setShowUpgradeDialog}
+          feature={blockedFeature}
+        />
       </>
     );
   }
