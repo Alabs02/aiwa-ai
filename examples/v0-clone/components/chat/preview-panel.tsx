@@ -1,3 +1,8 @@
+"use client";
+import { useState, useEffect } from "react";
+import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
+import { getFeatureAccess } from "@/lib/feature-access";
+
 import {
   WebPreview,
   WebPreviewNavigation,
@@ -15,7 +20,6 @@ import { StreamingCodePreview } from "@/components/ai-elements/streaming-code-pr
 import { GitHubExportDialog } from "@/components/chat/github-export-dialog";
 import { RefreshCw, Maximize, Minimize, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 import { useChatStore } from "@/components/home/home-client.store";
 
 // Support both v0 API format and legacy format
@@ -111,6 +115,10 @@ export function PreviewPanel({
   isGenerating = false,
   consoleLogs = []
 }: PreviewPanelProps) {
+  const [userPlan, setUserPlan] = useState<string>("free");
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [blockedFeature, setBlockedFeature] = useState("");
+
   // Get demo URL from either location
   const demoUrl = currentChat?.demo || currentChat?.latestVersion?.demoUrl;
   const hasContent = !!demoUrl;
@@ -152,7 +160,15 @@ export function PreviewPanel({
   });
 
   const handleDownload = async () => {
+    const access = getFeatureAccess(userPlan as any);
+
     if (!currentChat?.id) return;
+
+    if (!access.canDownload) {
+      setBlockedFeature("Download");
+      setShowUpgradeDialog(true);
+      return;
+    }
 
     try {
       const selectedProject = getSelectedProject();
@@ -190,6 +206,14 @@ export function PreviewPanel({
   };
 
   const handleGitHubExport = () => {
+    const access = getFeatureAccess(userPlan as any);
+
+    if (!access.canUseGitHub) {
+      setBlockedFeature("GitHub Export");
+      setShowUpgradeDialog(true);
+      return;
+    }
+
     setGithubDialogOpen(true);
   };
 
@@ -347,6 +371,12 @@ export function PreviewPanel({
         onOpenChange={setGithubDialogOpen}
         chatId={currentChat?.id || null}
         chatTitle={currentChat?.title}
+      />
+
+      <UpgradePromptDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        feature={blockedFeature}
       />
     </>
   );
