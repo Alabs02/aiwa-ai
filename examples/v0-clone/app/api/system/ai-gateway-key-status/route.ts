@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 
-/**
- * GET /api/system/ai-gateway-key-status
- *
- * Checks if the system AI_GATEWAY_API_KEY is configured and available
- * This is used by the auto-provisioning logic to determine if it can
- * use the system key or needs to prompt the user
- */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
