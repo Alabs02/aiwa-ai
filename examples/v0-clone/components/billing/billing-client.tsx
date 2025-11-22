@@ -11,9 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Zap, Sparkles, Crown } from "lucide-react";
+import { Check, Zap, Crown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { GL } from "../gl";
+import { Leva } from "leva";
 
 interface Subscription {
   plan: string;
@@ -32,6 +33,7 @@ const PLANS = {
     monthly: 20,
     annual: 17,
     credits: 100,
+    icon: Zap,
     features: [
       "100 AI credits monthly",
       "Prompt Enhancer & Library",
@@ -47,6 +49,7 @@ const PLANS = {
     monthly: 50,
     annual: 41.5,
     credits: 250,
+    icon: Crown,
     features: [
       "250 AI credits monthly",
       "Everything in Pro",
@@ -64,6 +67,7 @@ export function BillingClient() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly"
   );
+  const [hovering, setHovering] = useState(false);
 
   useEffect(() => {
     fetchSubscription();
@@ -126,163 +130,249 @@ export function BillingClient() {
     : 0;
 
   return (
-    <div className="bg-background min-h-screen p-8">
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">Billing & Credits</h1>
-          <p className="text-muted-foreground">
-            Manage your subscription and credits
-          </p>
-        </div>
+    <div className="grid min-h-screen grid-cols-1 bg-black/95 p-6 md:p-8">
+      <GL hovering={hovering} />
 
-        {/* Current Plan */}
-        {subscription && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Plan: {subscription.plan}</CardTitle>
-              <CardDescription>
-                Period ends{" "}
-                {new Date(subscription.current_period_end).toLocaleDateString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    {subscription.credits_remaining} /{" "}
-                    {subscription.credits_total} credits
-                  </span>
-                  <Badge
-                    variant={creditsPercent < 20 ? "destructive" : "default"}
-                  >
-                    {creditsPercent.toFixed(0)}%
-                  </Badge>
+      <Leva hidden />
+
+      <div className="bg-background/40 relative z-10 w-full">
+        <div className="mx-auto max-w-5xl space-y-8">
+          {/* Header */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-white">
+              Billing & Credits
+            </h1>
+            <p className="text-sm text-neutral-400">
+              Manage your subscription and credits
+            </p>
+          </div>
+
+          {/* Current Usage Card */}
+          {subscription && (
+            <div
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+              className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.05]"
+            >
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-neutral-400">Current plan</p>
+                  <p className="text-2xl font-semibold text-white capitalize">
+                    {subscription.plan}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Renews{" "}
+                    {new Date(
+                      subscription.current_period_end
+                    ).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    })}
+                  </p>
                 </div>
-                <Progress value={creditsPercent} />
+
+                <div className="text-right">
+                  <p className="text-sm text-neutral-400">Credits remaining</p>
+                  <p className="text-3xl font-bold text-white">
+                    {subscription.credits_remaining}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    of {subscription.credits_total} total
+                  </p>
+                </div>
               </div>
-              {subscription.rollover_credits > 0 && (
-                <p className="text-muted-foreground text-sm">
-                  Includes {subscription.rollover_credits} rollover credits
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Buy Extra Credits */}
-        {subscription?.plan !== "free" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Buy Extra Credits</CardTitle>
-              <CardDescription>One-time credit purchases</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-3">
-              {[
-                { credits: 50, price: 10 },
-                { credits: 100, price: 20 },
-                { credits: 200, price: 40 }
-              ].map((pkg) => (
-                <Card key={pkg.credits} className="border-2">
-                  <CardHeader>
-                    <CardTitle>{pkg.credits} Credits</CardTitle>
-                    <CardDescription>${pkg.price} USD</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleBuyCredits(pkg.credits)}
-                    >
-                      Purchase
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+              <div className="mt-6 space-y-2">
+                <Progress value={creditsPercent} className="h-1.5 bg-white/5" />
+                {subscription.rollover_credits > 0 && (
+                  <p className="text-xs text-neutral-500">
+                    Includes {subscription.rollover_credits} rollover credits
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
-        {/* Plans */}
-        <div>
-          <div className="mb-6 flex items-center justify-center gap-2">
-            <span
-              className={
+          {/* Billing Cycle Toggle */}
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={`text-sm font-medium transition-colors ${
                 billingCycle === "monthly"
-                  ? "font-semibold"
-                  : "text-muted-foreground"
-              }
+                  ? "text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
             >
               Monthly
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+
+            <button
               onClick={() =>
                 setBillingCycle(
                   billingCycle === "monthly" ? "annual" : "monthly"
                 )
               }
+              className="relative inline-flex h-6 w-11 items-center rounded-full border border-white/10 bg-white/5 transition-colors hover:bg-white/10"
             >
-              Toggle
-            </Button>
-            <span
-              className={
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  billingCycle === "annual" ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+
+            <button
+              onClick={() => setBillingCycle("annual")}
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
                 billingCycle === "annual"
-                  ? "font-semibold"
-                  : "text-muted-foreground"
-              }
+                  ? "text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
             >
-              Annual <Badge variant="secondary">Save 15-17%</Badge>
-            </span>
+              Annual
+              <Badge
+                variant="secondary"
+                className="border-0 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+              >
+                Save 15-17%
+              </Badge>
+            </button>
           </div>
 
+          {/* Plans Grid */}
           <div className="grid gap-6 md:grid-cols-2">
-            {Object.entries(PLANS).map(([key, plan]) => (
-              <Card key={key} className="relative border-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      {key === "advanced" ? (
-                        <Crown className="h-5 w-5" />
-                      ) : (
-                        <Zap className="h-5 w-5" />
+            {Object.entries(PLANS).map(([key, plan]) => {
+              const Icon = plan.icon;
+              const isCurrentPlan = subscription?.plan === key;
+
+              return (
+                <div
+                  key={key}
+                  onMouseEnter={() => setHovering(true)}
+                  onMouseLeave={() => setHovering(false)}
+                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+                    isCurrentPlan
+                      ? "border-white/15 bg-white/[0.05]"
+                      : "border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.05]"
+                  }`}
+                >
+                  {/* Fixed: Changed space-y-6 to explicit margins and added flex h-full flex-col */}
+                  <div className="flex h-full flex-col rounded-2xl p-6 backdrop-blur-xl">
+                    {/* Plan Header */}
+                    <div className="mb-6 flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="rounded-lg bg-white/5 p-2">
+                          <Icon className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">
+                            {plan.name}
+                          </h3>
+                          <Badge className="mt-1 rounded-full border-0 bg-white/5 text-xs text-neutral-300 hover:bg-white/10">
+                            {plan.credits} credits
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pricing */}
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-white">
+                          $
+                          {billingCycle === "monthly"
+                            ? plan.monthly
+                            : plan.annual}
+                        </span>
+                        <span className="text-sm text-neutral-400">/mo</span>
+                      </div>
+                      {billingCycle === "annual" && (
+                        <p className="mt-1 text-xs text-neutral-500">
+                          Save ${((plan.monthly - plan.annual) * 12).toFixed(0)}{" "}
+                          per year
+                        </p>
                       )}
-                      {plan.name}
-                    </CardTitle>
-                    <Badge>{plan.credits} credits</Badge>
+                    </div>
+
+                    {/* Features - Added flex-1 to take available space */}
+                    <ul className="mb-6 flex-1 space-y-2.5">
+                      {plan.features.map((feature, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                          <span className="text-sm text-neutral-300">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA Button - Added mt-auto to push to bottom */}
+                    <Button
+                      onClick={() => handleUpgrade(key as "pro" | "advanced")}
+                      disabled={isCurrentPlan}
+                      className={`mt-auto w-full transition-all duration-300 ${
+                        isCurrentPlan
+                          ? "cursor-default bg-white/5 text-neutral-400 hover:bg-white/5"
+                          : "bg-white text-black hover:bg-white/90"
+                      }`}
+                    >
+                      {isCurrentPlan ? "Current Plan" : "Upgrade"}
+                    </Button>
                   </div>
-                  <div className="text-3xl font-bold">
-                    ${billingCycle === "monthly" ? plan.monthly : plan.annual}
-                    <span className="text-muted-foreground text-base font-normal">
-                      /mo
-                    </span>
-                  </div>
-                  {billingCycle === "annual" && (
-                    <p className="text-muted-foreground text-sm">
-                      Save ${((plan.monthly - plan.annual) * 12).toFixed(0)}
-                      /year
-                    </p>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <Check className="text-primary mt-0.5 h-4 w-4" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleUpgrade(key as "pro" | "advanced")}
-                    disabled={subscription?.plan === key}
-                  >
-                    {subscription?.plan === key ? "Current Plan" : "Upgrade"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              );
+            })}
           </div>
+
+          {/* Buy Extra Credits */}
+          {/* {subscription?.plan !== "free" && (
+            <div
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+              className="rounded-2xl border border-white/5 bg-white/[0.03] p-6 backdrop-blur-xl"
+            >
+              <div className="mb-6 space-y-1">
+                <h2 className="text-lg font-semibold text-white">
+                  Buy Extra Credits
+                </h2>
+                <p className="text-sm text-neutral-400">
+                  One-time credit purchases
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {[
+                  { credits: 50, price: 10 },
+                  { credits: 100, price: 20 },
+                  { credits: 200, price: 40 }
+                ].map((pkg) => (
+                  <div
+                    key={pkg.credits}
+                    className="group rounded-xl border border-white/5 bg-white/[0.03] p-4 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.05]"
+                  >
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-xl font-semibold text-white">
+                          {pkg.credits} Credits
+                        </p>
+                        <p className="text-sm text-neutral-400">
+                          ${pkg.price} USD
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => handleBuyCredits(pkg.credits)}
+                        className="w-full bg-white/5 text-white hover:bg-white/10"
+                        variant="outline"
+                      >
+                        Purchase
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )} */}
         </div>
       </div>
     </div>
