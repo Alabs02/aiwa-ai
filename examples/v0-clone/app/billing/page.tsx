@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
+import { Toolbar } from "@/components/shared/toolbar";
 import { BillingClient } from "@/components/billing/billing-client";
 
 export default async function BillingPage() {
@@ -9,5 +10,10 @@ export default async function BillingPage() {
     redirect("/login");
   }
 
-  return <BillingClient />;
+  return (
+    <>
+      <Toolbar />
+      <BillingClient />
+    </>
+  );
 }
