@@ -250,20 +250,20 @@ export async function POST(request: NextRequest) {
           responseMode: "experimental_stream"
         });
 
-        // Deduct minimum credit BEFORE streaming starts
+        // Deduct 5 credits upfront for streaming (workaround until actual usage tracked)
         if (session?.user?.id) {
           await createUsageEvent({
             userId: session.user.id,
             eventType: "chat_generation",
             v0ChatId: chatId,
             v0MessageId: "streaming-in-progress",
-            inputTokens: 500,
-            outputTokens: 2000,
+            inputTokens: 2500,
+            outputTokens: 108000,
             model: "v0-gpt-5-streaming-upfront",
             status: "completed"
           });
           console.log(
-            "[STREAMING] Deducted 1 credit upfront for streaming generation"
+            "[STREAMING] Deducted 5 credits upfront for streaming generation"
           );
         }
 
@@ -304,20 +304,20 @@ export async function POST(request: NextRequest) {
           responseMode: "experimental_stream"
         });
 
-        // Deduct minimum credit BEFORE streaming starts
+        // Deduct 5 credits upfront for streaming (workaround until actual usage tracked)
         if (session?.user?.id) {
           await createUsageEvent({
             userId: session.user.id,
             eventType: "chat_generation",
             v0ChatId: "pending",
             v0MessageId: "streaming-in-progress",
-            inputTokens: 500,
-            outputTokens: 2000,
+            inputTokens: 2500,
+            outputTokens: 108000,
             model: "v0-gpt-5-streaming-upfront",
             status: "completed"
           });
           console.log(
-            "[STREAMING] Deducted 1 credit upfront for new streaming chat"
+            "[STREAMING] Deducted 5 credits upfront for new streaming chat"
           );
         }
 
