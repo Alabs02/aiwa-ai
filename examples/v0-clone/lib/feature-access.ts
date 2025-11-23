@@ -1,4 +1,4 @@
-export type UserPlan = "free" | "pro" | "advanced" | "white_label";
+export type UserPlan = "free" | "pro" | "advanced" | "ultimate" | "white_label";
 
 export interface FeatureAccess {
   canExport: boolean;
@@ -8,12 +8,41 @@ export interface FeatureAccess {
   canUsePromptLibrary: boolean;
   canUsePromptAnalysis: boolean;
   maxProjects: number;
+  maxIntegrations: number; // New field for integration limits
   hasUnlimitedSubdomains: boolean;
   hasAutoSyncGitHub: boolean;
   hasCreditRollover: boolean;
+  hasInAppCodeEdit: boolean; // Future feature
+  hasCloneWebsite: boolean; // Future feature
+  hasPrioritySupport: boolean;
+  hasVIPSupport: boolean;
 }
 
-export function getFeatureAccess(plan: UserPlan): FeatureAccess {
+export function getFeatureAccess(
+  plan: UserPlan,
+  isAdmin: boolean = false
+): FeatureAccess {
+  // Admin users get full access to everything
+  if (isAdmin) {
+    return {
+      canExport: true,
+      canDownload: true,
+      canUseGitHub: true,
+      canUsePromptEnhancer: true,
+      canUsePromptLibrary: true,
+      canUsePromptAnalysis: true,
+      maxProjects: -1, // unlimited
+      maxIntegrations: -1, // unlimited
+      hasUnlimitedSubdomains: true,
+      hasAutoSyncGitHub: true,
+      hasCreditRollover: true,
+      hasInAppCodeEdit: true,
+      hasCloneWebsite: true,
+      hasPrioritySupport: true,
+      hasVIPSupport: true
+    };
+  }
+
   const features: Record<UserPlan, FeatureAccess> = {
     free: {
       canExport: false,
@@ -23,9 +52,14 @@ export function getFeatureAccess(plan: UserPlan): FeatureAccess {
       canUsePromptLibrary: false,
       canUsePromptAnalysis: true,
       maxProjects: 1,
+      maxIntegrations: 0,
       hasUnlimitedSubdomains: false,
       hasAutoSyncGitHub: false,
-      hasCreditRollover: false
+      hasCreditRollover: false,
+      hasInAppCodeEdit: false,
+      hasCloneWebsite: false,
+      hasPrioritySupport: false,
+      hasVIPSupport: false
     },
     pro: {
       canExport: true,
@@ -35,9 +69,14 @@ export function getFeatureAccess(plan: UserPlan): FeatureAccess {
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
       maxProjects: 10,
+      maxIntegrations: 5, // Updated for new pricing
       hasUnlimitedSubdomains: true,
       hasAutoSyncGitHub: false,
-      hasCreditRollover: true
+      hasCreditRollover: true,
+      hasInAppCodeEdit: false,
+      hasCloneWebsite: false,
+      hasPrioritySupport: false,
+      hasVIPSupport: false
     },
     advanced: {
       canExport: true,
@@ -47,9 +86,31 @@ export function getFeatureAccess(plan: UserPlan): FeatureAccess {
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
       maxProjects: -1, // unlimited
+      maxIntegrations: 10, // Updated for new pricing
       hasUnlimitedSubdomains: true,
       hasAutoSyncGitHub: true,
-      hasCreditRollover: true
+      hasCreditRollover: true,
+      hasInAppCodeEdit: false,
+      hasCloneWebsite: false,
+      hasPrioritySupport: true,
+      hasVIPSupport: false
+    },
+    ultimate: {
+      canExport: true,
+      canDownload: true,
+      canUseGitHub: true,
+      canUsePromptEnhancer: true,
+      canUsePromptLibrary: true,
+      canUsePromptAnalysis: true,
+      maxProjects: -1, // unlimited
+      maxIntegrations: 20, // New ultimate tier
+      hasUnlimitedSubdomains: true,
+      hasAutoSyncGitHub: true,
+      hasCreditRollover: true,
+      hasInAppCodeEdit: true, // Future feature - ultimate exclusive
+      hasCloneWebsite: true, // Future feature - ultimate exclusive
+      hasPrioritySupport: true,
+      hasVIPSupport: true
     },
     white_label: {
       canExport: true,
@@ -59,9 +120,14 @@ export function getFeatureAccess(plan: UserPlan): FeatureAccess {
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
       maxProjects: -1,
+      maxIntegrations: -1,
       hasUnlimitedSubdomains: true,
       hasAutoSyncGitHub: true,
-      hasCreditRollover: true
+      hasCreditRollover: true,
+      hasInAppCodeEdit: true,
+      hasCloneWebsite: true,
+      hasPrioritySupport: true,
+      hasVIPSupport: true
     }
   };
 
@@ -70,7 +136,8 @@ export function getFeatureAccess(plan: UserPlan): FeatureAccess {
 
 export function canAccessFeature(
   plan: UserPlan,
-  feature: keyof FeatureAccess
+  feature: keyof FeatureAccess,
+  isAdmin: boolean = false
 ): boolean {
-  return getFeatureAccess(plan)[feature] as boolean;
+  return getFeatureAccess(plan, isAdmin)[feature] as boolean;
 }

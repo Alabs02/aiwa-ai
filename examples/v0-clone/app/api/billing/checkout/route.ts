@@ -11,7 +11,9 @@ const PLAN_PRICES = {
   pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID!,
   pro_annual: process.env.STRIPE_PRO_ANNUAL_PRICE_ID!,
   advanced_monthly: process.env.STRIPE_ADVANCED_MONTHLY_PRICE_ID!,
-  advanced_annual: process.env.STRIPE_ADVANCED_ANNUAL_PRICE_ID!
+  advanced_annual: process.env.STRIPE_ADVANCED_ANNUAL_PRICE_ID!,
+  ultimate_monthly: process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID!,
+  ultimate_annual: process.env.STRIPE_ULTIMATE_ANNUAL_PRICE_ID!
 };
 
 export async function POST(request: NextRequest) {
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { plan, billingCycle } = await request.json();
 
     if (
-      !["pro", "advanced"].includes(plan) ||
+      !["pro", "advanced", "ultimate"].includes(plan) ||
       !["monthly", "annual"].includes(billingCycle)
     ) {
       return NextResponse.json(

@@ -80,7 +80,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     const plan = session.metadata?.plan || "pro";
     const billingCycle = session.metadata?.billingCycle || "monthly";
-    const creditsTotal = plan === "pro" ? 100 : 250;
+
+    // Updated credit allocation for new pricing
+    const creditsMap: Record<string, number> = {
+      pro: 100,
+      advanced: 350, // Updated from 250
+      ultimate: 800 // New plan
+    };
+    const creditsTotal = creditsMap[plan] || 100;
 
     // Get period dates from subscription item
     const firstItem = stripeSubscription.items.data[0];

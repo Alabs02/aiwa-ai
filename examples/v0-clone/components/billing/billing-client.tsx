@@ -1,17 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Check, Zap, Crown, Sparkles } from "lucide-react";
+import { Check, Zap, Crown, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { GL } from "../gl";
 import { Leva } from "leva";
@@ -38,8 +31,8 @@ const PLANS = {
       "100 AI credits monthly",
       "Prompt Enhancer & Library",
       "Export/Download code",
-      "GitHub integration",
-      "10 projects max",
+      "10 projects",
+      "5 Integrations",
       "Credit rollovers",
       "Unlimited aiwa.codes subdomains"
     ]
@@ -48,15 +41,30 @@ const PLANS = {
     name: "Advanced",
     monthly: 50,
     annual: 41.5,
-    credits: 250,
+    credits: 350, // Updated from 250
     icon: Crown,
     features: [
-      "250 AI credits monthly",
+      "350 AI credits monthly", // Updated
       "Everything in Pro",
       "Unlimited projects",
       "Auto-sync GitHub",
-      "Priority support",
-      "Advanced integrations"
+      "10 integrations",
+      "Priority support"
+    ]
+  },
+  ultimate: {
+    name: "Ultimate",
+    monthly: 100,
+    annual: 88,
+    credits: 800,
+    icon: Gem,
+    features: [
+      "800 AI credits monthly",
+      "Everything in Advanced",
+      "In-app code edit",
+      "Clone & Import any website",
+      "20 Integrations",
+      "VIP support"
     ]
   }
 };
@@ -87,7 +95,7 @@ export function BillingClient() {
     }
   };
 
-  const handleUpgrade = async (plan: "pro" | "advanced") => {
+  const handleUpgrade = async (plan: "pro" | "advanced" | "ultimate") => {
     try {
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
@@ -129,6 +137,9 @@ export function BillingClient() {
     ? (subscription.credits_remaining / subscription.credits_total) * 100
     : 0;
 
+  // Check if user can buy credits (not on free plan)
+  const canBuyCredits = subscription && subscription.plan !== "free";
+
   return (
     <div className="grid min-h-screen grid-cols-1 bg-black/95 p-6 md:p-8">
       <GL hovering={hovering} />
@@ -136,7 +147,7 @@ export function BillingClient() {
       <Leva hidden />
 
       <div className="bg-background/40 relative z-10 w-full">
-        <div className="mx-auto max-w-5xl space-y-8">
+        <div className="mx-auto max-w-6xl space-y-8">
           {/* Header */}
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight text-white">
@@ -235,13 +246,13 @@ export function BillingClient() {
                 variant="secondary"
                 className="border-0 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
               >
-                Save 15-17%
+                Save 12-17%
               </Badge>
             </button>
           </div>
 
           {/* Plans Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-3">
             {Object.entries(PLANS).map(([key, plan]) => {
               const Icon = plan.icon;
               const isCurrentPlan = subscription?.plan === key;
@@ -257,7 +268,6 @@ export function BillingClient() {
                       : "border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.05]"
                   }`}
                 >
-                  {/* Fixed: Changed space-y-6 to explicit margins and added flex h-full flex-col */}
                   <div className="flex h-full flex-col rounded-2xl p-6 backdrop-blur-xl">
                     {/* Plan Header */}
                     <div className="mb-6 flex items-start justify-between">
@@ -295,7 +305,7 @@ export function BillingClient() {
                       )}
                     </div>
 
-                    {/* Features - Added flex-1 to take available space */}
+                    {/* Features */}
                     <ul className="mb-6 flex-1 space-y-2.5">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-2.5">
@@ -307,9 +317,11 @@ export function BillingClient() {
                       ))}
                     </ul>
 
-                    {/* CTA Button - Added mt-auto to push to bottom */}
+                    {/* CTA Button */}
                     <Button
-                      onClick={() => handleUpgrade(key as "pro" | "advanced")}
+                      onClick={() =>
+                        handleUpgrade(key as "pro" | "advanced" | "ultimate")
+                      }
                       disabled={isCurrentPlan}
                       className={`mt-auto w-full transition-all duration-300 ${
                         isCurrentPlan
@@ -325,8 +337,8 @@ export function BillingClient() {
             })}
           </div>
 
-          {/* Buy Extra Credits */}
-          {subscription?.plan !== "free" && (
+          {/* Buy Extra Credits - Only show for paid plans */}
+          {canBuyCredits && (
             <div
               onMouseEnter={() => setHovering(true)}
               onMouseLeave={() => setHovering(false)}
