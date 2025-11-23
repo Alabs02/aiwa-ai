@@ -8,14 +8,14 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Crown, Sparkles } from "lucide-react";
+import { Crown, Sparkles, Gem } from "lucide-react";
 import Link from "next/link";
 
 interface UpgradePromptDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   feature: string;
-  requiredPlan?: "pro" | "advanced";
+  requiredPlan?: "pro" | "advanced" | "ultimate";
 }
 
 export function UpgradePromptDialog({
@@ -24,17 +24,31 @@ export function UpgradePromptDialog({
   feature,
   requiredPlan = "pro"
 }: UpgradePromptDialogProps) {
+  const planNames = {
+    pro: "Pro",
+    advanced: "Advanced",
+    ultimate: "Ultimate"
+  };
+
+  const planIcons = {
+    pro: Crown,
+    advanced: Crown,
+    ultimate: Gem
+  };
+
+  const Icon = planIcons[requiredPlan];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Crown className="text-primary h-5 w-5" />
-            Upgrade to {requiredPlan === "pro" ? "Pro" : "Advanced"}
+            <Icon className="text-primary h-5 w-5" />
+            Upgrade to {planNames[requiredPlan]}
           </DialogTitle>
           <DialogDescription>
-            {feature} is available on{" "}
-            {requiredPlan === "pro" ? "Pro" : "Advanced"} and higher plans.
+            {feature} is available on {planNames[requiredPlan]} and higher
+            plans.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">

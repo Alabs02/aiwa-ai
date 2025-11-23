@@ -1,15 +1,16 @@
-import db from "@/lib/db/connection";
+import db from "./connection";
 import {
   subscriptions,
-  usage_events,
   credit_purchases,
+  usage_events,
   payment_transactions,
   users,
-  Subscription,
-  UsageEvent,
-  CreditPurchase
-} from "@/lib/db/schema";
-import { eq, and, gte, lte, sum, count, sql } from "drizzle-orm";
+  type Subscription,
+  type CreditPurchase,
+  type UsageEvent,
+  type PaymentTransaction
+} from "./schema";
+import { eq, desc, and, gte, lte, sum, count, sql } from "drizzle-orm";
 
 // ============================================================================
 // SUBSCRIPTION QUERIES
@@ -17,17 +18,17 @@ import { eq, and, gte, lte, sum, count, sql } from "drizzle-orm";
 
 export async function getUserSubscription(
   userId: string
-): Promise<Subscription | null> {
+): Promise<Subscription | undefined> {
   try {
     const [subscription] = await db
       .select()
       .from(subscriptions)
       .where(eq(subscriptions.user_id, userId));
 
-    return subscription || null;
+    return subscription;
   } catch (error) {
     console.error("Failed to get user subscription:", error);
-    return null;
+    throw error;
   }
 }
 
@@ -184,10 +185,8 @@ export async function resetMonthlyCredits(
       throw new Error("No subscription found");
     }
 
-    // Calculate rollover for Pro/Advanced/Ultimate plans
-    const rolloverCredits = ["pro", "advanced", "ultimate"].includes(
-      subscription.plan
-    )
+    // Calculate rollover for Pro/Advanced plans
+    const rolloverCredits = ["pro", "advanced"].includes(subscription.plan)
       ? subscription.credits_remaining
       : 0;
 
@@ -240,11 +239,13 @@ export async function createUsageEvent({
     const totalTokens = inputTokens + outputTokens;
 
     // Calculate costs (in cents)
-    const inputCost = Math.ceil((inputTokens / 1_000_000) * 150); // $1.5/1M = 150 cents
-    const outputCost = Math.ceil((outputTokens / 1_000_000) * 750); // $7.5/1M = 750 cents
+    // Input: $1.5/1M tokens = 0.00015 per token = 0.015 cents per token
+    // Output: $7.5/1M tokens = 0.00075 per token = 0.075 cents per token
+    const inputCost = Math.ceil(inputTokens * 0.00015 * 100); // Convert to cents
+    const outputCost = Math.ceil(outputTokens * 0.00075 * 100);
     const totalCost = inputCost + outputCost;
 
-    // Calculate credits (1 credit = $0.20 = 20 cents)
+    // Calculate credits to deduct (1 credit = 20 cents = $0.20)
     const creditsDeducted = Math.ceil(totalCost / 20);
 
     const [usageEvent] = await db
@@ -266,7 +267,7 @@ export async function createUsageEvent({
       })
       .returning();
 
-    // Deduct credits from subscription
+    // Deduct credits from user's subscription
     if (creditsDeducted > 0) {
       await deductCredits({
         userId,
@@ -278,6 +279,43 @@ export async function createUsageEvent({
     return usageEvent;
   } catch (error) {
     console.error("Failed to create usage event:", error);
+    throw error;
+  }
+}
+
+export async function getUserUsageEvents({
+  userId,
+  limit = 50,
+  offset = 0,
+  startDate,
+  endDate
+}: {
+  userId: string;
+  limit?: number;
+  offset?: number;
+  startDate?: Date;
+  endDate?: Date;
+}): Promise<UsageEvent[]> {
+  try {
+    let conditions = [eq(usage_events.user_id, userId)];
+
+    if (startDate) {
+      conditions.push(gte(usage_events.created_at, startDate));
+    }
+
+    if (endDate) {
+      conditions.push(lte(usage_events.created_at, endDate));
+    }
+
+    return await db
+      .select()
+      .from(usage_events)
+      .where(and(...conditions))
+      .orderBy(desc(usage_events.created_at))
+      .limit(limit)
+      .offset(offset);
+  } catch (error) {
+    console.error("Failed to get user usage events:", error);
     throw error;
   }
 }
@@ -367,8 +405,7 @@ export async function getSystemAnalytics({
         total_users: count(users.id),
         free_users: sql<number>`COUNT(CASE WHEN ${subscriptions.plan} = 'free' THEN 1 END)`,
         pro_users: sql<number>`COUNT(CASE WHEN ${subscriptions.plan} = 'pro' THEN 1 END)`,
-        advanced_users: sql<number>`COUNT(CASE WHEN ${subscriptions.plan} = 'advanced' THEN 1 END)`,
-        ultimate_users: sql<number>`COUNT(CASE WHEN ${subscriptions.plan} = 'ultimate' THEN 1 END)`
+        advanced_users: sql<number>`COUNT(CASE WHEN ${subscriptions.plan} = 'advanced' THEN 1 END)`
       })
       .from(users)
       .leftJoin(subscriptions, eq(users.id, subscriptions.user_id));
@@ -383,14 +420,74 @@ export async function getSystemAnalytics({
       .from(payment_transactions)
       .where(
         conditions.length > 0
-          ? and(...conditions.map((c) => sql`${c}`))
+          ? and(
+              ...conditions.map(
+                (c) =>
+                  // Replace usage_events.created_at with payment_transactions.created_at
+                  sql`${payment_transactions.created_at} ${c}`
+              )
+            )
           : undefined
       );
 
+    const activeSubscriptions = await db
+      .select({
+        plan: subscriptions.plan,
+        billing_cycle: subscriptions.billing_cycle,
+        count: sql<number>`COUNT(*)`
+      })
+      .from(subscriptions)
+      .where(eq(subscriptions.status, "active"))
+      .groupBy(subscriptions.plan, subscriptions.billing_cycle);
+
+    let mrrCents = 0;
+    for (const sub of activeSubscriptions) {
+      const monthlyRevenue =
+        sub.billing_cycle === "annual"
+          ? sub.plan === "pro"
+            ? 1700
+            : 4150 // Annual monthly equivalent
+          : sub.plan === "pro"
+            ? 2000
+            : 5000; // Monthly rate
+
+      mrrCents += monthlyRevenue * Number(sub.count);
+    }
+
+    const arrCents = mrrCents * 12;
+
     return {
-      usage: usageStats,
-      users: userStats,
-      revenue: revenueStats
+      usage: {
+        total_events: Number(usageStats?.total_events || 0),
+        total_tokens: Number(usageStats?.total_tokens || 0),
+        total_input_tokens: Number(usageStats?.total_input_tokens || 0),
+        total_output_tokens: Number(usageStats?.total_output_tokens || 0),
+        total_cost_cents: Number(usageStats?.total_cost || 0),
+        total_credits_used: Number(usageStats?.total_credits_used || 0),
+        avg_tokens_per_generation: usageStats?.total_events
+          ? Math.round(
+              Number(usageStats.total_tokens) / Number(usageStats.total_events)
+            )
+          : 0
+      },
+      users: {
+        total: Number(userStats?.total_users || 0),
+        free: Number(userStats?.free_users || 0),
+        pro: Number(userStats?.pro_users || 0),
+        advanced: Number(userStats?.advanced_users || 0)
+      },
+      revenue: {
+        total_cents: Number(revenueStats?.total_revenue || 0),
+        total_usd: (Number(revenueStats?.total_revenue || 0) / 100).toFixed(2),
+        subscription_revenue_cents: Number(
+          revenueStats?.subscription_revenue || 0
+        ),
+        credit_revenue_cents: Number(revenueStats?.credit_revenue || 0),
+        mrr_cents: mrrCents,
+        mrr_usd: (mrrCents / 100).toFixed(2),
+        arr_cents: arrCents,
+        arr_usd: (arrCents / 100).toFixed(2)
+      }
     };
   } catch (error) {
     console.error("Failed to get system analytics:", error);
@@ -434,8 +531,7 @@ function getPlanCredits(plan: string): number {
   const creditMap: Record<string, number> = {
     free: 15, // $3 worth = 15 credits
     pro: 100, // $20 worth = 100 credits
-    advanced: 350, // $50 worth = 350 credits (updated from 250)
-    ultimate: 800, // $100 worth = 800 credits
+    advanced: 250, // $50 worth = 250 credits
     white_label: 0 // Custom
   };
 
