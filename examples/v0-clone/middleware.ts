@@ -29,6 +29,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow AI proxy without authentication (for cross-origin requests from generated apps)
+  if (pathname.startsWith("/api/ai-proxy")) {
+    return NextResponse.next();
+  }
+
   // Check for required environment variables
   if (!process.env.AUTH_SECRET) {
     console.error(
