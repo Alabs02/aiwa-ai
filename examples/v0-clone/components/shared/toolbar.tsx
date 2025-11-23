@@ -39,7 +39,7 @@ function SearchParamsHandler() {
 }
 
 export function Toolbar({ className = "" }: ToolbarProps) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -50,6 +50,10 @@ export function Toolbar({ className = "" }: ToolbarProps) {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    console.log({ status });
+  }, [status]);
 
   return (
     <>
@@ -87,7 +91,7 @@ export function Toolbar({ className = "" }: ToolbarProps) {
         </Link>
 
         <div className="hidden transform-gpu items-center gap-2 transition-all duration-300 will-change-auto md:flex">
-          {session ? (
+          {status == "authenticated" ? (
             <div className="relative grid size-9 cursor-pointer place-items-center rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 p-[3px] shadow-inner brightness-100 transition-all duration-300 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 hover:brightness-110">
               <div className="relative grid size-full skew-2 grid-cols-1 rounded-full bg-black shadow-md">
                 <UserNav session={session} />
