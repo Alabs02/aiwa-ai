@@ -957,6 +957,8 @@ export async function getProjectEnvVars({
   }
 }
 
+const MASKED_VALUE = "••••••••••••••••••••••••••••••••";
+
 export async function getProjectEnvVarsByV0Id({
   v0ProjectId
 }: {
@@ -971,13 +973,56 @@ export async function getProjectEnvVarsByV0Id({
       throw new Error("Project not found");
     }
 
-    return await db
+    const envVars = await db
       .select()
       .from(project_env_vars)
       .where(eq(project_env_vars.project_id, project.id))
       .orderBy(asc(project_env_vars.key));
+
+    // Mask system keys for client display
+    return envVars.map((envVar: ProjectEnvVar) => ({
+      ...envVar,
+      value: envVar.value === "__USE_SYSTEM_KEY__" ? MASKED_VALUE : envVar.value
+    }));
   } catch (error) {
     console.error("Failed to get project env vars by v0 ID:", error);
+    throw error;
+  }
+}
+
+// For AI proxy use - returns actual system keys
+export async function getProjectEnvVarsForProxy({
+  v0ProjectId
+}: {
+  v0ProjectId: string;
+}): Promise<ProjectEnvVar[]> {
+  try {
+    const project = await db.query.projects.findFirst({
+      where: eq(projects.v0_project_id, v0ProjectId)
+    });
+
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    const envVars = await db
+      .select()
+      .from(project_env_vars)
+      .where(eq(project_env_vars.project_id, project.id))
+      .orderBy(asc(project_env_vars.key));
+
+    // Replace __USE_SYSTEM_KEY__ with actual system key
+    const systemKey = process.env.AI_GATEWAY_API_KEY;
+
+    return envVars.map((envVar: ProjectEnvVar) => ({
+      ...envVar,
+      value:
+        envVar.value === "__USE_SYSTEM_KEY__" && systemKey
+          ? systemKey
+          : envVar.value
+    }));
+  } catch (error) {
+    console.error("Failed to get project env vars for proxy:", error);
     throw error;
   }
 }
