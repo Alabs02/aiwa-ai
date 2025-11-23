@@ -27,6 +27,7 @@ interface Analytics {
     free: number;
     pro: number;
     advanced: number;
+    ultimate: number; // Added
   };
   revenue: {
     total_usd: string;
@@ -105,7 +106,8 @@ export function AdminDashboard() {
               </div>
               <p className="text-muted-foreground text-xs">
                 {analytics?.users.pro || 0} Pro •{" "}
-                {analytics?.users.advanced || 0} Advanced
+                {analytics?.users.advanced || 0} Advanced •{" "}
+                {analytics?.users.ultimate || 0} Ultimate
               </p>
             </CardContent>
           </Card>
@@ -193,6 +195,12 @@ export function AdminDashboard() {
                       <span className="text-sm">Advanced</span>
                       <span className="font-medium">
                         {analytics?.users.advanced || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Ultimate</span>
+                      <span className="font-medium">
+                        {analytics?.users.ultimate || 0}
                       </span>
                     </div>
                   </div>
