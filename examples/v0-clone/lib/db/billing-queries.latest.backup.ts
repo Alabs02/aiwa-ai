@@ -11,6 +11,10 @@ import {
 } from "@/lib/db/schema";
 import { eq, and, gte, lte, sum, count, sql, desc } from "drizzle-orm";
 
+// ============================================================================
+// SUBSCRIPTION QUERIES
+// ============================================================================
+
 export async function getUserSubscription(
   userId: string
 ): Promise<Subscription | null> {
@@ -96,6 +100,10 @@ export async function updateSubscription({
   }
 }
 
+// ============================================================================
+// CREDIT MANAGEMENT
+// ============================================================================
+
 export async function deductCredits({
   userId,
   creditsToDeduct,
@@ -113,23 +121,12 @@ export async function deductCredits({
     }
 
     if (subscription.credits_remaining < creditsToDeduct) {
-      console.warn(
-        `[CREDIT DEDUCTION] Insufficient credits: User has ${subscription.credits_remaining}, attempting to deduct ${creditsToDeduct}`
-      );
       throw new Error("Insufficient credits");
     }
 
     const newCreditsUsed = subscription.credits_used + creditsToDeduct;
     const newCreditsRemaining =
       subscription.credits_remaining - creditsToDeduct;
-
-    console.log("[CREDIT DEDUCTION] Deducting credits:", {
-      userId,
-      creditsToDeduct,
-      before: subscription.credits_remaining,
-      after: newCreditsRemaining,
-      usageEventId
-    });
 
     return await updateSubscription({
       userId,
@@ -187,12 +184,14 @@ export async function resetMonthlyCredits(
       throw new Error("No subscription found");
     }
 
+    // Calculate rollover for Pro/Advanced/Ultimate plans
     const rolloverCredits = ["pro", "advanced", "ultimate"].includes(
       subscription.plan
     )
       ? subscription.credits_remaining
       : 0;
 
+    // Get base credits for plan
     const planCredits = getPlanCredits(subscription.plan);
 
     return await updateSubscription({
@@ -214,7 +213,9 @@ export async function resetMonthlyCredits(
   }
 }
 
-const MINIMUM_CREDITS_PER_GENERATION = 1;
+// ============================================================================
+// USAGE EVENT TRACKING
+// ============================================================================
 
 export async function createUsageEvent({
   userId,
@@ -238,32 +239,13 @@ export async function createUsageEvent({
   try {
     const totalTokens = inputTokens + outputTokens;
 
-    const inputCost = Math.ceil((inputTokens / 1_000_000) * 150);
-    const outputCost = Math.ceil((outputTokens / 1_000_000) * 750);
+    // Calculate costs (in cents)
+    const inputCost = Math.ceil((inputTokens / 1_000_000) * 150); // $1.5/1M = 150 cents
+    const outputCost = Math.ceil((outputTokens / 1_000_000) * 750); // $7.5/1M = 750 cents
     const totalCost = inputCost + outputCost;
 
-    let creditsDeducted = Math.ceil(totalCost / 20);
-
-    if (
-      eventType === "chat_generation" &&
-      creditsDeducted < MINIMUM_CREDITS_PER_GENERATION
-    ) {
-      console.warn(
-        `[CREDIT CALCULATION] Calculated credits (${creditsDeducted}) below minimum, enforcing minimum of ${MINIMUM_CREDITS_PER_GENERATION}`
-      );
-      creditsDeducted = MINIMUM_CREDITS_PER_GENERATION;
-    }
-
-    console.log("[USAGE EVENT] Creating:", {
-      userId,
-      eventType,
-      v0ChatId,
-      v0MessageId,
-      tokens: { input: inputTokens, output: outputTokens, total: totalTokens },
-      costs: { input: inputCost, output: outputCost, total: totalCost },
-      creditsDeducted,
-      model
-    });
+    // Calculate credits (1 credit = $0.20 = 20 cents)
+    const creditsDeducted = Math.ceil(totalCost / 20);
 
     const [usageEvent] = await db
       .insert(usage_events)
@@ -284,6 +266,7 @@ export async function createUsageEvent({
       })
       .returning();
 
+    // Deduct credits from subscription
     if (creditsDeducted > 0) {
       await deductCredits({
         userId,
@@ -294,7 +277,7 @@ export async function createUsageEvent({
 
     return usageEvent;
   } catch (error) {
-    console.error("[USAGE EVENT] Failed to create:", error);
+    console.error("Failed to create usage event:", error);
     throw error;
   }
 }
@@ -336,6 +319,10 @@ export async function getUserUsageEvents({
   }
 }
 
+// ============================================================================
+// CREDIT PURCHASES
+// ============================================================================
+
 export async function createCreditPurchase({
   userId,
   amountUsd,
@@ -360,6 +347,7 @@ export async function createCreditPurchase({
       })
       .returning();
 
+    // Add credits to user's subscription
     await addCredits({
       userId,
       creditsToAdd: creditsPurchased,
@@ -372,6 +360,10 @@ export async function createCreditPurchase({
     throw error;
   }
 }
+
+// ============================================================================
+// ANALYTICS & ADMIN QUERIES
+// ============================================================================
 
 export async function getSystemAnalytics({
   startDate,
@@ -393,6 +385,7 @@ export async function getSystemAnalytics({
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
+    // Total usage stats
     const [usageStats] = await db
       .select({
         total_events: count(usage_events.id),
@@ -405,6 +398,7 @@ export async function getSystemAnalytics({
       .from(usage_events)
       .where(whereClause);
 
+    // User stats
     const [userStats] = await db
       .select({
         total_users: count(users.id),
@@ -416,6 +410,7 @@ export async function getSystemAnalytics({
       .from(users)
       .leftJoin(subscriptions, eq(users.id, subscriptions.user_id));
 
+    // Revenue stats (from payment_transactions)
     const [revenueStats] = await db
       .select({
         total_revenue: sum(payment_transactions.amount),
@@ -450,6 +445,7 @@ export async function getAllUsers({
   searchQuery?: string;
 } = {}) {
   try {
+    // This will need more sophisticated querying
     const allUsers = await db
       .select({
         user: users,
@@ -467,13 +463,17 @@ export async function getAllUsers({
   }
 }
 
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
 function getPlanCredits(plan: string): number {
   const creditMap: Record<string, number> = {
-    free: 15,
-    pro: 100,
-    advanced: 350,
-    ultimate: 800,
-    white_label: 0
+    free: 15, // $3 worth = 15 credits
+    pro: 100, // $20 worth = 100 credits
+    advanced: 350, // $50 worth = 350 credits (updated from 250)
+    ultimate: 800, // $100 worth = 800 credits
+    white_label: 0 // Custom
   };
 
   return creditMap[plan] || 0;
@@ -486,6 +486,7 @@ function getNextPeriodEnd(billingCycle: string): Date {
     return new Date(now.setFullYear(now.getFullYear() + 1));
   }
 
+  // Default to monthly
   return new Date(now.setMonth(now.getMonth() + 1));
 }
 

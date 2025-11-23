@@ -4,23 +4,73 @@ export interface TokenUsage {
   totalTokens: number;
 }
 
-export function parseV0Response(response: any): TokenUsage {
-  // Check for usage data in V0 API response
+interface TokenUsageWithMetadata extends TokenUsage {
+  isEstimated: boolean;
+}
+
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+function extractContentText(response: any): string {
+  let content = "";
+
+  if (response?.messages && Array.isArray(response.messages)) {
+    response.messages.forEach((msg: any) => {
+      if (msg.content) content += msg.content + " ";
+      if (msg.experimental_content) content += msg.experimental_content + " ";
+    });
+  }
+
+  if (response?.demo) {
+    content += response.demo;
+  }
+
+  return content;
+}
+
+export function parseV0Response(response: any): TokenUsageWithMetadata {
   if (response?.usage) {
     return {
       inputTokens: response.usage.prompt_tokens || 0,
       outputTokens: response.usage.completion_tokens || 0,
-      totalTokens: response.usage.total_tokens || 0
+      totalTokens: response.usage.total_tokens || 0,
+      isEstimated: false
     };
   }
 
-  // Fallback: estimate from content
-  const estimateTokens = (text: string) => Math.ceil(text.length / 4);
+  const contentText = extractContentText(response);
+
+  if (contentText.length > 0) {
+    const outputTokens = estimateTokens(contentText);
+    const inputTokens = Math.ceil(outputTokens * 0.3);
+
+    console.warn(
+      "[TOKEN ESTIMATION] No usage data from V0 API, using estimation:",
+      {
+        outputTokens,
+        inputTokens,
+        contentLength: contentText.length
+      }
+    );
+
+    return {
+      inputTokens,
+      outputTokens,
+      totalTokens: inputTokens + outputTokens,
+      isEstimated: true
+    };
+  }
+
+  console.warn(
+    "[TOKEN ESTIMATION] No content to estimate, using minimum fallback"
+  );
 
   return {
-    inputTokens: 0,
-    outputTokens: 0,
-    totalTokens: 0
+    inputTokens: 500,
+    outputTokens: 2000,
+    totalTokens: 2500,
+    isEstimated: true
   };
 }
 
@@ -29,7 +79,6 @@ export async function getV0UsageFromReport(
   messageId: string
 ): Promise<TokenUsage | null> {
   try {
-    // Use V0 usage report endpoint
     const response = await fetch(
       `https://api.v0.dev/reports/usage?chatId=${chatId}&messageId=${messageId}`,
       {
@@ -40,12 +89,15 @@ export async function getV0UsageFromReport(
       }
     );
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn(`[V0 USAGE REPORT] Failed with status ${response.status}`);
+      return null;
+    }
 
     const data = await response.json();
+
     if (data.data && data.data.length > 0) {
       const usage = data.data[0];
-      // Parse token info from usage report
       return {
         inputTokens: usage.promptTokens || 0,
         outputTokens: usage.completionTokens || 0,
@@ -55,7 +107,7 @@ export async function getV0UsageFromReport(
 
     return null;
   } catch (error) {
-    console.error("Failed to fetch V0 usage:", error);
+    console.error("[V0 USAGE REPORT] Fetch failed:", error);
     return null;
   }
 }
