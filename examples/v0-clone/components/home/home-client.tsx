@@ -66,7 +66,29 @@ function SearchParamsHandler({ onReset }: { onReset: () => void }) {
     }
   }, [searchParams, onReset]);
 
-  return null;
+  return <></>;
+}
+
+function UpgradeSearchParamsHandler() {
+  const searchParams = useSearchParams();
+
+  const { setShowWelcomeDialog } = useChatStore();
+
+  useEffect(() => {
+    const isNewUser = searchParams.get("new_user") === "true";
+    const dismissed = localStorage.getItem("welcome_dialog_dismissed");
+
+    if (isNewUser && !dismissed) {
+      // Small delay for smooth UX
+      setTimeout(() => {
+        setShowWelcomeDialog(true);
+        // Clean URL without triggering navigation
+        window.history.replaceState({}, "", "/");
+      }, 800);
+    }
+  }, [searchParams, setShowWelcomeDialog]);
+
+  return <></>;
 }
 
 function AutoProvisioningOverlay() {
@@ -95,8 +117,6 @@ function AutoProvisioningOverlay() {
 }
 
 export function HomeClient() {
-  const searchParams = useSearchParams();
-
   const {
     currentChatId,
     showChatInterface,
@@ -190,20 +210,6 @@ export function HomeClient() {
       }
     }
   }, [currentChat]);
-
-  useEffect(() => {
-    const isNewUser = searchParams.get("new_user") === "true";
-    const dismissed = localStorage.getItem("welcome_dialog_dismissed");
-
-    if (isNewUser && !dismissed) {
-      // Small delay for smooth UX
-      setTimeout(() => {
-        setShowWelcomeDialog(true);
-        // Clean URL without triggering navigation
-        window.history.replaceState({}, "", "/");
-      }, 800);
-    }
-  }, [searchParams, setShowWelcomeDialog]);
 
   const handleReset = () => {
     resetChatState();
@@ -541,6 +547,7 @@ export function HomeClient() {
         {/* Handle search params with Suspense boundary */}
         <Suspense fallback={null}>
           <SearchParamsHandler onReset={handleReset} />
+          <UpgradeSearchParamsHandler />
         </Suspense>
 
         <NavBar />
