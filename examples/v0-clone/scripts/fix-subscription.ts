@@ -28,10 +28,12 @@ async function fixSubscription() {
   console.log(`✓ Found customer: ${customer.id}`);
 
   const subs = await stripe.subscriptions.list({
-    customer: customer.id,
-    status: "active",
+    // customer: customer.id,
+    // status: "active",
     limit: 1
   });
+
+  console.log({ subs });
 
   if (subs.data.length === 0) {
     console.error("❌ No active subscription found");

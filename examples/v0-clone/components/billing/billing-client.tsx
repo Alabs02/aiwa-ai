@@ -326,7 +326,7 @@ export function BillingClient() {
           </div>
 
           {/* Buy Extra Credits */}
-          {/* {subscription?.plan !== "free" && (
+          {subscription?.plan !== "free" && (
             <div
               onMouseEnter={() => setHovering(true)}
               onMouseLeave={() => setHovering(false)}
@@ -372,7 +372,7 @@ export function BillingClient() {
                 ))}
               </div>
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </div>

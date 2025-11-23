@@ -2,7 +2,7 @@ import db from "../lib/db/connection";
 import { users } from "../lib/db/schema";
 import { eq } from "drizzle-orm";
 
-const ADMIN_EMAILS = ["alabson.inc@gmail.com"];
+const ADMIN_EMAILS = ["leonandrew94@gmail.com"];
 
 async function setAdmins() {
   console.log("Setting admin roles...\n");
