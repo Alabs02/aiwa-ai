@@ -50,6 +50,7 @@ import { Loader } from "lucide-react";
 import { CreditWarningBanner } from "@/components/shared/credit-warning-banner";
 import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
 import { getFeatureAccess } from "@/lib/feature-access";
+import { WelcomeUpgradeDialog } from "@/components/shared/welcome-upgrade-dialog";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -94,6 +95,8 @@ function AutoProvisioningOverlay() {
 }
 
 export function HomeClient() {
+  const searchParams = useSearchParams();
+
   const {
     currentChatId,
     showChatInterface,
@@ -106,6 +109,7 @@ export function HomeClient() {
     selectedProjectId,
     envVarsValid,
     isAutoProvisioning, // NEW
+    showWelcomeDialog,
     setCurrentChatId,
     setShowChatInterface,
     setChatHistory,
@@ -115,6 +119,7 @@ export function HomeClient() {
     setIsFullscreen,
     setRefreshKey,
     setActivePanel,
+    setShowWelcomeDialog,
     resetChatState,
     getSelectedProject
   } = useChatStore();
@@ -185,6 +190,20 @@ export function HomeClient() {
       }
     }
   }, [currentChat]);
+
+  useEffect(() => {
+    const isNewUser = searchParams.get("new_user") === "true";
+    const dismissed = localStorage.getItem("welcome_dialog_dismissed");
+
+    if (isNewUser && !dismissed) {
+      // Small delay for smooth UX
+      setTimeout(() => {
+        setShowWelcomeDialog(true);
+        // Clean URL without triggering navigation
+        window.history.replaceState({}, "", "/");
+      }, 800);
+    }
+  }, [searchParams, setShowWelcomeDialog]);
 
   const handleReset = () => {
     resetChatState();
@@ -785,6 +804,11 @@ export function HomeClient() {
           open={showUpgradeDialog}
           onOpenChange={setShowUpgradeDialog}
           feature={blockedFeature}
+        />
+
+        <WelcomeUpgradeDialog
+          open={showWelcomeDialog}
+          onOpenChange={setShowWelcomeDialog}
         />
       </>
     );

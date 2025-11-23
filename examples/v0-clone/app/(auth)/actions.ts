@@ -104,7 +104,8 @@ export async function signUpAction(
     }
 
     revalidatePath("/");
-    redirect("/?refresh=session");
+    // Add new_user flag to trigger welcome upgrade dialog
+    redirect("/?new_user=true");
   } catch (error) {
     if (error instanceof z.ZodError) {
       return {

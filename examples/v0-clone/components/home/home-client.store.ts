@@ -39,7 +39,8 @@ interface ChatState {
   projects: Project[];
   envVarsValid: boolean;
   showEnvDialog: boolean;
-  isAutoProvisioning: boolean; // NEW: Track auto-provisioning state
+  isAutoProvisioning: boolean;
+  showWelcomeDialog: boolean; // NEW: Welcome upgrade dialog
 }
 
 interface ChatActions {
@@ -57,7 +58,8 @@ interface ChatActions {
   setProjects: (projects: Project[]) => void;
   setEnvVarsValid: (valid: boolean) => void;
   setShowEnvDialog: (show: boolean) => void;
-  setIsAutoProvisioning: (provisioning: boolean) => void; // NEW
+  setIsAutoProvisioning: (provisioning: boolean) => void;
+  setShowWelcomeDialog: (show: boolean) => void; // NEW
   resetChatState: () => void;
 }
 
@@ -82,7 +84,8 @@ const initialState: ChatState = {
   projects: [],
   envVarsValid: false,
   showEnvDialog: false,
-  isAutoProvisioning: false // NEW
+  isAutoProvisioning: false,
+  showWelcomeDialog: false // NEW
 };
 
 export const useChatStore = create<ChatStore>()(
@@ -123,7 +126,9 @@ export const useChatStore = create<ChatStore>()(
       setShowEnvDialog: (show) => set({ showEnvDialog: show }),
 
       setIsAutoProvisioning: (provisioning) =>
-        set({ isAutoProvisioning: provisioning }), // NEW
+        set({ isAutoProvisioning: provisioning }),
+
+      setShowWelcomeDialog: (show) => set({ showWelcomeDialog: show }), // NEW
 
       getSelectedProject: () => {
         const { selectedProjectId, projects } = get();
@@ -147,7 +152,7 @@ export const useChatStore = create<ChatStore>()(
         selectedProjectId: state.selectedProjectId,
         projects: state.projects,
         envVarsValid: state.envVarsValid,
-        isAutoProvisioning: state.isAutoProvisioning, // NEW: Persist this
+        isAutoProvisioning: state.isAutoProvisioning,
         chatHistory: state.chatHistory.map((msg) => ({
           type: msg.type,
           content: msg.content,

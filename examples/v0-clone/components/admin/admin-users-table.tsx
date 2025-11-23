@@ -54,6 +54,19 @@ export function AdminUsersTable() {
     u.user.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  const getPlanBadgeVariant = (plan: string) => {
+    switch (plan) {
+      case "ultimate":
+        return "default"; // Use primary color for ultimate
+      case "advanced":
+        return "default";
+      case "pro":
+        return "secondary";
+      default:
+        return "outline";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -98,12 +111,11 @@ export function AdminUsersTable() {
                   <TableCell className="font-medium">{u.user.email}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        u.subscription?.plan === "advanced"
-                          ? "default"
-                          : u.subscription?.plan === "pro"
-                            ? "secondary"
-                            : "outline"
+                      variant={getPlanBadgeVariant(
+                        u.subscription?.plan || "free"
+                      )}
+                      className={
+                        u.subscription?.plan === "ultimate" ? "capitalize" : ""
                       }
                     >
                       {u.subscription?.plan || "free"}
