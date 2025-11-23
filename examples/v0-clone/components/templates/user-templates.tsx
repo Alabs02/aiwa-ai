@@ -310,7 +310,7 @@ function ProjectCard({ chat }: { chat: UserChat }) {
       <MagicCard
         gradientFrom="#9E7AFF"
         gradientTo="#f9a862"
-        className="group rounded-lg p-0.5"
+        className="group rounded-lg p-1"
       >
         {/* Preview/Thumbnail */}
         <div className="relative aspect-video overflow-hidden rounded-t-lg bg-neutral-800">
@@ -365,7 +365,7 @@ function ProjectCard({ chat }: { chat: UserChat }) {
         </div>
 
         {/* Content */}
-        <div className="bg-neutral-900/90 p-4">
+        <div className="bg-neutral-900/90  rounded-b-lg p-4">
           <h3 className="font-heading mb-1 line-clamp-2 text-base font-medium text-white transition-colors group-hover:text-neutral-200">
             {displayTitle}
           </h3>
