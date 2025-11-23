@@ -19,13 +19,6 @@ import {
 import { ChatSDKError } from "@/lib/errors";
 import { parseV0Response, getV0UsageFromReport } from "@/lib/v0-token-parser";
 
-interface TokenUsageWithMetadata {
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  isEstimated: boolean;
-}
-
 const v0 = createClient(
   process.env.V0_API_URL ? { baseUrl: process.env.V0_API_URL } : {}
 );
@@ -43,118 +36,6 @@ function getClientIP(request: NextRequest): string {
   }
 
   return "unknown";
-}
-
-async function trackUsageAndDeductCredits(
-  userId: string,
-  chatDetail: ChatDetail,
-  tokenUsage: TokenUsageWithMetadata
-): Promise<void> {
-  try {
-    const messageId =
-      chatDetail.messages?.[chatDetail.messages.length - 1]?.id || "";
-
-    await createUsageEvent({
-      userId,
-      eventType: "chat_generation",
-      v0ChatId: chatDetail.id,
-      v0MessageId: messageId,
-      inputTokens: tokenUsage.inputTokens,
-      outputTokens: tokenUsage.outputTokens,
-      model: tokenUsage.isEstimated ? "v0-gpt-5-estimated" : "v0-gpt-5",
-      status: "completed"
-    });
-
-    console.log("[CREDIT DEDUCTION] Successfully deducted credits:", {
-      userId,
-      chatId: chatDetail.id,
-      tokens: tokenUsage.totalTokens,
-      isEstimated: tokenUsage.isEstimated
-    });
-  } catch (error) {
-    console.error(
-      "[CREDIT DEDUCTION] CRITICAL ERROR - Failed to deduct credits:",
-      {
-        userId,
-        chatId: chatDetail.id,
-        error: error instanceof Error ? error.message : error
-      }
-    );
-    throw error;
-  }
-}
-
-async function refineTokenUsageFromReport(
-  userId: string,
-  chatDetail: ChatDetail,
-  initialUsage: TokenUsageWithMetadata
-): Promise<void> {
-  if (!initialUsage.isEstimated) {
-    return;
-  }
-
-  const messageId = chatDetail.messages?.[chatDetail.messages.length - 1]?.id;
-  if (!messageId) return;
-
-  try {
-    const reportUsage = await getV0UsageFromReport(chatDetail.id, messageId);
-
-    if (reportUsage && reportUsage.totalTokens > 0) {
-      console.log(
-        "[TOKEN REFINEMENT] Got actual usage from report, adjusting:",
-        {
-          initial: initialUsage,
-          actual: reportUsage
-        }
-      );
-
-      const tokenDiff = reportUsage.totalTokens - initialUsage.totalTokens;
-
-      if (Math.abs(tokenDiff) > 100) {
-        const inputCost = Math.ceil(
-          (reportUsage.inputTokens / 1_000_000) * 150
-        );
-        const outputCost = Math.ceil(
-          (reportUsage.outputTokens / 1_000_000) * 750
-        );
-        const actualTotalCost = inputCost + outputCost;
-
-        const initialInputCost = Math.ceil(
-          (initialUsage.inputTokens / 1_000_000) * 150
-        );
-        const initialOutputCost = Math.ceil(
-          (initialUsage.outputTokens / 1_000_000) * 750
-        );
-        const initialTotalCost = initialInputCost + initialOutputCost;
-
-        const creditAdjustment =
-          Math.ceil(actualTotalCost / 20) - Math.ceil(initialTotalCost / 20);
-
-        if (creditAdjustment !== 0) {
-          await createUsageEvent({
-            userId,
-            eventType: "credit_adjustment",
-            v0ChatId: chatDetail.id,
-            v0MessageId: messageId,
-            inputTokens: reportUsage.inputTokens - initialUsage.inputTokens,
-            outputTokens: reportUsage.outputTokens - initialUsage.outputTokens,
-            model: "v0-gpt-5-adjustment",
-            status: "completed"
-          });
-
-          console.log("[TOKEN REFINEMENT] Applied credit adjustment:", {
-            creditAdjustment,
-            reason: "Actual usage differs from estimate"
-          });
-        }
-      }
-    }
-  } catch (error) {
-    console.warn(
-      "[TOKEN REFINEMENT] Failed to refine from report (non-critical):",
-      error
-    );
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -178,8 +59,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (session?.user?.id) {
+      // Ensure user has a subscription
       await ensureUserSubscription(session.user.id);
 
+      // Check rate limits
       const chatCount = await getChatCountByUserId({
         userId: session.user.id,
         differenceInHours: 24
@@ -190,6 +73,7 @@ export async function POST(request: NextRequest) {
         return new ChatSDKError("rate_limit:chat").toResponse();
       }
 
+      // Check credits
       const subscription = await getUserSubscription(session.user.id);
 
       if (!subscription) {
@@ -210,7 +94,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log("[API REQUEST] Authenticated user:", {
+      console.log("API request:", {
         message,
         chatId,
         streaming,
@@ -229,7 +113,7 @@ export async function POST(request: NextRequest) {
         return new ChatSDKError("rate_limit:chat").toResponse();
       }
 
-      console.log("[API REQUEST] Anonymous user:", {
+      console.log("API request (anonymous):", {
         message,
         chatId,
         streaming,
@@ -244,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     if (chatId) {
       if (streaming) {
-        console.log("[V0 SDK] Sending streaming message to existing chat:", {
+        console.log("Sending streaming message to existing chat:", {
           chatId,
           message,
           responseMode: "experimental_stream"
@@ -259,6 +143,7 @@ export async function POST(request: NextRequest) {
           responseMode: "experimental_stream",
           ...(attachments && attachments.length > 0 && { attachments })
         });
+        console.log("Streaming message sent to existing chat successfully");
 
         return new Response(chat as ReadableStream<Uint8Array>, {
           headers: {
@@ -280,7 +165,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       if (streaming) {
-        console.log("[V0 SDK] Creating streaming chat:", {
+        console.log("Creating streaming chat with params:", {
           message,
           projectId,
           responseMode: "experimental_stream"
@@ -295,6 +180,7 @@ export async function POST(request: NextRequest) {
           },
           ...(attachments && attachments.length > 0 && { attachments })
         });
+        console.log("Streaming chat created successfully");
 
         return new Response(chat as ReadableStream<Uint8Array>, {
           headers: {
@@ -304,7 +190,7 @@ export async function POST(request: NextRequest) {
           }
         });
       } else {
-        console.log("[V0 SDK] Creating sync chat:", {
+        console.log("Creating sync chat with params:", {
           message,
           projectId,
           responseMode: "sync"
@@ -319,6 +205,7 @@ export async function POST(request: NextRequest) {
           },
           ...(attachments && attachments.length > 0 && { attachments })
         });
+        console.log("Sync chat created successfully");
       }
     }
 
@@ -328,6 +215,7 @@ export async function POST(request: NextRequest) {
 
     const chatDetail = chat as ChatDetail;
 
+    // Create ownership/log for new chats
     if (!chatId && chatDetail.id) {
       try {
         if (session?.user?.id) {
@@ -335,52 +223,71 @@ export async function POST(request: NextRequest) {
             v0ChatId: chatDetail.id,
             userId: session.user.id
           });
-          console.log("[CHAT OWNERSHIP] Created:", chatDetail.id);
+          console.log("Chat ownership created:", chatDetail.id);
         } else {
           const clientIP = getClientIP(request);
           await createAnonymousChatLog({
             ipAddress: clientIP,
             v0ChatId: chatDetail.id
           });
-          console.log(
-            "[CHAT LOG] Anonymous chat logged:",
-            chatDetail.id,
-            "IP:",
-            clientIP
-          );
+          console.log("Anonymous chat logged:", chatDetail.id, "IP:", clientIP);
         }
       } catch (error) {
-        console.error("[CHAT OWNERSHIP] Failed to create:", error);
+        console.error("Failed to create chat ownership/log:", error);
       }
     }
 
+    // Track usage for authenticated users
     if (session?.user?.id && chatDetail) {
-      const tokenUsage = parseV0Response(chatDetail);
+      let tokenUsage = parseV0Response(chatDetail);
 
-      console.log("[TOKEN USAGE] Parsed from response:", {
-        tokens: tokenUsage,
-        isEstimated: tokenUsage.isEstimated,
-        chatId: chatDetail.id
-      });
-
-      await trackUsageAndDeductCredits(session.user.id, chatDetail, tokenUsage);
-
-      if (tokenUsage.isEstimated) {
-        setTimeout(() => {
-          refineTokenUsageFromReport(
-            session.user.id,
-            chatDetail,
-            tokenUsage
-          ).catch((error) => {
-            console.warn(
-              "[TOKEN REFINEMENT] Background refinement failed:",
-              error
+      // If tokens not in response, fetch from usage report (async)
+      if (tokenUsage.totalTokens === 0) {
+        setTimeout(async () => {
+          try {
+            const reportUsage = await getV0UsageFromReport(
+              chatDetail.id,
+              chatDetail.messages?.[chatDetail.messages.length - 1]?.id || ""
             );
-          });
+
+            if (reportUsage && reportUsage.totalTokens > 0) {
+              await createUsageEvent({
+                userId: session.user.id,
+                eventType: "chat_generation",
+                v0ChatId: chatDetail.id,
+                v0MessageId:
+                  chatDetail.messages?.[chatDetail.messages.length - 1]?.id,
+                inputTokens: reportUsage.inputTokens,
+                outputTokens: reportUsage.outputTokens,
+                model: "v0-gpt-5",
+                status: "completed"
+              });
+            }
+          } catch (usageError) {
+            console.error("Failed to track usage from report:", usageError);
+          }
         }, 5000);
+      } else {
+        // Track immediately if tokens available
+        try {
+          await createUsageEvent({
+            userId: session.user.id,
+            eventType: "chat_generation",
+            v0ChatId: chatDetail.id,
+            v0MessageId:
+              chatDetail.messages?.[chatDetail.messages.length - 1]?.id,
+            inputTokens: tokenUsage.inputTokens,
+            outputTokens: tokenUsage.outputTokens,
+            model: "v0-gpt-5",
+            status: "completed"
+          });
+        } catch (usageError) {
+          console.error("Failed to track usage:", usageError);
+        }
       }
     }
 
+    // Get updated subscription for response
     let creditsInfo = { credits_remaining: 0, low_credit_warning: false };
     if (session?.user?.id) {
       const updatedSubscription = await getUserSubscription(session.user.id);
@@ -402,7 +309,7 @@ export async function POST(request: NextRequest) {
       ...creditsInfo
     });
   } catch (error) {
-    console.error("[V0 API ERROR]:", error);
+    console.error("V0 API Error:", error);
 
     if (error instanceof Error) {
       console.error("Error message:", error.message);
