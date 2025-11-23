@@ -250,7 +250,7 @@ function TemplateCard({ chat }: { chat: FeaturedChat }) {
         </div>
 
         {/* Content */}
-        <div className="bg-neutral-900/90 rounded-b-lg p-4">
+        <div className="rounded-b-lg bg-neutral-900/90 p-4">
           <h3 className="font-heading mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
             {displayTitle}
           </h3>

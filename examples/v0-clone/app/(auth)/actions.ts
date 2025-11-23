@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { signIn, signOut } from "./auth";
 import { createUser, getUser } from "@/lib/db/queries";
+import { createSubscription } from "@/lib/db/billing-queries";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
@@ -87,7 +88,38 @@ export async function signUpAction(
       };
     }
 
-    await createUser(validatedData.email, validatedData.password);
+    // Create the user
+    const newUser = await createUser(
+      validatedData.email,
+      validatedData.password
+    );
+
+    // Create free subscription for new user
+    try {
+      const now = new Date();
+      const nextMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate()
+      );
+
+      await createSubscription({
+        userId: newUser[0].id,
+        plan: "free",
+        creditsTotal: 15,
+        currentPeriodStart: now,
+        currentPeriodEnd: nextMonth
+      });
+
+      console.log(`✅ Created free subscription for user: ${newUser[0].email}`);
+    } catch (subscriptionError) {
+      console.error(
+        "Failed to create subscription for new user:",
+        subscriptionError
+      );
+      // Don't fail the signup if subscription creation fails
+      // The ensureUserSubscription function will create it on first use
+    }
 
     const result = await signIn("credentials", {
       email: validatedData.email,
@@ -105,7 +137,7 @@ export async function signUpAction(
 
     revalidatePath("/");
     // Add new_user flag to trigger welcome upgrade dialog
-    redirect("/?new_user=true");
+    redirect("/?refresh=session&new_user=true");
   } catch (error) {
     if (error instanceof z.ZodError) {
       return {
