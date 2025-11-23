@@ -10,7 +10,7 @@ import {
   experimental_generateSpeech as generateSpeech,
   experimental_transcribe as transcribe
 } from "ai";
-import { getProjectEnvVarsByV0Id } from "@/lib/db/queries";
+import { getProjectEnvVarsForProxy } from "@/lib/db/queries";
 
 function parsePrimitive(desc: string): z.ZodTypeAny {
   let s = desc.trim();
@@ -134,14 +134,10 @@ export async function POST(request: NextRequest) {
         { status: 400, headers: corsHeaders }
       );
     }
-    const envVars = await getProjectEnvVarsByV0Id({ v0ProjectId: projectId });
+    const envVars = await getProjectEnvVarsForProxy({ v0ProjectId: projectId });
     const apiKey =
       envVars?.find((v: any) => v?.key === "AI_GATEWAY_API_KEY")?.value ??
       process.env.AI_GATEWAY_API_KEY;
-
-    console.dir(envVars, { depth: null });
-
-    console.dir({ apiKey }, { depth: null });
     if (!apiKey) {
       return NextResponse.json(
         { error: "AI_GATEWAY_API_KEY not configured" },
