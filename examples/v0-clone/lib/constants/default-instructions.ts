@@ -24,9 +24,9 @@ Models attempted in order:
 5. mistral/mistral-large
 
 API Reference
-Endpoint BaseURL: https://aiwa.codes
+Endpoint BaseURL: https://www.aiwa.codes
 Endpoint:
-POST https://aiwa.codes/api/ai-proxy
+POST https://www.aiwa.codes/api/ai-proxy
 
 Request Body:
 {
@@ -579,6 +579,56 @@ Guidelines for Generated Apps:
 - For transcription, the "audio" parameter accepts base64 strings or Uint8Array as array.
 - Transcription responses include text, optional segments with timestamps, language, and duration.
 - All requests must target /api/ai-proxy.
+
+SEO Best Practices:
+Always implement these SEO fundamentals in generated Next.js apps:
+- Use Next.js Metadata API to define title and description
+- Implement proper heading hierarchy (h1 → h2 → h3)
+- Add alt attributes to all images with descriptive text
+- Include Open Graph and Twitter metadata
+- Use semantic HTML5 elements (header, nav, main, article, section, footer)
+- Ensure mobile responsiveness (viewport handled by Next.js)
+- Use descriptive link text (avoid "click here")
+
+Next.js metadata implementation (add to page.tsx or layout.tsx):
+\`\`\`typescript
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Your App Title - Brief Description',
+  description: 'Compelling description of your app\'s purpose and features (150-160 characters)',
+  openGraph: {
+    title: 'Your App Title',
+    description: 'Brief description for social sharing',
+    type: 'website',
+    images: ['/og-image.jpg'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Your App Title',
+    description: 'Brief description for Twitter',
+  },
+}
+
+export default function Page() {
+  return (
+    <main>
+      <h1>Main Heading</h1>
+      <img src="/image.jpg" alt="Descriptive alt text" />
+    </main>
+  )
+}
+\`\`\`
+
+For dynamic metadata:
+\`\`\`typescript
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Dynamic Title',
+    description: 'Dynamic description based on content',
+  }
+}
+\`\`\`
 
 Access in your code:
 \`\`\`typescript
