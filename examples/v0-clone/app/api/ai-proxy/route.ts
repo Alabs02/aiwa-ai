@@ -138,6 +138,10 @@ export async function POST(request: NextRequest) {
     const apiKey =
       envVars?.find((v: any) => v?.key === "AI_GATEWAY_API_KEY")?.value ??
       process.env.AI_GATEWAY_API_KEY;
+
+    console.dir(envVars, { depth: null });
+
+    console.dir({ apiKey }, { depth: null });
     if (!apiKey) {
       return NextResponse.json(
         { error: "AI_GATEWAY_API_KEY not configured" },
