@@ -35,6 +35,7 @@ This is a **TypeScript monorepo** containing SDKs and tools for interacting with
 **License:** Apache 2.0
 
 **Primary Technologies:**
+
 - TypeScript 5.7.3
 - Node.js 22+
 - pnpm 9+ (workspace package manager)
@@ -89,11 +90,13 @@ v0-sdk (Core SDK)
 ### Prerequisites
 
 **Required:**
+
 - **Node.js:** ≥22 (specified in package.json engines)
 - **pnpm:** ≥9 (specified in package.json engines)
 - Package manager locked to: `pnpm@9.15.0`
 
 **Environment Variables:**
+
 - `V0_API_KEY` - Required for API operations (get from v0.dev/chat/settings/keys)
 - Additional env vars documented in [Environment Variables](#environment-variables)
 
@@ -118,6 +121,7 @@ pnpm type-check
 ### Workspace Configuration
 
 **File:** `pnpm-workspace.yaml`
+
 ```yaml
 packages:
   - 'packages/*'
@@ -129,6 +133,7 @@ All packages in `packages/` and `examples/` are part of the workspace.
 ### Internal Dependencies
 
 Packages use workspace protocol for internal dependencies:
+
 ```json
 {
   "dependencies": {
@@ -151,6 +156,7 @@ This ensures packages always use the local workspace version during development.
 **Purpose:** TypeScript SDK for v0 Platform API
 
 **Structure:**
+
 ```
 v0-sdk/
 ├── src/
@@ -170,11 +176,13 @@ v0-sdk/
 ```
 
 **Key Scripts:**
+
 - `pnpm build` - Build with bunchee
 - `pnpm test` - Run Vitest tests
 - `pnpm sdk:generate` - Generate SDK from OpenAPI spec
 
 **Exports:**
+
 - ESM: `dist/index.js`
 - CJS: `dist/index.cjs`
 - Types: `dist/index.d.ts`
@@ -189,6 +197,7 @@ v0-sdk/
 **Purpose:** Headless React components for rendering v0 Platform content
 
 **Structure:**
+
 ```
 react/
 ├── src/
@@ -206,9 +215,11 @@ react/
 ```
 
 **Peer Dependencies:**
+
 - React: `^18.0.0 || ^19.0.0`
 
 **Key Exports:**
+
 - Components: `Message`, `StreamingMessage`, `CodeBlock`, etc.
 - Hooks: `useMessage`, `useStreamingMessage`, `useCodeBlock`, etc.
 - Backward compatibility aliases maintained
@@ -223,11 +234,13 @@ react/
 **Purpose:** AI SDK integration tools for v0 Platform
 
 **Dependencies:**
+
 - `v0-sdk` (workspace)
 - `zod` - Schema validation
 - Peer: `ai` (≥5.0.0)
 
 **Structure:**
+
 ```
 ai-tools/
 ├── src/
@@ -248,6 +261,7 @@ ai-tools/
 **Binary:** `create-v0-sdk-app`
 
 **Dependencies:**
+
 - `commander` - CLI framework
 - `prompts` - Interactive prompts
 - `picocolors` - Terminal colors
@@ -312,18 +326,22 @@ pnpm --filter v0-sdk --filter @v0-sdk/react build
 Turborepo manages task dependencies and caching. Key task configurations:
 
 **Build Task:**
+
 - Depends on: `^build` (dependencies must build first)
 - Outputs: `dist/**`, `.next/**`
 - Cached by default
 
 **Test Task:**
+
 - Depends on: `^build`, `build` (requires build completion)
 - Not cached (by default)
 
 **Type-check Task:**
+
 - Depends on: `^build`, `build`
 
 **Development Task:**
+
 - `cache: false`
 - `persistent: true` (keeps running)
 
@@ -442,6 +460,7 @@ Automatically runs `pnpm format` before every commit to ensure consistent format
 ### TypeScript Configuration
 
 **Root `tsconfig.json`:**
+
 - Target: `ES2022`
 - Module: `ESNext`
 - Module Resolution: `bundler`
@@ -450,6 +469,7 @@ Automatically runs `pnpm format` before every commit to ensure consistent format
 - `isolatedModules: true`
 
 **Path Aliases:**
+
 ```json
 {
   "paths": {
@@ -465,6 +485,7 @@ Automatically runs `pnpm format` before every commit to ensure consistent format
 ### Bundler: Bunchee
 
 All packages use **bunchee** for bundling:
+
 - Outputs: ESM, CJS, TypeScript declarations
 - Zero-config bundler optimized for libraries
 - Automatically generates `.d.ts` files
@@ -472,6 +493,7 @@ All packages use **bunchee** for bundling:
 ### Build Outputs
 
 Each package produces:
+
 ```
 dist/
 ├── index.js       # ESM
@@ -519,6 +541,7 @@ Clean script: `rm -rf dist *.tsbuildinfo`
 **Tool:** [@changesets/cli](https://github.com/changesets/changesets)
 
 **Configuration:** `.changeset/config.json`
+
 - Base branch: `main`
 - Access: `public`
 - Update internal dependencies: `patch`
@@ -533,6 +556,7 @@ pnpm changeset
 ```
 
 Follow prompts to:
+
 1. Select affected packages
 2. Choose version bump type (patch/minor/major)
 3. Write change summary
@@ -591,6 +615,7 @@ refactor: improve code structure
 ### Pre-commit Automation
 
 **.husky/pre-commit** automatically:
+
 1. Formats code with Prettier
 2. Stages formatted files
 
@@ -611,6 +636,7 @@ The SDK (`packages/v0-sdk/src/sdk/v0.ts`) is **generated from OpenAPI spec**.
 ### 2. **Always Include Changesets**
 
 When modifying packages:
+
 1. Make code changes
 2. Run `pnpm changeset`
 3. Include changeset file in PR
@@ -626,6 +652,7 @@ When modifying packages:
 ### 4. **Respect Workspace Dependencies**
 
 When adding dependencies:
+
 - Internal packages: use `workspace:*`
 - External packages: use specific versions
 - Check if dependency exists elsewhere first
@@ -633,6 +660,7 @@ When adding dependencies:
 ### 5. **Maintain Export Patterns**
 
 Each package has specific export patterns:
+
 - **v0-sdk:** Exports SDK client and types
 - **@v0-sdk/react:** Exports components + hooks + types
 - **@v0-sdk/ai-tools:** Exports tools + schemas
@@ -640,6 +668,7 @@ Each package has specific export patterns:
 ### 6. **Build Before Testing**
 
 Tests depend on built packages:
+
 ```bash
 pnpm build    # Required before tests
 pnpm test
@@ -648,6 +677,7 @@ pnpm test
 ### 7. **Format Before Committing**
 
 Pre-commit hook handles this, but manually:
+
 ```bash
 pnpm format   # Format all code
 ```
@@ -668,11 +698,12 @@ pnpm format   # Format all code
 ### 10. **Backward Compatibility**
 
 When refactoring exports:
+
 - Maintain old export names as aliases
 - See `@v0-sdk/react` for examples:
   ```typescript
-  export { Message as MessageRenderer }  // Old name
-  export { Message }                     // New name
+  export { Message as MessageRenderer } // Old name
+  export { Message } // New name
   ```
 
 ---
@@ -745,6 +776,7 @@ pnpm --filter v0-sdk sdk:generate
 ### Example-Specific Variables
 
 Different examples may require:
+
 - `AUTH_SECRET`
 - `POSTGRES_URL`
 - `AI_GATEWAY_API_KEY`
@@ -760,6 +792,7 @@ See `turbo.json` for full list.
 ### Setting Environment Variables
 
 Create `.env.local` in example directories:
+
 ```bash
 V0_API_KEY=your_key_here
 # ... other vars
@@ -771,46 +804,46 @@ V0_API_KEY=your_key_here
 
 ### Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `package.json` | Root package config, scripts, prettier config |
-| `pnpm-workspace.yaml` | Workspace configuration |
-| `turbo.json` | Turborepo task configuration |
-| `tsconfig.json` | Root TypeScript configuration |
-| `.changeset/config.json` | Changesets configuration |
-| `.husky/pre-commit` | Git pre-commit hook |
+| File                     | Purpose                                       |
+| ------------------------ | --------------------------------------------- |
+| `package.json`           | Root package config, scripts, prettier config |
+| `pnpm-workspace.yaml`    | Workspace configuration                       |
+| `turbo.json`             | Turborepo task configuration                  |
+| `tsconfig.json`          | Root TypeScript configuration                 |
+| `.changeset/config.json` | Changesets configuration                      |
+| `.husky/pre-commit`      | Git pre-commit hook                           |
 
 ### Source Directories
 
-| Directory | Contents |
-|-----------|----------|
-| `packages/v0-sdk/src/` | Core SDK source |
-| `packages/react/src/` | React components & hooks |
-| `packages/ai-tools/src/` | AI SDK tools |
-| `packages/create-v0-sdk-app/src/` | CLI tool source |
+| Directory                         | Contents                 |
+| --------------------------------- | ------------------------ |
+| `packages/v0-sdk/src/`            | Core SDK source          |
+| `packages/react/src/`             | React components & hooks |
+| `packages/ai-tools/src/`          | AI SDK tools             |
+| `packages/create-v0-sdk-app/src/` | CLI tool source          |
 
 ### Test Directories
 
-| Directory | Contents |
-|-----------|----------|
-| `packages/v0-sdk/tests/` | SDK tests |
+| Directory                  | Contents       |
+| -------------------------- | -------------- |
+| `packages/v0-sdk/tests/`   | SDK tests      |
 | `packages/ai-tools/tests/` | AI tools tests |
 
 ### Build Outputs
 
-| Directory | Contents |
-|-----------|----------|
-| `packages/*/dist/` | Compiled package outputs (gitignored) |
-| `.next/` | Next.js build outputs in examples (gitignored) |
+| Directory          | Contents                                       |
+| ------------------ | ---------------------------------------------- |
+| `packages/*/dist/` | Compiled package outputs (gitignored)          |
+| `.next/`           | Next.js build outputs in examples (gitignored) |
 
 ### Documentation
 
-| File | Purpose |
-|------|---------|
-| `README.md` | Repository overview & quick start |
-| `CONTRIBUTING.md` | Contribution guidelines |
-| `LICENSE` | Apache 2.0 license |
-| `.changeset/README.md` | Changesets documentation |
+| File                   | Purpose                           |
+| ---------------------- | --------------------------------- |
+| `README.md`            | Repository overview & quick start |
+| `CONTRIBUTING.md`      | Contribution guidelines           |
+| `LICENSE`              | Apache 2.0 license                |
+| `.changeset/README.md` | Changesets documentation          |
 
 ---
 
@@ -819,11 +852,13 @@ V0_API_KEY=your_key_here
 ### Core SDK (`v0-sdk`)
 
 **Main files:**
+
 - `src/sdk/v0.ts` - Generated SDK (43KB+, DO NOT EDIT)
 - `src/sdk/core.ts` - Core fetcher implementation
 - `src/index.ts` - Public API surface
 
 **Key Exports:**
+
 ```typescript
 // Client
 export { v0, createClient, type V0ClientConfig }
@@ -833,8 +868,10 @@ export { parseStreamingResponse, type StreamEvent }
 
 // Types (extensive)
 export type {
-  ChatDetail, ChatSummary,
-  ProjectDetail, ProjectSummary,
+  ChatDetail,
+  ChatSummary,
+  ProjectDetail,
+  ProjectSummary,
   // ... 100+ types
 }
 ```
@@ -842,11 +879,13 @@ export type {
 ### React Package (`@v0-sdk/react`)
 
 **Architecture:**
+
 - **Headless components** - Logic without styling
 - **Custom hooks** - For building custom UIs
 - **Utilities** - Shared helpers
 
 **Pattern:**
+
 ```typescript
 // Component with hook
 export function Message(props: MessageProps) {
@@ -897,6 +936,7 @@ pnpm --filter <package-name> build
 ### Common Workflows
 
 **Adding a feature:**
+
 1. Create feature branch
 2. Make changes in appropriate package
 3. Add/update tests
@@ -906,6 +946,7 @@ pnpm --filter <package-name> build
 7. Open PR
 
 **Fixing a bug:**
+
 1. Add failing test
 2. Fix bug
 3. Verify test passes
@@ -913,6 +954,7 @@ pnpm --filter <package-name> build
 5. Submit PR
 
 **Updating dependencies:**
+
 1. Update `package.json`
 2. Run `pnpm install`
 3. Test changes
@@ -978,6 +1020,7 @@ pnpm install
 When working with this codebase:
 
 ✅ **DO:**
+
 - Use `pnpm` for all package management
 - Include changesets with every package modification
 - Follow existing test organization patterns
@@ -987,6 +1030,7 @@ When working with this codebase:
 - Use workspace dependencies for internal packages
 
 ❌ **DON'T:**
+
 - Edit generated SDK code (`v0.ts`)
 - Skip changesets
 - Mix `npm` or `yarn` with `pnpm`
