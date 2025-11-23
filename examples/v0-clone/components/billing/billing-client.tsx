@@ -256,6 +256,7 @@ export function BillingClient() {
             {Object.entries(PLANS).map(([key, plan]) => {
               const Icon = plan.icon;
               const isCurrentPlan = subscription?.plan === key;
+              const isPopular = key === "advanced";
 
               return (
                 <div
@@ -268,6 +269,17 @@ export function BillingClient() {
                       : "border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.05]"
                   }`}
                 >
+                  {/* Popular Badge */}
+                  {isPopular && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 backdrop-blur-sm">
+                        <span className="text-xs font-medium text-emerald-400">
+                          Most Popular
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex h-full flex-col rounded-2xl p-6 backdrop-blur-xl">
                     {/* Plan Header */}
                     <div className="mb-6 flex items-start justify-between">
