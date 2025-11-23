@@ -4,12 +4,10 @@ import {
   createSubscription,
   updateSubscription,
   createCreditPurchase,
-  resetMonthlyCredits,
-  getUserSubscription
+  resetMonthlyCredits
 } from "@/lib/db/billing-queries";
 import db from "@/lib/db/connection";
-import { payment_transactions, users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { payment_transactions } from "@/lib/db/schema";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover"
@@ -84,16 +82,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const billingCycle = session.metadata?.billingCycle || "monthly";
     const creditsTotal = plan === "pro" ? 100 : 250;
 
-    // Calculate period end based on billing cycle
-    const periodStart = new Date(
-      (stripeSubscription.start_date || stripeSubscription.created) * 1000
-    );
-    const periodEnd = new Date(periodStart);
-    if (billingCycle === "annual") {
-      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-    } else {
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-    }
+    // Get period dates from subscription item
+    const firstItem = stripeSubscription.items.data[0];
+    const periodStart = new Date((firstItem?.current_period_start || 0) * 1000);
+    const periodEnd = new Date((firstItem?.current_period_end || 0) * 1000);
 
     await createSubscription({
       userId,
@@ -102,7 +94,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       creditsTotal,
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: subscriptionId,
-      stripePriceId: stripeSubscription.items.data[0].price.id,
+      stripePriceId: firstItem.price.id,
       currentPeriodStart: periodStart,
       currentPeriodEnd: periodEnd
     });
@@ -143,20 +135,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.userId;
   if (!userId) return;
 
-  const periodStart = new Date(
-    (subscription.start_date || subscription.created) * 1000
-  );
-  const periodEnd = new Date(periodStart);
-  const billingCycle =
-    subscription.items.data[0].price.recurring?.interval === "year"
-      ? "annual"
-      : "monthly";
-
-  if (billingCycle === "annual") {
-    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-  } else {
-    periodEnd.setMonth(periodEnd.getMonth() + 1);
-  }
+  // Get period dates from subscription item
+  const firstItem = subscription.items.data[0];
+  const periodStart = new Date((firstItem?.current_period_start || 0) * 1000);
+  const periodEnd = new Date((firstItem?.current_period_end || 0) * 1000);
 
   await updateSubscription({
     userId,
@@ -168,6 +150,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
   });
 }
+
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.userId;
   if (!userId) return;
@@ -182,7 +165,6 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  // Get subscription from invoice parent or metadata
   const subscriptionId =
     invoice.parent?.type === "subscription_details"
       ? (invoice.parent.subscription_details as any).subscription
@@ -195,7 +177,6 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
   if (!userId) return;
 
-  // Reset monthly credits on successful payment
   await resetMonthlyCredits(userId);
 
   await db.insert(payment_transactions).values({
