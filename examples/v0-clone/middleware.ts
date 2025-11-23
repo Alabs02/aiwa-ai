@@ -24,6 +24,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow Stripe webhooks without authentication
+  if (pathname.startsWith("/api/billing/webhook")) {
+    return NextResponse.next();
+  }
+
   // Check for required environment variables
   if (!process.env.AUTH_SECRET) {
     console.error(
