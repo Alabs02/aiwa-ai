@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -87,21 +87,27 @@ export function WelcomeUpgradeDialog({
     onOpenChange(false);
   };
 
+  useEffect(() => {
+    return () => {
+      localStorage.setItem("welcome_dialog_dismissed", "true");
+    };
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl border-white/10 bg-black/95 p-0">
+    <Dialog modal open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl border border-white/10 bg-black/95 p-0">
         {/* Header */}
         <div className="relative overflow-hidden border-b border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent p-8">
-          <button
+          {/* <button
             onClick={handleContinueFree}
             className="absolute top-4 right-4 rounded-full p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
           >
             <X className="h-4 w-4" />
-          </button>
+          </button> */}
 
           <div className="space-y-3 text-center">
             <div className="flex items-center justify-center gap-2">
-              <Sparkles className="h-5 w-5 text-emerald-400" />
+              {/* <Sparkles className="h-5 w-5 text-emerald-400" /> */}
               <DialogTitle className="text-3xl font-bold text-white">
                 Welcome to AIWA!
               </DialogTitle>
@@ -119,7 +125,7 @@ export function WelcomeUpgradeDialog({
               </Badge>
               <Badge
                 variant="secondary"
-                className="border-0 bg-blue-500/10 text-blue-400"
+                className="bg-primary/10 text-primary border-0"
               >
                 ✓ Cancel anytime
               </Badge>

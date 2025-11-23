@@ -66,7 +66,7 @@ function SearchParamsHandler({ onReset }: { onReset: () => void }) {
     }
   }, [searchParams, onReset]);
 
-  return <></>;
+  return null;
 }
 
 function UpgradeSearchParamsHandler() {
@@ -75,6 +75,7 @@ function UpgradeSearchParamsHandler() {
   const { setShowWelcomeDialog } = useChatStore();
 
   useEffect(() => {
+    console.log("MOUNTED");
     const isNewUser = searchParams.get("new_user") === "true";
     const dismissed = localStorage.getItem("welcome_dialog_dismissed");
 
@@ -88,7 +89,7 @@ function UpgradeSearchParamsHandler() {
     }
   }, [searchParams, setShowWelcomeDialog]);
 
-  return <></>;
+  return null;
 }
 
 function AutoProvisioningOverlay() {
@@ -615,6 +616,11 @@ export function HomeClient() {
         {isAuthenticated && isAutoProvisioning && <AutoProvisioningOverlay />}
 
         <EnvVariablesDialog />
+
+        <WelcomeUpgradeDialog
+          open={showWelcomeDialog}
+          onOpenChange={setShowWelcomeDialog}
+        />
       </div>
     );
   } else {
@@ -626,6 +632,7 @@ export function HomeClient() {
           {/* Handle search params with Suspense boundary */}
           <Suspense fallback={null}>
             <SearchParamsHandler onReset={handleReset} />
+            <UpgradeSearchParamsHandler />
           </Suspense>
 
           {/* Toolbar */}
