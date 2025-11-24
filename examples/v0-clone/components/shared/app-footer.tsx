@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Github, Twitter, Linkedin, MessageSquare } from "lucide-react";
 import { IconBrandX, IconBrandLinkedin } from "@tabler/icons-react";
 
 const footerLinks = {
