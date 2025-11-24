@@ -130,8 +130,12 @@ export const blog_posts = pgTable("blog_posts", {
   cover_image: varchar("cover_image", { length: 512 }),
   tags: text("tags").array().default([]),
   category: varchar("category", { length: 100 }),
-  is_published: varchar("is_published", { length: 10 }).notNull().default("false"),
-  is_featured: varchar("is_featured", { length: 10 }).notNull().default("false"),
+  is_published: varchar("is_published", { length: 10 })
+    .notNull()
+    .default("false"),
+  is_featured: varchar("is_featured", { length: 10 })
+    .notNull()
+    .default("false"),
   view_count: integer("view_count").default(0),
   reading_time: integer("reading_time"), // minutes
   author_id: uuid("author_id")

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Toolbar } from "@/components/shared/toolbar";
-import { Footer } from "@/components/shared/footer";
+import { AppFooter } from "@/components/shared/app-footer";
 import { Shield, Mail, ArrowRight } from "lucide-react";
 
 const sections = [
@@ -481,7 +481,7 @@ export default function PrivacyPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <AppFooter />
     </>
   );
 }

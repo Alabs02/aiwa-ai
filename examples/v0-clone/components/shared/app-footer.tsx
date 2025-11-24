@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Github, Twitter, Linkedin, MessageSquare } from "lucide-react";
+import { IconBrandX, IconBrandLinkedin } from "@tabler/icons-react";
 
 const footerLinks = {
   product: {
@@ -18,25 +18,25 @@ const footerLinks = {
     title: "Resources",
     links: [
       { label: "Blog", href: "/blog" },
-      { label: "Vibe Hub", href: "/hub" },
-      { label: "Documentation", href: "/docs" },
-      { label: "Support", href: "/support" }
+      { label: "Vibe Hub", href: "/hub" }
+      // { label: "Documentation", href: "/docs" },
+      // { label: "Support", href: "/support" }
     ]
   },
   legal: {
     title: "Legal",
     links: [
       { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Use", href: "/terms" },
-      { label: "Cookie Settings", href: "#" }
+      { label: "Terms of Use", href: "/terms" }
+      // { label: "Cookie Settings", href: "#" }
     ]
   },
   community: {
     title: "Community",
     links: [
-      { label: "Discord", href: "https://discord.gg/aiwa", external: true },
+      // { label: "Discord", href: "https://discord.gg/aiwa", external: true },
       { label: "Twitter/X", href: "https://x.com/aiwa", external: true },
-      { label: "GitHub", href: "https://github.com/aiwa", external: true },
+      // { label: "GitHub", href: "https://github.com/aiwa", external: true },
       {
         label: "LinkedIn",
         href: "https://linkedin.com/company/aiwa",
@@ -47,14 +47,14 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Twitter, href: "https://x.com/aiwa", label: "Twitter" },
-  { icon: Github, href: "https://github.com/aiwa", label: "GitHub" },
+  { icon: IconBrandX, href: "https://x.com/aiwa", label: "X" },
+  // { icon: Github, href: "https://github.com/aiwa", label: "GitHub" },
   {
-    icon: Linkedin,
+    icon: IconBrandLinkedin,
     href: "https://linkedin.com/company/aiwa",
     label: "LinkedIn"
-  },
-  { icon: MessageSquare, href: "https://discord.gg/aiwa", label: "Discord" }
+  }
+  // { icon: MessageSquare, href: "https://discord.gg/aiwa", label: "Discord" }
 ];
 
 export function AppFooter() {
