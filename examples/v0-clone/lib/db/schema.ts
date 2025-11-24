@@ -95,6 +95,55 @@ export const prompt_library = pgTable("prompt_library", {
 
 export type PromptLibraryItem = InferSelectModel<typeof prompt_library>;
 
+export const hub_videos = pgTable("hub_videos", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  youtube_url: varchar("youtube_url", { length: 512 }).notNull(),
+  youtube_id: varchar("youtube_id", { length: 100 }).notNull().unique(),
+  title: varchar("title", { length: 500 }).notNull(),
+  description: text("description"),
+  summary: text("summary"),
+  transcript: text("transcript"),
+  thumbnail_url: varchar("thumbnail_url", { length: 512 }),
+  duration: integer("duration"), // in seconds
+  tags: text("tags").array().default([]),
+  category: varchar("category", { length: 100 }),
+  view_count: integer("view_count").default(0),
+  is_featured: varchar("is_featured", { length: 10 })
+    .notNull()
+    .default("false"),
+  published_at: timestamp("published_at"),
+  created_by: uuid("created_by")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow()
+});
+
+export type HubVideo = InferSelectModel<typeof hub_videos>;
+
+export const blog_posts = pgTable("blog_posts", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  title: varchar("title", { length: 500 }).notNull(),
+  excerpt: text("excerpt"),
+  content: text("content").notNull(),
+  cover_image: varchar("cover_image", { length: 512 }),
+  tags: text("tags").array().default([]),
+  category: varchar("category", { length: 100 }),
+  is_published: varchar("is_published", { length: 10 }).notNull().default("false"),
+  is_featured: varchar("is_featured", { length: 10 }).notNull().default("false"),
+  view_count: integer("view_count").default(0),
+  reading_time: integer("reading_time"), // minutes
+  author_id: uuid("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  published_at: timestamp("published_at"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow()
+});
+
+export type BlogPost = InferSelectModel<typeof blog_posts>;
+
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   user_id: uuid("user_id")

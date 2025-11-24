@@ -3,32 +3,25 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-
 import Link from "next/link";
 import Image from "next/image";
 import { UserNav } from "@/components/user-nav";
 import { RippleButton } from "@/components/ui/ripple-button";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface ToolbarProps {
   className?: string;
 }
 
-// Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler() {
   const searchParams = useSearchParams();
   const { update } = useSession();
 
-  // Force session refresh when redirected after auth
   useEffect(() => {
     const shouldRefresh = searchParams.get("refresh") === "session";
-
     if (shouldRefresh) {
-      // Force session update
       update();
-
-      // Clean up URL without causing navigation
       const url = new URL(window.location.href);
       url.searchParams.delete("refresh");
       window.history.replaceState({}, "", url.pathname);
@@ -38,9 +31,16 @@ function SearchParamsHandler() {
   return null;
 }
 
+const navLinks = [
+  { href: "/blog", label: "Blog" },
+  { href: "/hub", label: "Vibe Hub" },
+  { href: "/billing", label: "Pricing" }
+];
+
 export function Toolbar({ className = "" }: ToolbarProps) {
   const { data: session, status } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,10 +51,6 @@ export function Toolbar({ className = "" }: ToolbarProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    console.log({ status });
-  }, [status]);
-
   return (
     <>
       <Suspense fallback={null}>
@@ -63,7 +59,7 @@ export function Toolbar({ className = "" }: ToolbarProps) {
 
       <motion.nav
         className={cn(
-          "sticky top-0 z-50 flex h-[60px] w-full items-center justify-between px-5 md:px-4",
+          "sticky top-0 z-50 flex h-[60px] w-full items-center justify-between px-5 md:px-6",
           className
         )}
         animate={{
@@ -72,26 +68,43 @@ export function Toolbar({ className = "" }: ToolbarProps) {
             : "rgba(0, 0, 0, 0)",
           backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)"
         }}
-        transition={{
-          duration: 0.3,
-          ease: "easeInOut"
-        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        <Link href="/" passHref>
-          <div className="relative grid h-9 w-20 cursor-pointer grid-cols-1 overflow-hidden border-none">
-            <Image
-              src={"/aiwa.webp"}
-              alt={"Aiwa Brand Logo"}
-              fill
-              priority
-              draggable={false}
-              className="size-full object-contain"
-            />
-          </div>
-        </Link>
+        {/* Left Side: Logo + Nav Links */}
+        <div className="flex items-center gap-6 lg:gap-8">
+          <Link href="/" passHref>
+            <div className="relative grid h-9 w-20 cursor-pointer grid-cols-1 overflow-hidden border-none">
+              <Image
+                src="/aiwa.webp"
+                alt="Aiwa Brand Logo"
+                fill
+                priority
+                draggable={false}
+                className="size-full object-contain"
+              />
+            </div>
+          </Link>
 
-        <div className="hidden transform-gpu items-center gap-2 transition-all duration-300 will-change-auto md:flex">
-          {status == "authenticated" ? (
+          {/* Desktop Nav Links */}
+          <div className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-white",
+                  pathname === link.href ? "text-white" : "text-white/60"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Side: Auth Buttons / User Nav */}
+        <div className="flex items-center gap-2">
+          {status === "authenticated" ? (
             <div className="relative grid size-9 cursor-pointer place-items-center rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 p-[3px] shadow-inner brightness-100 transition-all duration-300 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 hover:brightness-110">
               <div className="relative grid size-full skew-2 grid-cols-1 rounded-full bg-black shadow-md">
                 <UserNav session={session} />
@@ -99,25 +112,26 @@ export function Toolbar({ className = "" }: ToolbarProps) {
             </div>
           ) : (
             <>
-              <Link href="/login" passHref>
+              <Link href="/login" passHref className="hidden md:block">
                 <RippleButton className="text-foreground font-medium transition-all duration-300">
                   Sign In
                 </RippleButton>
               </Link>
 
-              <Link href="/register" passHref>
+              <Link href="/register" passHref className="hidden md:block">
                 <RippleButton className="text-background bg-neutral-100 font-medium transition-all duration-300 hover:bg-neutral-200">
                   Sign Up
                 </RippleButton>
               </Link>
+
+              {/* Mobile User Nav */}
+              <div className="relative grid size-9 cursor-pointer place-items-center rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 p-[3px] shadow-inner brightness-100 transition-all duration-300 hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 hover:brightness-110 md:hidden">
+                <div className="relative grid size-full skew-2 grid-cols-1 rounded-full bg-black shadow-md">
+                  <UserNav session={session} />
+                </div>
+              </div>
             </>
           )}
-        </div>
-
-        <div className="relative grid size-9 transform-gpu cursor-pointer place-items-center rounded-full bg-gradient-to-br from-neutral-50 via-neutral-500 to-neutral-800 p-[3px] shadow-inner brightness-100 transition-all duration-300 will-change-auto hover:from-neutral-800 hover:via-neutral-500 hover:to-neutral-50 hover:brightness-110 md:hidden">
-          <div className="relative grid size-full skew-2 grid-cols-1 rounded-full bg-black shadow-md">
-            <UserNav session={session} />
-          </div>
         </div>
       </motion.nav>
     </>

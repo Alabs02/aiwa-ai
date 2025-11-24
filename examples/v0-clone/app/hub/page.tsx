@@ -1,20 +1,16 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
 import { Toolbar } from "@/components/shared/toolbar";
-import { BillingClient } from "@/components/billing/billing-client";
+import { VibeHubClient } from "@/components/hub/hub-client";
 import { AppFooter } from "@/components/shared/app-footer";
 
-export default async function BillingPage() {
+export default async function VibeHubPage() {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
 
   return (
     <>
       <Toolbar />
-      <BillingClient />
+      <VibeHubClient />
       <AppFooter />
     </>
   );

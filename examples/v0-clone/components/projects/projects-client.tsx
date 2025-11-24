@@ -130,7 +130,7 @@ export function ProjectsClient() {
             {!searchQuery && (
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="mt-4 bg-white/10 hover:bg-white/20"
+                className="text-background mt-4 bg-white/75 hover:bg-white/95"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Project

@@ -5,7 +5,6 @@ import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for static files and Next.js internals
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
@@ -24,21 +23,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow Stripe webhooks without authentication
   if (pathname.startsWith("/api/billing/webhook")) {
     return NextResponse.next();
   }
 
-  // Allow AI proxy without authentication (for cross-origin requests from generated apps)
   if (pathname.startsWith("/api/ai-proxy")) {
     return NextResponse.next();
   }
 
-  // Check for required environment variables
   if (!process.env.AUTH_SECRET) {
-    console.error(
-      "❌ Missing AUTH_SECRET environment variable. Please check your .env file."
-    );
+    console.error("❌ Missing AUTH_SECRET environment variable");
     return NextResponse.next();
   }
 
@@ -48,7 +42,6 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment
   });
 
-  // Protect admin routes
   if (pathname.startsWith("/studio")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
@@ -57,9 +50,7 @@ export async function middleware(request: NextRequest) {
     try {
       const roleResponse = await fetch(
         `${request.nextUrl.origin}/api/user/role`,
-        {
-          headers: { Cookie: request.headers.get("cookie") || "" }
-        }
+        { headers: { Cookie: request.headers.get("cookie") || "" } }
       );
 
       if (roleResponse.ok) {
@@ -77,17 +68,20 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    // Allow API routes to proceed without authentication for anonymous chat creation
     if (pathname.startsWith("/api/")) {
       return NextResponse.next();
     }
 
-    // Allow homepage for anonymous users
-    if (pathname === "/") {
+    // Public pages
+    if (
+      pathname === "/" ||
+      pathname.startsWith("/hub") ||
+      pathname.startsWith("/blog")
+    ) {
       return NextResponse.next();
     }
 
-    // Redirect protected pages to login
+    // Protected pages
     if (
       [
         "/chats",
@@ -101,12 +95,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // Allow login and register pages
     if (["/login", "/register"].includes(pathname)) {
       return NextResponse.next();
     }
 
-    // For any other protected routes, redirect to login
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
