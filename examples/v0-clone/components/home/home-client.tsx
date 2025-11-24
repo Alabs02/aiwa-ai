@@ -51,6 +51,7 @@ import { CreditWarningBanner } from "@/components/shared/credit-warning-banner";
 import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
 import { getFeatureAccess } from "@/lib/feature-access";
 import { WelcomeUpgradeDialog } from "@/components/shared/welcome-upgrade-dialog";
+import { AppFooter } from "@/components/shared/app-footer";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -75,7 +76,6 @@ function UpgradeSearchParamsHandler() {
   const { setShowWelcomeDialog } = useChatStore();
 
   useEffect(() => {
-    console.log("MOUNTED");
     const isNewUser = searchParams.get("new_user") === "true";
     const dismissed = localStorage.getItem("welcome_dialog_dismissed");
 
@@ -792,6 +792,8 @@ export function HomeClient() {
 
             <FeaturedTemplates />
           </main>
+
+          <AppFooter />
         </div>
 
         {/* Enhancement dialogs */}

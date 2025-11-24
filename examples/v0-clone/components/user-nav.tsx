@@ -21,7 +21,7 @@ import {
   IconFolders,
   IconLayoutDashboard
 } from "@tabler/icons-react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, BookOpen, Video, DollarSign } from "lucide-react";
 import { Session } from "next-auth";
 import Link from "next/link";
 
@@ -88,6 +88,29 @@ export function UserNav({ session }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+
+        {/* Mobile Nav Links - Only visible on mobile */}
+        <div className="md:hidden">
+          <DropdownMenuItem asChild>
+            <Link href="/blog" className="font-button cursor-pointer">
+              <BookOpen className="mr-2 size-4" />
+              <span>Blog</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/hub" className="font-button cursor-pointer">
+              <Video className="mr-2 size-4" />
+              <span>Vibe Hub</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/billing" className="font-button cursor-pointer">
+              <DollarSign className="mr-2 size-4" />
+              <span>Pricing</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+        </div>
 
         {/* Credits Section - Only for authenticated non-guest users */}
         {!isSignedOut && !isGuest && (
