@@ -12,6 +12,8 @@ export default async function StudioPage() {
 
   const role = await getUserRole(session.user.id);
 
+  console.log({ role });
+
   if (role !== "admin") {
     redirect("/");
   }
