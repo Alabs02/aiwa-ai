@@ -16,23 +16,25 @@ import { AdminAnalyticsCharts } from "./admin-analytics-charts";
 
 interface Analytics {
   usage: {
-    total_events: number;
-    total_tokens: number;
-    avg_tokens_per_generation: number;
-    total_cost_cents: number;
-    total_credits_used: number;
+    total_events: number | string;
+    total_tokens: number | string;
+    total_input_tokens?: number | string;
+    total_output_tokens?: number | string;
+    total_cost?: number | string;
+    total_cost_cents?: number | string;
+    total_credits_used: number | string;
   };
   users: {
-    total: number;
-    free: number;
-    pro: number;
-    advanced: number;
-    ultimate: number; // Added
+    total_users: number | string;
+    free_users: number | string;
+    pro_users: number | string;
+    advanced_users: number | string;
+    ultimate_users: number | string;
   };
   revenue: {
-    total_usd: string;
-    mrr_cents: number;
-    arr_cents: number;
+    total_revenue: number | string;
+    subscription_revenue: number | string;
+    credit_revenue: number | string;
   };
 }
 
@@ -69,19 +71,44 @@ export function AdminDashboard() {
     );
   }
 
-  const mrr = analytics
-    ? (analytics.revenue.mrr_cents / 100).toFixed(2)
-    : "0.00";
-  const arr = analytics
-    ? (analytics.revenue.arr_cents / 100).toFixed(2)
-    : "0.00";
-  const avgCostPerGen = analytics
-    ? (
-        analytics.usage.total_cost_cents /
-        analytics.usage.total_events /
-        100
-      ).toFixed(4)
-    : "0.00";
+  // Helper function to safely convert to number
+  const toNumber = (value: number | string | undefined): number => {
+    if (value === undefined || value === null) return 0;
+    return typeof value === "string" ? Number(value) || 0 : value;
+  };
+
+  // Safely extract and convert values from API response
+  const usage = analytics?.usage as any;
+  const users = analytics?.users as any;
+  const revenue = analytics?.revenue as any;
+
+  // Usage metrics
+  const totalEvents = toNumber(usage?.total_events);
+  const totalTokens = toNumber(usage?.total_tokens);
+  const totalInputTokens = toNumber(usage?.total_input_tokens);
+  const totalOutputTokens = toNumber(usage?.total_output_tokens);
+  const totalCost = toNumber(usage?.total_cost || usage?.total_cost_cents);
+  const totalCreditsUsed = toNumber(usage?.total_credits_used);
+
+  // User metrics
+  const totalUsers = toNumber(users?.total_users);
+  const freeUsers = toNumber(users?.free_users);
+  const proUsers = toNumber(users?.pro_users);
+  const advancedUsers = toNumber(users?.advanced_users);
+  const ultimateUsers = toNumber(users?.ultimate_users);
+
+  // Revenue metrics (all in cents)
+  const totalRevenue = toNumber(revenue?.total_revenue);
+  const subscriptionRevenue = toNumber(revenue?.subscription_revenue);
+  const creditRevenue = toNumber(revenue?.credit_revenue);
+
+  // Calculate derived metrics
+  const mrr = (subscriptionRevenue / 100).toFixed(2);
+  const arr = ((subscriptionRevenue * 12) / 100).toFixed(2);
+  const avgCostPerGen =
+    totalEvents > 0 ? (totalCost / totalEvents / 100).toFixed(4) : "0.00";
+  const avgTokensPerGen =
+    totalEvents > 0 ? Math.round(totalTokens / totalEvents) : 0;
 
   return (
     <div className="bg-background min-h-screen p-8">
@@ -102,12 +129,12 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {analytics?.users.total || 0}
+                {totalUsers.toLocaleString()}
               </div>
               <p className="text-muted-foreground text-xs">
-                {analytics?.users.pro || 0} Pro •{" "}
-                {analytics?.users.advanced || 0} Advanced •{" "}
-                {analytics?.users.ultimate || 0} Ultimate
+                {proUsers.toLocaleString()} Pro •{" "}
+                {advancedUsers.toLocaleString()} Advanced •{" "}
+                {ultimateUsers.toLocaleString()} Ultimate
               </p>
             </CardContent>
           </Card>
@@ -132,13 +159,10 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {analytics?.usage.total_events.toLocaleString() || 0}
+                {totalEvents.toLocaleString()}
               </div>
               <p className="text-muted-foreground text-xs">
-                Avg{" "}
-                {analytics?.usage.avg_tokens_per_generation.toLocaleString() ||
-                  0}{" "}
-                tokens/gen
+                Avg {avgTokensPerGen.toLocaleString()} tokens/gen
               </p>
             </CardContent>
           </Card>
@@ -150,11 +174,7 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                $
-                {(analytics?.usage.total_cost_cents
-                  ? analytics.usage.total_cost_cents / 100
-                  : 0
-                ).toFixed(2)}
+                ${(totalCost / 100).toFixed(2)}
               </div>
               <p className="text-muted-foreground text-xs">
                 ${avgCostPerGen} per generation
@@ -172,7 +192,7 @@ export function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader>
                   <CardTitle>User Distribution</CardTitle>
@@ -182,25 +202,25 @@ export function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Free</span>
                       <span className="font-medium">
-                        {analytics?.users.free || 0}
+                        {freeUsers.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Pro</span>
                       <span className="font-medium">
-                        {analytics?.users.pro || 0}
+                        {proUsers.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Advanced</span>
                       <span className="font-medium">
-                        {analytics?.users.advanced || 0}
+                        {advancedUsers.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Ultimate</span>
                       <span className="font-medium">
-                        {analytics?.users.ultimate || 0}
+                        {ultimateUsers.toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -216,15 +236,66 @@ export function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Total Tokens</span>
                       <span className="font-medium">
-                        {analytics?.usage.total_tokens.toLocaleString() || 0}
+                        {totalTokens.toLocaleString()}
                       </span>
                     </div>
+                    {totalInputTokens > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Input Tokens</span>
+                        <span className="font-medium">
+                          {totalInputTokens.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {totalOutputTokens > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Output Tokens</span>
+                        <span className="font-medium">
+                          {totalOutputTokens.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Credits Used</span>
                       <span className="font-medium">
-                        {analytics?.usage.total_credits_used.toLocaleString() ||
-                          0}
+                        {totalCreditsUsed.toLocaleString()}
                       </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Total Revenue</span>
+                      <span className="font-medium">
+                        ${(totalRevenue / 100).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Subscription Revenue</span>
+                      <span className="font-medium">
+                        ${(subscriptionRevenue / 100).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Credit Revenue</span>
+                      <span className="font-medium">
+                        ${(creditRevenue / 100).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between border-t pt-2">
+                      <span className="text-sm font-semibold">MRR</span>
+                      <span className="font-bold">${mrr}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">ARR</span>
+                      <span className="font-bold">${arr}</span>
                     </div>
                   </div>
                 </CardContent>
