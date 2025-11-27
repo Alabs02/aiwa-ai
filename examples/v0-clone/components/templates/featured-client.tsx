@@ -3,9 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader, Search, X, ExternalLink, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
 import { TemplateCardSkeleton } from "@/components/templates/card-skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 
 type VisibilityFilter = "all" | "public" | "private" | "team";
 
@@ -316,8 +324,10 @@ function getUserInitials(chat: FeaturedChat): string {
 }
 
 function ProjectCard({ chat }: { chat: FeaturedChat }) {
+  const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [isForking, setIsForking] = useState(false);
 
   const hasPreview = chat.preview_url && !imageError;
   const canShowIframe =
@@ -325,86 +335,194 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
   const displayTitle = generateTitle(chat);
   const displayName = getUserDisplayName(chat);
   const initials = getUserInitials(chat);
+  const previewUrl = chat.latestVersion?.demoUrl || chat.demo_url || chat.demo;
+
+  const handlePreview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (previewUrl) {
+      window.open(previewUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleFork = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isForking) return;
+
+    setIsForking(true);
+
+    const loadingToast = toast.loading("Forking template...", {
+      description: "This may take a moment"
+    });
+
+    try {
+      const response = await fetch("/api/chat/fork", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ chatId: chat.id })
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to fork template");
+      }
+
+      const result = await response.json();
+
+      toast.dismiss(loadingToast);
+      toast.success("Template forked successfully", {
+        description: "Redirecting to your new project..."
+      });
+
+      setTimeout(() => {
+        router.push(`/chats/${result.id}`);
+      }, 500);
+    } catch (error) {
+      console.error("Error forking template:", error);
+
+      toast.dismiss(loadingToast);
+      toast.error("Failed to fork template", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again."
+      });
+    } finally {
+      setIsForking(false);
+    }
+  };
 
   return (
-    <Link
-      href={`/chats/${chat.id}`}
-      className="group block overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600 hover:shadow-xl hover:shadow-neutral-900/50"
-    >
-      {/* Preview/Thumbnail */}
-      <div className="relative aspect-video overflow-hidden bg-neutral-800">
-        {hasPreview ? (
-          <Image
-            src={chat.preview_url!}
-            alt={displayTitle}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={() => setImageError(true)}
-          />
-        ) : canShowIframe ? (
-          <div className="[&>iframe]:scrollbar-hide project-iframe-container relative h-full w-full overflow-hidden">
-            {!iframeLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
-                <Loader className="h-6 w-6 animate-spin text-neutral-600" />
-              </div>
-            )}
-            <iframe
-              src={chat.latestVersion?.demoUrl || chat.demo_url || chat.demo}
-              className="project-iframe pointer-events-none h-full w-full border-0"
-              sandbox="allow-scripts allow-same-origin"
-              onLoad={() => setIframeLoaded(true)}
-              style={{
-                transform: "scale(0.5)",
-                transformOrigin: "top left",
-                width: "200%",
-                height: "200%",
-                overflow: "hidden",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none"
-              }}
-              title={displayTitle}
+    <TooltipProvider>
+      <div className="group relative overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600 hover:shadow-xl hover:shadow-neutral-900/50">
+        {/* Preview/Thumbnail */}
+        <div className="relative aspect-video overflow-hidden bg-neutral-800">
+          {hasPreview ? (
+            <Image
+              src={chat.preview_url!}
+              alt={displayTitle}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              onError={() => setImageError(true)}
             />
+          ) : canShowIframe ? (
+            <div className="[&>iframe]:scrollbar-hide project-iframe-container relative h-full w-full overflow-hidden">
+              {!iframeLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
+                  <Loader className="h-6 w-6 animate-spin text-neutral-600" />
+                </div>
+              )}
+              <iframe
+                src={chat.latestVersion?.demoUrl || chat.demo_url || chat.demo}
+                className="project-iframe pointer-events-none h-full w-full border-0"
+                sandbox="allow-scripts allow-same-origin"
+                onLoad={() => setIframeLoaded(true)}
+                style={{
+                  transform: "scale(0.5)",
+                  transformOrigin: "top left",
+                  width: "200%",
+                  height: "200%",
+                  overflow: "hidden",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none"
+                }}
+                title={displayTitle}
+              />
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <div className="font-heading text-4xl font-bold text-neutral-700">
+                {chat.id.slice(0, 2).toUpperCase()}
+              </div>
+            </div>
+          )}
+
+          {/* Visibility Badge */}
+          {chat.visibility && chat.visibility !== "public" && (
+            <div className="absolute top-2 right-2">
+              <span className="font-body rounded-md border border-neutral-700 bg-black/80 px-2 py-1 text-xs font-medium text-white capitalize backdrop-blur-sm">
+                {chat.visibility}
+              </span>
+            </div>
+          )}
+
+          {/* Actions Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+            {previewUrl && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handlePreview}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/20"
+                    aria-label="Preview template"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Preview in new tab</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleFork}
+                  disabled={isForking}
+                  className="flex h-10 items-center gap-2 rounded-full bg-white px-4 font-medium text-black backdrop-blur-md transition-all hover:scale-105 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Fork template"
+                >
+                  {isForking ? (
+                    <>
+                      <Loader className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Forking...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      <span className="text-sm">Use Template</span>
+                    </>
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Fork and customize this template</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <div className="font-heading text-4xl font-bold text-neutral-700">
-              {chat.id.slice(0, 2).toUpperCase()}
+        </div>
+
+        {/* Content */}
+        <Link href={`/chats/${chat.id}`} prefetch>
+          <div className="p-4">
+            <h3 className="font-heading mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
+              {displayTitle}
+            </h3>
+            <p className="font-body mb-3 text-sm text-neutral-500">
+              Created{" "}
+              {chat.created_at
+                ? new Date(chat.created_at).toLocaleDateString()
+                : "recently"}
+            </p>
+
+            {/* Creator Attribution */}
+            <div className="font-body flex items-center gap-2 border-t border-neutral-800 pt-2">
+              <div className="font-body flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400">
+                {initials}
+              </div>
+              <span className="text-sm text-neutral-500">
+                by <span className="text-neutral-400">{displayName}</span>
+              </span>
             </div>
           </div>
-        )}
-
-        {/* Visibility Badge */}
-        {chat.visibility && chat.visibility !== "public" && (
-          <div className="absolute top-2 right-2">
-            <span className="font-body rounded-md border border-neutral-700 bg-black/80 px-2 py-1 text-xs font-medium text-white capitalize backdrop-blur-sm">
-              {chat.visibility}
-            </span>
-          </div>
-        )}
+        </Link>
       </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <h3 className="font-heading mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
-          {displayTitle}
-        </h3>
-        <p className="font-body mb-3 text-sm text-neutral-500">
-          Created{" "}
-          {chat.created_at
-            ? new Date(chat.created_at).toLocaleDateString()
-            : "recently"}
-        </p>
-
-        {/* Creator Attribution */}
-        <div className="font-body flex items-center gap-2 border-t border-neutral-800 pt-2">
-          <div className="font-body flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400">
-            {initials}
-          </div>
-          <span className="text-sm text-neutral-500">
-            by <span className="text-neutral-400">{displayName}</span>
-          </span>
-        </div>
-      </div>
-    </Link>
+    </TooltipProvider>
   );
 }
