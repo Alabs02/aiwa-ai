@@ -71,6 +71,20 @@
       "when": 1763960674820,
       "tag": "0009_clean_wilson_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1764207205948,
+      "tag": "0010_zippy_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1764212910122,
+      "tag": "0011_parallel_wild_pack",
+      "breakpoints": true
     }
   ]
 }

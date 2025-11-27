@@ -3,16 +3,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Users,
-  DollarSign,
-  Activity,
-  TrendingUp,
-  CreditCard,
-  Zap
-} from "lucide-react";
+import { Users, DollarSign, Activity, CreditCard } from "lucide-react";
 import { AdminUsersTable } from "./admin-users-table";
 import { AdminAnalyticsCharts } from "./admin-analytics-charts";
+import { AdminWebhookLogs } from "./admin-webhook-logs";
 
 interface Analytics {
   usage: {
@@ -32,7 +26,9 @@ interface Analytics {
     ultimate_users: number | string;
   };
   revenue: {
-    total_revenue: number | string;
+    monthly_recurring_revenue: number | string; // NEW: from active subscriptions
+    annual_recurring_revenue: number | string; // NEW: MRR * 12
+    total_revenue: number | string; // Historical transaction data
     subscription_revenue: number | string;
     credit_revenue: number | string;
   };
@@ -71,13 +67,11 @@ export function AdminDashboard() {
     );
   }
 
-  // Helper function to safely convert to number
   const toNumber = (value: number | string | undefined): number => {
     if (value === undefined || value === null) return 0;
     return typeof value === "string" ? Number(value) || 0 : value;
   };
 
-  // Safely extract and convert values from API response
   const usage = analytics?.usage as any;
   const users = analytics?.users as any;
   const revenue = analytics?.revenue as any;
@@ -98,13 +92,15 @@ export function AdminDashboard() {
   const ultimateUsers = toNumber(users?.ultimate_users);
 
   // Revenue metrics (all in cents)
+  const mrr = toNumber(revenue?.monthly_recurring_revenue);
+  const arr = toNumber(revenue?.annual_recurring_revenue);
   const totalRevenue = toNumber(revenue?.total_revenue);
   const subscriptionRevenue = toNumber(revenue?.subscription_revenue);
   const creditRevenue = toNumber(revenue?.credit_revenue);
 
-  // Calculate derived metrics
-  const mrr = (subscriptionRevenue / 100).toFixed(2);
-  const arr = ((subscriptionRevenue * 12) / 100).toFixed(2);
+  // Display values
+  const mrrDisplay = (mrr / 100).toFixed(2);
+  const arrDisplay = (arr / 100).toFixed(2);
   const avgCostPerGen =
     totalEvents > 0 ? (totalCost / totalEvents / 100).toFixed(4) : "0.00";
   const avgTokensPerGen =
@@ -145,8 +141,10 @@ export function AdminDashboard() {
               <DollarSign className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${mrr}</div>
-              <p className="text-muted-foreground text-xs">ARR: ${arr}</p>
+              <div className="text-2xl font-bold">${mrrDisplay}</div>
+              <p className="text-muted-foreground text-xs">
+                ARR: ${arrDisplay}
+              </p>
             </CardContent>
           </Card>
 
@@ -189,6 +187,7 @@ export function AdminDashboard() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -267,35 +266,35 @@ export function AdminDashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Revenue Breakdown</CardTitle>
+                  <CardTitle>Revenue</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Total Revenue</span>
+                      <span className="text-sm font-semibold">MRR</span>
+                      <span className="font-bold">${mrrDisplay}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">ARR</span>
+                      <span className="font-bold">${arrDisplay}</span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between border-t pt-2">
+                      <span className="text-sm">Total Revenue (All-Time)</span>
                       <span className="font-medium">
                         ${(totalRevenue / 100).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Subscription Revenue</span>
+                      <span className="text-sm">Subscription Payments</span>
                       <span className="font-medium">
                         ${(subscriptionRevenue / 100).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Credit Revenue</span>
+                      <span className="text-sm">Credit Purchases</span>
                       <span className="font-medium">
                         ${(creditRevenue / 100).toFixed(2)}
                       </span>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between border-t pt-2">
-                      <span className="text-sm font-semibold">MRR</span>
-                      <span className="font-bold">${mrr}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">ARR</span>
-                      <span className="font-bold">${arr}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -309,6 +308,10 @@ export function AdminDashboard() {
 
           <TabsContent value="analytics">
             <AdminAnalyticsCharts />
+          </TabsContent>
+
+          <TabsContent value="webhooks">
+            <AdminWebhookLogs />
           </TabsContent>
         </Tabs>
       </div>
