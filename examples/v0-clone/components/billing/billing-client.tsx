@@ -322,7 +322,7 @@ export function BillingClient() {
                     <ul className="mb-6 flex-1 space-y-2.5">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-2.5">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                          <Check className="text-primary/75 mt-0.5 h-4 w-4 shrink-0" />
                           <span className="text-sm text-neutral-300">
                             {feature}
                           </span>

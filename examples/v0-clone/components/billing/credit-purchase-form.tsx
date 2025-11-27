@@ -56,9 +56,9 @@ export function CreditPurchaseForm({ onPurchase }: CreditPurchaseFormProps) {
   return (
     <div className="space-y-4">
       {/* Info Banner */}
-      <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
-        <p className="text-xs text-blue-400">
-          💡 Purchase between ${MIN_AMOUNT.toLocaleString()} and $
+      <div className="border-primary/20 bg-primary/5 rounded-lg border p-3">
+        <p className="text-primary text-xs">
+          Purchase between ${MIN_AMOUNT.toLocaleString()} and $
           {MAX_AMOUNT.toLocaleString()} • 1 credit = $0.20 • Credits never
           expire
         </p>
