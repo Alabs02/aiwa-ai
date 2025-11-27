@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Loader, Search, X, ExternalLink, Copy } from "lucide-react";
@@ -464,7 +463,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
                     <ExternalLink className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="text-background">
                   <p>Preview in new tab</p>
                 </TooltipContent>
               </Tooltip>
@@ -491,7 +490,7 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
                   )}
                 </button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="text-background">
                 <p>Fork and customize this template</p>
               </TooltipContent>
             </Tooltip>
@@ -499,29 +498,27 @@ function ProjectCard({ chat }: { chat: FeaturedChat }) {
         </div>
 
         {/* Content */}
-        <Link href={`/chats/${chat.id}`} prefetch>
-          <div className="p-4">
-            <h3 className="font-heading mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
-              {displayTitle}
-            </h3>
-            <p className="font-body mb-3 text-sm text-neutral-500">
-              Created{" "}
-              {chat.created_at
-                ? new Date(chat.created_at).toLocaleDateString()
-                : "recently"}
-            </p>
+        <div className="p-4">
+          <h3 className="font-heading mb-1 line-clamp-2 text-lg font-medium text-white transition-colors group-hover:text-neutral-200">
+            {displayTitle}
+          </h3>
+          <p className="font-body mb-3 text-sm text-neutral-500">
+            Created{" "}
+            {chat.created_at
+              ? new Date(chat.created_at).toLocaleDateString()
+              : "recently"}
+          </p>
 
-            {/* Creator Attribution */}
-            <div className="font-body flex items-center gap-2 border-t border-neutral-800 pt-2">
-              <div className="font-body flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400">
-                {initials}
-              </div>
-              <span className="text-sm text-neutral-500">
-                by <span className="text-neutral-400">{displayName}</span>
-              </span>
+          {/* Creator Attribution */}
+          <div className="font-body flex items-center gap-2 border-t border-neutral-800 pt-2">
+            <div className="font-body flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-medium text-neutral-400">
+              {initials}
             </div>
+            <span className="text-sm text-neutral-500">
+              by <span className="text-neutral-400">{displayName}</span>
+            </span>
           </div>
-        </Link>
+        </div>
       </div>
     </TooltipProvider>
   );
