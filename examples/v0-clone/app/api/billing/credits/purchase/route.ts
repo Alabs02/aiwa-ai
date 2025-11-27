@@ -1,79 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import Stripe from "stripe";
-import { getUserSubscription } from "@/lib/db/billing-queries";
+import { validateCreditPurchase } from "@/lib/credit-purchase-validation";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover"
 });
 
-const CREDIT_PACKAGES = {
-  50: { price: 1000, credits: 50 }, // $10
-  100: { price: 2000, credits: 100 }, // $20
-  200: { price: 4000, credits: 200 } // $40
-};
-
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user?.id || !session.user.email) {
+    if (!session?.user?.email || !session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { credits } = await request.json();
+    const body = await req.json();
+    const { amount, credits } = body;
 
-    if (!CREDIT_PACKAGES[credits as keyof typeof CREDIT_PACKAGES]) {
+    const validation = validateCreditPurchase(amount);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+
+    if (credits !== validation.credits) {
       return NextResponse.json(
-        { error: "Invalid credit package" },
+        { error: "Credit calculation mismatch" },
         { status: 400 }
       );
     }
 
-    const pkg = CREDIT_PACKAGES[credits as keyof typeof CREDIT_PACKAGES];
-    const subscription = await getUserSubscription(session.user.id);
-
-    let customerId = subscription?.stripe_customer_id;
-
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: session.user.email,
-        metadata: { userId: session.user.id }
-      });
-      customerId = customer.id;
-    }
-
     const checkoutSession = await stripe.checkout.sessions.create({
-      customer: customerId,
-      mode: "payment",
+      customer_email: session.user.email,
       payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `${pkg.credits} AIWA Credits`,
+              name: `${validation.credits} AI Credits`,
               description: "One-time credit purchase"
             },
-            unit_amount: pkg.price
+            unit_amount: amount
           },
           quantity: 1
         }
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing?purchase_success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing`,
+      mode: "payment",
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing?canceled=true`,
       metadata: {
         userId: session.user.id,
+        credits: validation.credits?.toString(),
         type: "credit_purchase",
-        credits: pkg.credits.toString(),
-        amount: pkg.price.toString()
+        amountUsd: validation.amountUsd?.toString()
       }
-    });
+    } as Stripe.Checkout.SessionCreateParams);
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("Credit purchase error:", error);
     return NextResponse.json(
-      { error: "Failed to create purchase session" },
+      { error: "Failed to create checkout session" },
       { status: 500 }
     );
   }

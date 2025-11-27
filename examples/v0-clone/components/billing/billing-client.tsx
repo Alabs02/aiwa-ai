@@ -8,6 +8,7 @@ import { Check, Zap, Crown, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { GL } from "../gl";
 import { Leva } from "leva";
+import { CreditPurchaseForm } from "./credit-purchase-form";
 
 interface Subscription {
   plan: string;
@@ -114,12 +115,12 @@ export function BillingClient() {
     }
   };
 
-  const handleBuyCredits = async (credits: number) => {
+  const handleBuyCredits = async (amountCents: number, credits: number) => {
     try {
       const response = await fetch("/api/billing/credits/purchase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credits })
+        body: JSON.stringify({ amount: amountCents, credits })
       });
 
       if (response.ok) {
@@ -351,50 +352,17 @@ export function BillingClient() {
 
           {/* Buy Extra Credits - Only show for paid plans */}
           {canBuyCredits && (
-            <div
-              onMouseEnter={() => setHovering(true)}
-              onMouseLeave={() => setHovering(false)}
-              className="rounded-2xl border border-white/5 bg-white/[0.03] p-6 backdrop-blur-xl"
-            >
+            <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-6 backdrop-blur-xl">
               <div className="mb-6 space-y-1">
                 <h2 className="text-lg font-semibold text-white">
                   Buy Extra Credits
                 </h2>
                 <p className="text-sm text-neutral-400">
-                  One-time credit purchases
+                  Flexible one-time credit purchases • 1 credit = $0.20
                 </p>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
-                {[
-                  { credits: 50, price: 10 },
-                  { credits: 100, price: 20 },
-                  { credits: 200, price: 40 }
-                ].map((pkg) => (
-                  <div
-                    key={pkg.credits}
-                    className="group rounded-xl border border-white/5 bg-white/[0.03] p-4 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.05]"
-                  >
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-xl font-semibold text-white">
-                          {pkg.credits} Credits
-                        </p>
-                        <p className="text-sm text-neutral-400">
-                          ${pkg.price} USD
-                        </p>
-                      </div>
-                      <Button
-                        onClick={() => handleBuyCredits(pkg.credits)}
-                        className="w-full bg-white/5 text-white hover:bg-white/10"
-                        variant="outline"
-                      >
-                        Purchase
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CreditPurchaseForm onPurchase={handleBuyCredits} />
             </div>
           )}
         </div>
