@@ -160,7 +160,10 @@ export function PreviewPanel({
   });
 
   const handleDownload = async () => {
+    console.log({ userPlan });
     const access = getFeatureAccess(userPlan as any);
+
+    console.log({ access });
 
     if (!currentChat?.id) return;
 
@@ -216,6 +219,13 @@ export function PreviewPanel({
 
     setGithubDialogOpen(true);
   };
+
+  useEffect(() => {
+    fetch("/api/billing/subscription")
+      .then((r) => r.json())
+      .then((data) => setUserPlan(data?.plan || "free"))
+      .catch(() => setUserPlan("free"));
+  }, []);
 
   const getEmptyState = () => (
     <div className="flex h-full flex-1 items-center justify-center bg-gray-50 dark:bg-black">

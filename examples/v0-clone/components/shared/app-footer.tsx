@@ -35,7 +35,7 @@ const footerLinks = {
     title: "Community",
     links: [
       // { label: "Discord", href: "https://discord.gg/aiwa", external: true },
-      { label: "Twitter/X", href: "https://x.com/aiwa", external: true },
+      { label: "Twitter/X", href: "https://x.com/aiwacodes", external: true },
       // { label: "GitHub", href: "https://github.com/aiwa", external: true },
       {
         label: "LinkedIn",

@@ -26,8 +26,8 @@ async function fixCreditsTotal() {
     const updatedSub = await updateSubscription({
       userId,
       updates: {
-        credits_remaining: 15,
-        credits_total: 15,
+        credits_remaining: 200,
+        credits_total: 200,
         credits_used: 0
       }
     });

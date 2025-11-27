@@ -416,23 +416,97 @@ export async function getSystemAnalytics({
       .from(users)
       .leftJoin(subscriptions, eq(users.id, subscriptions.user_id));
 
-    const [revenueStats] = await db
+    // FIXED: Calculate MRR from active subscriptions, not payment history
+    const activeSubscriptions = await db
       .select({
-        total_revenue: sum(payment_transactions.amount),
-        subscription_revenue: sql<number>`SUM(CASE WHEN ${payment_transactions.type} = 'subscription' THEN ${payment_transactions.amount} ELSE 0 END)`,
-        credit_revenue: sql<number>`SUM(CASE WHEN ${payment_transactions.type} = 'credit_purchase' THEN ${payment_transactions.amount} ELSE 0 END)`
+        plan: subscriptions.plan,
+        billing_cycle: subscriptions.billing_cycle,
+        status: subscriptions.status
       })
-      .from(payment_transactions)
+      .from(subscriptions)
       .where(
-        conditions.length > 0
-          ? and(...conditions.map((c) => sql`${c}`))
-          : undefined
+        sql`${subscriptions.status} = 'active' AND ${subscriptions.plan} != 'free'`
       );
+
+    // Monthly prices in cents
+    const PLAN_PRICES = {
+      pro_monthly: 2000,
+      pro_annual: 204, // $17/mo * 12 = $204 total, so monthly = 204/12 = $17
+      advanced_monthly: 5000,
+      advanced_annual: 498, // $41.5/mo * 12 = $498 total, monthly = 498/12 = $41.5
+      ultimate_monthly: 10000,
+      ultimate_annual: 1056 // $88/mo * 12 = $1056 total, monthly = 1056/12 = $88
+    };
+
+    let monthlyRecurringRevenue = 0;
+
+    for (const sub of activeSubscriptions) {
+      const cycle = sub.billing_cycle || "monthly";
+      const key = `${sub.plan}_${cycle}` as keyof typeof PLAN_PRICES;
+      const price = PLAN_PRICES[key] || 0;
+
+      if (cycle === "annual") {
+        // Annual subscriptions: divide by 12 to get monthly value
+        monthlyRecurringRevenue += Math.round(price / 12);
+      } else {
+        monthlyRecurringRevenue += price;
+      }
+    }
+
+    const annualRecurringRevenue = monthlyRecurringRevenue * 12;
+
+    // Historical transaction data (for reporting, not MRR)
+    // FIXED: Deduplicate by stripe_payment_id, but keep all NULL records
+    const deduplicatedQuery = sql`
+      SELECT 
+        COALESCE(SUM(amount), 0) as total_revenue,
+        COALESCE(SUM(CASE WHEN type = 'subscription' THEN amount ELSE 0 END), 0) as subscription_revenue,
+        COALESCE(SUM(CASE WHEN type = 'credit_purchase' THEN amount ELSE 0 END), 0) as credit_revenue
+      FROM (
+        (
+          SELECT DISTINCT ON (stripe_payment_id) 
+            amount, 
+            type
+          FROM payment_transactions
+          WHERE stripe_payment_id IS NOT NULL
+          ${conditions.length > 0 ? sql`AND ${and(...conditions)}` : sql``}
+          ORDER BY stripe_payment_id, created_at DESC
+        )
+        UNION ALL
+        (
+          SELECT 
+            amount, 
+            type
+          FROM payment_transactions
+          WHERE stripe_payment_id IS NULL
+          ${conditions.length > 0 ? sql`AND ${and(...conditions)}` : sql``}
+        )
+      ) as deduplicated
+    `;
+
+    const deduplicatedResult = await db.execute(deduplicatedQuery);
+    const row = Array.isArray(deduplicatedResult)
+      ? deduplicatedResult[0]
+      : deduplicatedResult.rows?.[0];
+
+    const transactionStats = {
+      total_revenue: Number(row?.total_revenue || 0),
+      subscription_revenue: Number(row?.subscription_revenue || 0),
+      credit_revenue: Number(row?.credit_revenue || 0)
+    };
 
     return {
       usage: usageStats,
       users: userStats,
-      revenue: revenueStats
+      revenue: {
+        // MRR/ARR from active subscriptions
+        monthly_recurring_revenue: monthlyRecurringRevenue,
+        annual_recurring_revenue: annualRecurringRevenue,
+        // Historical transaction data
+        total_revenue: transactionStats.total_revenue,
+        subscription_revenue: transactionStats.subscription_revenue,
+        credit_revenue: transactionStats.credit_revenue
+      }
     };
   } catch (error) {
     console.error("Failed to get system analytics:", error);

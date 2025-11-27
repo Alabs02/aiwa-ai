@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Zap, Crown, Gem, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Check, Zap, Crown, Gem, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface WelcomeUpgradeDialogProps {
@@ -16,7 +16,8 @@ const PLANS = [
   {
     key: "pro",
     name: "Pro",
-    price: 20,
+    monthly: 20,
+    annual: 17,
     credits: 100,
     icon: Zap,
     popular: false,
@@ -32,7 +33,8 @@ const PLANS = [
   {
     key: "advanced",
     name: "Advanced",
-    price: 50,
+    monthly: 50,
+    annual: 41.5,
     credits: 350,
     icon: Crown,
     popular: true,
@@ -48,7 +50,8 @@ const PLANS = [
   {
     key: "ultimate",
     name: "Ultimate",
-    price: 100,
+    monthly: 100,
+    annual: 88,
     credits: 800,
     icon: Gem,
     popular: false,
@@ -67,12 +70,32 @@ export function WelcomeUpgradeDialog({
   open,
   onOpenChange
 }: WelcomeUpgradeDialogProps) {
-  const router = useRouter();
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
+  const [upgrading, setUpgrading] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
+    "monthly"
+  );
 
-  const handleUpgrade = (plan: string) => {
-    router.push(`/billing?plan=${plan}`);
-    onOpenChange(false);
+  const handleUpgrade = async (plan: string) => {
+    setUpgrading(plan);
+    try {
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, billingCycle })
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
+      } else {
+        toast.error("Failed to start checkout");
+        setUpgrading(null);
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+      setUpgrading(null);
+    }
   };
 
   const handleContinueFree = () => {
@@ -133,12 +156,61 @@ export function WelcomeUpgradeDialog({
           </div>
         </div>
 
+        {/* Billing Cycle Toggle */}
+        <div className="border-b border-white/[0.08] bg-white/[0.02] px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={`text-sm font-medium transition-colors ${
+                billingCycle === "monthly"
+                  ? "text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              Monthly
+            </button>
+
+            <button
+              onClick={() =>
+                setBillingCycle(
+                  billingCycle === "monthly" ? "annual" : "monthly"
+                )
+              }
+              className="relative inline-flex h-6 w-11 items-center rounded-full border border-white/10 bg-white/5 transition-colors hover:bg-white/10"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  billingCycle === "annual" ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+
+            <button
+              onClick={() => setBillingCycle("annual")}
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
+                billingCycle === "annual"
+                  ? "text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              Annual
+              <Badge
+                variant="secondary"
+                className="border-0 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+              >
+                Save 12-17%
+              </Badge>
+            </button>
+          </div>
+        </div>
+
         {/* Plans Grid */}
         <div className="overflow-y-auto">
           <div className="grid gap-3 p-4 sm:gap-4 sm:p-6 md:grid-cols-3">
             {PLANS.map((plan) => {
               const Icon = plan.icon;
               const isHovered = hoveredPlan === plan.key;
+              const isUpgrading = upgrading === plan.key;
 
               return (
                 <div
@@ -192,12 +264,21 @@ export function WelcomeUpgradeDialog({
                     <div className="mb-3 sm:mb-4">
                       <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-bold text-white sm:text-3xl">
-                          ${plan.price}
+                          $
+                          {billingCycle === "monthly"
+                            ? plan.monthly
+                            : plan.annual}
                         </span>
                         <span className="text-xs text-neutral-400 sm:text-sm">
                           /month
                         </span>
                       </div>
+                      {billingCycle === "annual" && (
+                        <p className="mt-1 text-xs text-neutral-500">
+                          Save ${((plan.monthly - plan.annual) * 12).toFixed(0)}{" "}
+                          per year
+                        </p>
+                      )}
                       <p className="mt-1 text-xs text-neutral-500">
                         {plan.credits} credits per month
                       </p>
@@ -225,6 +306,7 @@ export function WelcomeUpgradeDialog({
                     {/* CTA */}
                     <Button
                       onClick={() => handleUpgrade(plan.key)}
+                      disabled={isUpgrading}
                       className={cn(
                         "w-full text-xs transition-all sm:text-sm",
                         plan.popular
@@ -232,7 +314,14 @@ export function WelcomeUpgradeDialog({
                           : "bg-white text-black hover:bg-white/90"
                       )}
                     >
-                      Start with {plan.name}
+                      {isUpgrading ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        `Start with ${plan.name}`
+                      )}
                     </Button>
                   </div>
                 </div>

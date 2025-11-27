@@ -185,10 +185,11 @@ export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   user_id: uuid("user_id")
     .notNull()
+    .unique() // FIXED: Added unique constraint to prevent duplicates
     .references(() => users.id, { onDelete: "cascade" }),
 
   // Plan details
-  plan: varchar("plan", { length: 50 }).notNull().default("free"), // free, pro, advanced, white_label
+  plan: varchar("plan", { length: 50 }).notNull().default("free"), // free, pro, advanced, ultimate, white_label
   billing_cycle: varchar("billing_cycle", { length: 20 }), // monthly, annual
   status: varchar("status", { length: 20 }).notNull().default("active"), // active, cancelled, past_due, paused
 
@@ -295,3 +296,37 @@ export const payment_transactions = pgTable("payment_transactions", {
 });
 
 export type PaymentTransaction = InferSelectModel<typeof payment_transactions>;
+
+export const webhook_logs = pgTable("webhook_logs", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  // Stripe event data
+  stripe_event_id: varchar("stripe_event_id", { length: 255 })
+    .notNull()
+    .unique(),
+  event_type: varchar("event_type", { length: 100 }).notNull(),
+
+  // User context
+  user_id: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  user_email: varchar("user_email", { length: 255 }),
+
+  // Payment details
+  amount: integer("amount"),
+  currency: varchar("currency", { length: 3 }),
+  stripe_customer_id: varchar("stripe_customer_id", { length: 255 }),
+  stripe_subscription_id: varchar("stripe_subscription_id", { length: 255 }),
+  stripe_invoice_id: varchar("stripe_invoice_id", { length: 255 }),
+
+  // Status
+  status: varchar("status", { length: 20 }).notNull(), // success, failed, pending
+  error_message: text("error_message"),
+
+  // Full event payload (for debugging)
+  raw_event: text("raw_event"), // JSON stringified
+
+  // Timing
+  processed_at: timestamp("processed_at"),
+  created_at: timestamp("created_at").notNull().defaultNow()
+});
+
+export type WebhookLog = InferSelectModel<typeof webhook_logs>;
