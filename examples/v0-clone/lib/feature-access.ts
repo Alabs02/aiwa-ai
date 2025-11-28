@@ -4,6 +4,7 @@ export interface FeatureAccess {
   canExport: boolean;
   canDownload: boolean;
   canUseGitHub: boolean;
+  canUseTranscribe: boolean;
   canUsePromptEnhancer: boolean;
   canUsePromptLibrary: boolean;
   canUsePromptAnalysis: boolean;
@@ -28,6 +29,7 @@ export function getFeatureAccess(
       canExport: true,
       canDownload: true,
       canUseGitHub: true,
+      canUseTranscribe: true,
       canUsePromptEnhancer: true,
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
@@ -48,6 +50,7 @@ export function getFeatureAccess(
       canExport: false,
       canDownload: false,
       canUseGitHub: false,
+      canUseTranscribe: false,
       canUsePromptEnhancer: false,
       canUsePromptLibrary: false,
       canUsePromptAnalysis: true,
@@ -65,6 +68,7 @@ export function getFeatureAccess(
       canExport: true,
       canDownload: true,
       canUseGitHub: true,
+      canUseTranscribe: true,
       canUsePromptEnhancer: true,
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
@@ -82,6 +86,7 @@ export function getFeatureAccess(
       canExport: true,
       canDownload: true,
       canUseGitHub: true,
+      canUseTranscribe: true,
       canUsePromptEnhancer: true,
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
@@ -99,6 +104,7 @@ export function getFeatureAccess(
       canExport: true,
       canDownload: true,
       canUseGitHub: true,
+      canUseTranscribe: true,
       canUsePromptEnhancer: true,
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
@@ -116,6 +122,7 @@ export function getFeatureAccess(
       canExport: true,
       canDownload: true,
       canUseGitHub: true,
+      canUseTranscribe: true,
       canUsePromptEnhancer: true,
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,

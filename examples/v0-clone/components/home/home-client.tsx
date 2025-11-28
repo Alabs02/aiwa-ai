@@ -536,6 +536,14 @@ export function HomeClient() {
   };
 
   const handleSpeechTranscript = useCallback((transcript: string) => {
+    const access = getFeatureAccess(userPlan as any);
+
+    if (!access.canUsePromptLibrary) {
+      setBlockedFeature("Transcription");
+      setShowUpgradeDialog(true);
+      return;
+    }
+
     setMessage((prev) => prev + (prev ? " " : "") + transcript);
     setTimeout(() => {
       textareaRef.current?.focus();
