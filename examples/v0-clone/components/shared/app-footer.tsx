@@ -35,25 +35,25 @@ const footerLinks = {
     title: "Community",
     links: [
       // { label: "Discord", href: "https://discord.gg/aiwa", external: true },
-      { label: "Twitter/X", href: "https://x.com/aiwacodes", external: true },
+      { label: "Twitter/X", href: "https://x.com/aiwacodes", external: true }
       // { label: "GitHub", href: "https://github.com/aiwa", external: true },
-      {
-        label: "LinkedIn",
-        href: "https://linkedin.com/company/aiwa",
-        external: true
-      }
+      // {
+      //   label: "LinkedIn",
+      //   href: "https://linkedin.com/company/aiwa",
+      //   external: true
+      // }
     ]
   }
 };
 
 const socialLinks = [
-  { icon: IconBrandX, href: "https://x.com/aiwa", label: "X" },
+  { icon: IconBrandX, href: "https://x.com/aiwacodes", label: "X" }
   // { icon: Github, href: "https://github.com/aiwa", label: "GitHub" },
-  {
-    icon: IconBrandLinkedin,
-    href: "https://linkedin.com/company/aiwa",
-    label: "LinkedIn"
-  }
+  // {
+  //   icon: IconBrandLinkedin,
+  //   href: "https://linkedin.com/company/aiwa",
+  //   label: "LinkedIn"
+  // }
   // { icon: MessageSquare, href: "https://discord.gg/aiwa", label: "Discord" }
 ];
 
