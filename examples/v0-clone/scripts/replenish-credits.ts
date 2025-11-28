@@ -7,7 +7,7 @@ import {
  * Fix script to correct 15/30 back to 15/15 for free tier
  */
 async function fixCreditsTotal() {
-  const userId = "74bf2f06-451b-4441-8e58-f54c2e26c201";
+  const userId = "30c819be-9f7e-428d-af4c-ef5ace820f5b";
 
   try {
     console.log("🔧 Fixing credits total...");
@@ -26,8 +26,8 @@ async function fixCreditsTotal() {
     const updatedSub = await updateSubscription({
       userId,
       updates: {
-        credits_remaining: 200,
-        credits_total: 200,
+        credits_remaining: 30,
+        credits_total: 15,
         credits_used: 0
       }
     });

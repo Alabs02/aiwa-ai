@@ -56,13 +56,13 @@ export function CreditPurchaseForm({ onPurchase }: CreditPurchaseFormProps) {
   return (
     <div className="space-y-4">
       {/* Info Banner */}
-      <div className="border-primary/20 bg-primary/5 rounded-lg border p-3">
+      {/* <div className="border-primary/20 bg-primary/5 rounded-lg border p-3">
         <p className="text-primary text-xs">
           Purchase between ${MIN_AMOUNT.toLocaleString()} and $
           {MAX_AMOUNT.toLocaleString()} • 1 credit = $0.20 • Credits never
           expire
         </p>
-      </div>
+      </div> */}
 
       {/* Quick Amount Buttons */}
       <div className="flex flex-wrap gap-2">
@@ -93,9 +93,9 @@ export function CreditPurchaseForm({ onPurchase }: CreditPurchaseFormProps) {
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
-        <p className="text-xs text-neutral-500">
+        {/* <p className="text-xs text-neutral-500">
           Min: ${MIN_AMOUNT} • Max: ${MAX_AMOUNT}
-        </p>
+        </p> */}
       </div>
 
       {/* Credit Calculation Display */}
