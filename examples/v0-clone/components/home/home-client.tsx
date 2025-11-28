@@ -52,6 +52,7 @@ import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
 import { getFeatureAccess } from "@/lib/feature-access";
 import { WelcomeUpgradeDialog } from "@/components/shared/welcome-upgrade-dialog";
 import { AppFooter } from "@/components/shared/app-footer";
+import { toast } from "sonner";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();
@@ -534,6 +535,20 @@ export function HomeClient() {
     setShowLibrary(true);
   };
 
+  const handleSpeechTranscript = useCallback((transcript: string) => {
+    setMessage((prev) => prev + (prev ? " " : "") + transcript);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      const len = textareaRef.current?.value.length || 0;
+      textareaRef.current?.setSelectionRange(len, len);
+    }, 100);
+  }, []);
+
+  const handleSpeechError = useCallback((error: string) => {
+    // Mic button already shows toasts, just log
+    console.error("Speech error:", error);
+  }, []);
+
   const getFirstOrLast = (): string | undefined => {
     if (!session?.user?.name) return undefined;
 
@@ -729,14 +744,8 @@ export function HomeClient() {
                       <PromptInputTools>
                         {isAuthenticated && <ProjectSelector />}
                         <PromptInputMicButton
-                          onTranscript={(transcript) => {
-                            setMessage(
-                              (prev) => prev + (prev ? " " : "") + transcript
-                            );
-                          }}
-                          onError={(error) => {
-                            console.error("Speech recognition error:", error);
-                          }}
+                          onTranscript={handleSpeechTranscript}
+                          onError={(e) => handleSpeechError(e?.toString())}
                           disabled={isLoading}
                         />
                         <PromptInputSubmit
