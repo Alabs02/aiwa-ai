@@ -293,7 +293,7 @@ export function WelcomeUpgradeDialog({
                               "mt-0.5 h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4",
                               plan.popular
                                 ? "text-emerald-400"
-                                : "text-neutral-400"
+                                : "text-primary/75"
                             )}
                           />
                           <span className="text-xs text-neutral-300 sm:text-sm">
