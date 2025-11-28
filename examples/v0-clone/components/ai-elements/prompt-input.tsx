@@ -14,9 +14,9 @@ import type { ChatStatus } from "ai";
 import {
   ArrowUpIcon,
   ImageIcon,
-  Loader2Icon,
+  Loader,
   MicIcon,
-  MicOffIcon,
+  Disc3,
   SquareIcon,
   XIcon
 } from "lucide-react";
@@ -26,6 +26,14 @@ import type {
   KeyboardEventHandler
 } from "react";
 import { Children, useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+}
 
 // Utility function to convert file to data URL
 export const fileToDataUrl = (file: File): Promise<string> => {
@@ -333,7 +341,7 @@ export const PromptInputSubmit = ({
   let Icon = <ArrowUpIcon className="size-4" />;
 
   if (status === "submitted") {
-    Icon = <Loader2Icon className="size-4 animate-spin" />;
+    Icon = <Loader className="size-4 animate-spin" />;
   } else if (status === "streaming") {
     Icon = <SquareIcon className="size-4" />;
   } else if (status === "error") {
@@ -429,113 +437,149 @@ export const PromptInputMicButton = ({
   className,
   onTranscript,
   onError,
+  disabled,
   ...props
 }: PromptInputMicButtonProps) => {
-  const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const isCleaningUpRef = useRef(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
-  useEffect(() => {
-    // Check if speech recognition is supported
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      recognition.onstart = () => {
-        if (!isCleaningUpRef.current) {
-          setIsListening(true);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4"
+      });
+
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
       };
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        if (!isCleaningUpRef.current) {
-          const transcript = event.results[0][0].transcript;
-          onTranscript?.(transcript);
-          setIsListening(false);
-        }
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: mediaRecorder.mimeType
+        });
+
+        stream.getTracks().forEach((track) => track.stop());
+        await transcribeAudio(audioBlob);
       };
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        // Don't report "aborted" errors as they're usually from cleanup or natural timeout
-        if (event.error !== "aborted" && !isCleaningUpRef.current) {
-          console.error("Speech recognition error:", event.error);
-          onError?.(event.error);
-        }
-        setIsListening(false);
-      };
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
 
-      recognition.onend = () => {
-        if (!isCleaningUpRef.current) {
-          setIsListening(false);
-        }
-      };
+      toast.success("Recording started", {
+        description: "Speak clearly into your microphone"
+      });
+    } catch (error: any) {
+      console.error("Error starting recording:", error);
 
-      recognitionRef.current = recognition;
+      let errorMessage = "Failed to start recording";
+      if (error.name === "NotAllowedError") {
+        errorMessage = "Microphone access denied. Please enable permissions.";
+      } else if (error.name === "NotFoundError") {
+        errorMessage = "No microphone found. Please connect a microphone.";
+      }
+
+      toast.error(errorMessage);
+      onError?.(errorMessage);
     }
+  }, [onError]);
 
-    return () => {
-      isCleaningUpRef.current = true;
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch (error) {
-          // Ignore errors during cleanup
-        }
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }, [isRecording]);
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      setIsTranscribing(true);
+
+      const formData = new FormData();
+      formData.append("audio", audioBlob);
+
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Transcription failed");
       }
-    };
-  }, [onTranscript, onError]);
 
-  const toggleListening = useCallback(() => {
-    if (!recognitionRef.current || isCleaningUpRef.current) return;
+      const data = await response.json();
 
-    if (isListening) {
-      try {
-        recognitionRef.current.stop();
-      } catch (error) {
-        console.warn("Error stopping speech recognition:", error);
-        setIsListening(false);
+      if (data.transcript) {
+        onTranscript?.(data.transcript);
+        toast.success("Transcription complete");
+      } else {
+        throw new Error("No transcript received");
       }
+    } catch (error: any) {
+      console.error("Transcription error:", error);
+      const errorMessage = error.message || "Failed to transcribe audio";
+      toast.error(errorMessage);
+      onError?.(errorMessage);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const toggleRecording = useCallback(() => {
+    if (isRecording) {
+      stopRecording();
     } else {
-      try {
-        recognitionRef.current.start();
-      } catch (error) {
-        console.error("Error starting speech recognition:", error);
-        onError?.("Failed to start speech recognition");
-      }
+      startRecording();
     }
-  }, [isListening, onError]);
-
-  if (!isSupported) {
-    return null;
-  }
+  }, [isRecording, startRecording, stopRecording]);
 
   return (
-    <PromptInputButton
+    <Button
+      type="button"
+      size="icon"
+      variant="ghost"
       className={cn(
-        "transition-all duration-300",
-        isListening && [
+        "h-8 w-8 p-0 transition-all duration-300",
+        "text-white/60 hover:text-white",
+        isRecording && [
           "border-red-500/30 bg-red-500/20",
           "text-red-400 hover:text-red-300",
           "hover:border-red-500/40 hover:bg-red-500/30",
-          "shadow-[0_0_15px_rgba(239,68,68,0.25)]"
+          "shadow-[0_0_15px_rgba(239,68,68,0.25)]",
+          "animate-pulse"
         ],
         className
       )}
-      onClick={toggleListening}
+      onClick={toggleRecording}
+      disabled={disabled || isTranscribing}
+      title={
+        isTranscribing
+          ? "Transcribing..."
+          : isRecording
+            ? "Stop recording"
+            : "Start voice input"
+      }
       {...props}
     >
-      {isListening ? (
-        <MicOffIcon className="size-4" />
+      {isTranscribing ? (
+        <Loader className="size-4 animate-spin" />
+      ) : isRecording ? (
+        <Disc3 className="animate-pulse-subtle size-4" />
       ) : (
         <MicIcon className="size-4" />
       )}
-    </PromptInputButton>
+    </Button>
   );
 };
 

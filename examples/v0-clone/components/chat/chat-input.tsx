@@ -68,6 +68,28 @@ export function ChatInput({
       .catch(() => setUserPlan("free"));
   }, []);
 
+  const handleSpeechTranscript = useCallback(
+    (transcript: string) => {
+      const newMessage = message + (message ? " " : "") + transcript;
+      setMessage(newMessage);
+
+      setTimeout(() => {
+        const textarea = textareaRef?.current;
+        if (textarea) {
+          textarea.focus();
+          const length = newMessage.length;
+          textarea.setSelectionRange(length, length);
+        }
+      }, 100);
+    },
+    [message, setMessage, textareaRef]
+  );
+
+  const handleSpeechError = useCallback((error: string) => {
+    console.error("Speech recognition error:", error);
+    // Error toast already handled by mic button
+  }, []);
+
   const handleImageFiles = useCallback(
     async (files: File[]) => {
       if (!onAttachmentsChange) return;
@@ -213,12 +235,9 @@ export function ChatInput({
             </PromptInputTools>
             <PromptInputTools>
               <PromptInputMicButton
-                onTranscript={(transcript) => {
-                  setMessage(message + (message ? " " : "") + transcript);
-                }}
-                onError={(error) => {
-                  console.error("Speech recognition error:", error);
-                }}
+                onTranscript={handleSpeechTranscript}
+                onError={(e) => handleSpeechError(e?.toString())}
+                disabled={isLoading}
               />
               <PromptInputSubmit
                 disabled={!message}

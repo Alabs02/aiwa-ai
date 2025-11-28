@@ -64,7 +64,7 @@ export function getFeatureAccess(
     pro: {
       canExport: true,
       canDownload: true,
-      canUseGitHub: false,
+      canUseGitHub: true,
       canUsePromptEnhancer: true,
       canUsePromptLibrary: true,
       canUsePromptAnalysis: true,
