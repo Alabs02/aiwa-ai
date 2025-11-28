@@ -70,6 +70,14 @@ export function ChatInput({
 
   const handleSpeechTranscript = useCallback(
     (transcript: string) => {
+      const access = getFeatureAccess(userPlan as any);
+
+      if (!access.canUsePromptLibrary) {
+        setBlockedFeature("Transcription");
+        setShowUpgradeDialog(true);
+        return;
+      }
+
       const newMessage = message + (message ? " " : "") + transcript;
       setMessage(newMessage);
 
