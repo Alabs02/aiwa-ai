@@ -22,4 +22,5 @@ Complete guide to all features in AIWA AI, the next-generation vibe coding platf
 ## Intelligent Prompt Analyzer
 
 ### Overview
+
 The Prompt Analyzer is AIWA AI's flagship feature - a real-time analysis tool that evaluates your prompts as you type, similar to how Grammarly

@@ -30,6 +30,7 @@
 **Track:** 💼 AI-Powered Developer Tools
 
 **Built With:**
+
 - ✅ Amazon Q Developer (CLI & IDE)
 - ✅ Amazon Kiro IDE
 - ✅ AWS Infrastructure & Services
@@ -40,7 +41,7 @@
 
 ## 🎯 What is AIWA AI?
 
-**AIWA AI** is a next-generation vibe coding platform that revolutionizes how developers build applications. Starting from the v0-SDK foundation, AIWA has evolved into a comprehensive development environment that rivals platforms like Lovable, with unique features that set it apart.
+**AIWA AI** is a next-generation vibe coding platform that revolutionizes how developers build applications. Starting from the v0-SDK foundation, AIWA has evolved into a comprehensive development environment that is similar to Lovable, with unique features that set it apart.
 
 ### The Evolution
 
@@ -56,7 +57,7 @@
 <td width="50%">
 
 **After: AIWA AI**
-<img src="./examples/v0-clone/screenshot.png" alt="AIWA AI" width="100%" />
+<img src="./examples/v0-clone/public/aiwa-hero.webp" alt="AIWA AI" width="100%" />
 <em>Feature-rich platform with advanced capabilities</em>
 
 </td>
@@ -78,9 +79,11 @@
 ### 🎯 Core Innovations
 
 #### 1. **Intelligent Prompt Analyzer** 🧠
-> *Like Grammarly for your AI prompts*
+
+> _Like Grammarly for your AI prompts_
 
 Real-time analysis of your prompts as you type, showing:
+
 - **Strength Score** - How effective your prompt is
 - **Clarity Rating** - How well-defined your requirements are
 - **Specificity Level** - How detailed your instructions are
@@ -89,7 +92,9 @@ Real-time analysis of your prompts as you type, showing:
 **Built with Amazon Q Developer:** Used Q Developer to design the scoring algorithm and implement the real-time analysis engine.
 
 #### 2. **Project-Based Workflow** 📁
+
 Organize your work efficiently:
+
 - Group related chats under projects
 - Add environment variables per project
 - AI agent automatically uses your API keys and configurations
@@ -98,13 +103,16 @@ Organize your work efficiently:
 **Built with Kiro IDE:** Leveraged Kiro's spec-driven development to design the project architecture and implement the environment variable management system.
 
 #### 3. **Advanced Code Preview** 👁️
+
 - **Multi-Device Preview** - Mobile, tablet, and desktop views
 - **Live Console** - Real-time console.log output
 - **Codebase Explorer** - Read-only preview of generated code
 - **Animated Generation** - Beautiful loading states during code creation
 
 #### 4. **Export & Deploy** 🚀
+
 Multiple deployment options:
+
 - **Download as ZIP** - Includes environment variables
 - **Export to GitHub** - Direct repository creation
 - **Custom Domains** - Connect your own domain (coming soon)
@@ -113,14 +121,18 @@ Multiple deployment options:
 **Built with Amazon Q Developer:** Q Developer helped implement the GitHub API integration and ZIP generation logic.
 
 #### 5. **Prompt Library** 📚
+
 Curated collection of high-quality prompts:
+
 - Pre-built templates for common use cases
 - Community-contributed prompts
 - Personal prompt collections
 - One-click prompt enhancement
 
 #### 6. **Speech-to-Text** 🎤
+
 Powered by OpenAI Whisper via Vercel AI SDK:
+
 - Hands-free prompt input
 - Multi-language support
 - High accuracy transcription
@@ -158,6 +170,7 @@ Powered by OpenAI Whisper via Vercel AI SDK:
 Throughout the development of AIWA AI, Amazon Q Developer was instrumental in:
 
 #### 1. **Architecture Design**
+
 ```bash
 # Used Q Developer CLI to analyze and optimize the project structure
 q chat "Analyze this Next.js project structure and suggest improvements for scalability"
@@ -167,27 +180,31 @@ q chat "Analyze this Next.js project structure and suggest improvements for scal
 <img src="./docs/screenshots/q-developer-architecture.png" alt="Q Developer Architecture Analysis" width="600" />
 
 #### 2. **Feature Implementation**
+
 - **Prompt Analyzer**: Q Developer helped design the scoring algorithm
+
   ```typescript
   // Q Developer suggested this approach for real-time analysis
   const analyzePrompt = (text: string) => {
-    const strength = calculateStrength(text);
-    const clarity = assessClarity(text);
-    const specificity = measureSpecificity(text);
-    return { strength, clarity, specificity };
-  };
+    const strength = calculateStrength(text)
+    const clarity = assessClarity(text)
+    const specificity = measureSpecificity(text)
+    return { strength, clarity, specificity }
+  }
   ```
 
 - **GitHub Export**: Q Developer implemented the GitHub API integration
 - **Environment Variable Management**: Q Developer designed the secure storage system
 
 #### 3. **Debugging & Optimization**
+
 ```bash
 # Used Q Developer to identify and fix performance bottlenecks
 q chat "This React component is re-rendering too often. How can I optimize it?"
 ```
 
 #### 4. **Code Review & Best Practices**
+
 - Security vulnerability scanning
 - Performance optimization suggestions
 - TypeScript type safety improvements
@@ -198,7 +215,9 @@ q chat "This React component is re-rendering too often. How can I optimize it?"
 Kiro IDE was used extensively for:
 
 #### 1. **Spec-Driven Development**
+
 Created comprehensive specs for major features:
+
 - Project management system
 - Prompt analyzer
 - Export functionality
@@ -207,13 +226,17 @@ Created comprehensive specs for major features:
 <img src="./docs/screenshots/kiro-spec-development.png" alt="Kiro Spec Development" width="600" />
 
 #### 2. **Agentic Workflows**
+
 Leveraged Kiro's AI agents for:
+
 - Automated test generation
 - Documentation creation
 - Code refactoring
 
 #### 3. **Multi-File Editing**
+
 Used Kiro's powerful multi-file editing capabilities to:
+
 - Refactor the authentication system
 - Implement the project-based workflow
 - Update the database schema
@@ -233,9 +256,11 @@ Used Kiro's powerful multi-file editing capabilities to:
 ## 🎬 Demo
 
 ### Live Demo
+
 🔗 **[Try AIWA AI Live](https://aiwa-ai-demo.vercel.app)**
 
 ### Video Walkthrough
+
 📹 **[Watch Demo Video](https://youtu.be/your-demo-video)**
 
 ### Key Demo Highlights
@@ -333,6 +358,7 @@ OPENAI_API_KEY=your_openai_api_key
 ### Technology Stack
 
 **Frontend:**
+
 - Next.js 15 (App Router)
 - React 19
 - TypeScript
@@ -340,12 +366,14 @@ OPENAI_API_KEY=your_openai_api_key
 - Framer Motion (animations)
 
 **Backend:**
+
 - Next.js API Routes
 - NextAuth.js (authentication)
 - Drizzle ORM
 - PostgreSQL
 
 **AI & APIs:**
+
 - v0 SDK
 - Vercel AI SDK
 - OpenAI Whisper
@@ -353,6 +381,7 @@ OPENAI_API_KEY=your_openai_api_key
 - GitHub API
 
 **Infrastructure:**
+
 - AWS Amplify
 - Amazon RDS
 - Amazon S3
@@ -424,25 +453,25 @@ CREATE TABLE chat_ownership (
 
 ## 🎨 Feature Comparison
 
-| Feature | v0-clone | AIWA AI | Lovable |
-|---------|----------|---------|---------|
-| Basic Chat | ✅ | ✅ | ✅ |
-| Code Preview | ✅ | ✅ | ✅ |
-| Multi-Device Preview | ❌ | ✅ | ✅ |
-| Console Logs | ❌ | ✅ | ✅ |
-| Prompt Analyzer | ❌ | ✅ | ❌ |
-| Prompt Library | ❌ | ✅ | ❌ |
-| Project Management | ❌ | ✅ | ✅ |
-| Environment Variables | ❌ | ✅ | ✅ |
-| Speech-to-Text | ❌ | ✅ | ❌ |
-| GitHub Export | ❌ | ✅ | ✅ |
-| Download ZIP | ❌ | ✅ | ✅ |
-| Template Gallery | ❌ | ✅ | ✅ |
-| Blog System | ❌ | ✅ | ❌ |
-| Vibe Hub | ❌ | ✅ | ❌ |
-| Animated Generation | ❌ | ✅ | ✅ |
-| Custom Domains | ❌ | 🚧 | ✅ |
-| Integrations | ❌ | 🚧 | ✅ |
+| Feature               | v0-clone | AIWA AI | Lovable |
+| --------------------- | -------- | ------- | ------- |
+| Basic Chat            | ✅       | ✅      | ✅      |
+| Code Preview          | ✅       | ✅      | ✅      |
+| Multi-Device Preview  | ❌       | ✅      | ✅      |
+| Console Logs          | ❌       | ✅      | ✅      |
+| Prompt Analyzer       | ❌       | ✅      | ❌      |
+| Prompt Library        | ❌       | ✅      | ❌      |
+| Project Management    | ❌       | ✅      | ✅      |
+| Environment Variables | ❌       | ✅      | ✅      |
+| Speech-to-Text        | ❌       | ✅      | ❌      |
+| GitHub Export         | ❌       | ✅      | ✅      |
+| Download ZIP          | ❌       | ✅      | ✅      |
+| Template Gallery      | ❌       | ✅      | ✅      |
+| Blog System           | ❌       | ✅      | ❌      |
+| Vibe Hub              | ❌       | ✅      | ❌      |
+| Animated Generation   | ❌       | ✅      | ✅      |
+| Custom Domains        | ❌       | 🚧      | ✅      |
+| Integrations          | ❌       | 🚧      | ✅      |
 
 ✅ = Available | ❌ = Not Available | 🚧 = In Progress
 
@@ -496,23 +525,27 @@ CREATE TABLE chat_ownership (
 ## 🔮 Future Roadmap
 
 ### Phase 1: Current (Hackathon Submission)
+
 - ✅ Core features implemented
 - ✅ AWS tools integration
 - ✅ Production-ready MVP
 
 ### Phase 2: Post-Hackathon (Q1 2026)
+
 - 🚧 Custom domain support
 - 🚧 Third-party integrations (Supabase, Firebase, etc.)
 - 🚧 Collaborative editing
 - 🚧 Version control integration
 
 ### Phase 3: Growth (Q2 2026)
+
 - 📋 Team workspaces
 - 📋 Advanced analytics
 - 📋 Plugin marketplace
 - 📋 Mobile app
 
 ### Phase 4: Enterprise (Q3 2026)
+
 - 📋 Self-hosted option
 - 📋 SSO integration
 - 📋 Advanced security features
@@ -560,12 +593,14 @@ pnpm test:e2e
 ## 📚 Documentation
 
 ### For Users
+
 - [Getting Started Guide](./docs/getting-started.md)
 - [Feature Documentation](./docs/features.md)
 - [FAQ](./docs/faq.md)
 - [Video Tutorials](./docs/tutorials.md)
 
 ### For Developers
+
 - [API Documentation](./docs/api.md)
 - [Architecture Guide](./docs/architecture.md)
 - [Contributing Guide](./CONTRIBUTING.md)
