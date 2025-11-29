@@ -180,7 +180,7 @@
 
 ### Demo Site
 
-- [ ] Deploy to production
+- [x] Deploy to production (https://www.aiwa.codes/)
 - [ ] Test all features
 - [ ] Verify performance
 - [ ] Check mobile responsiveness

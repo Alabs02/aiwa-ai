@@ -446,7 +446,7 @@ Without Kiro IDE, AIWA AI would not exist in its current form. Kiro enabled:
 
 ### Live Demo
 
-🔗 **[Try AIWA AI Live](https://aiwa-ai-demo.vercel.app)**
+🔗 **[Try AIWA AI Live](https://www.aiwa.codes/)**
 
 ### Video Walkthrough
 
@@ -850,9 +850,11 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](./LICE
 
 ### Project Links
 
-- **Live Demo**: [https://aiwa-ai-demo.vercel.app](https://aiwa-ai-demo.vercel.app)
+- **Live Demo**: [https://www.aiwa.codes/](https://www.aiwa.codes/)
 - **GitHub Repository**: [https://github.com/Alabs02/aiwa-ai](https://github.com/Alabs02/aiwa-ai)
 - **Documentation**: [./docs](./docs)
+- **X (Twitter)**: [@aiwacodes](https://x.com/aiwacodes)
+- **Support Email**: support@aiwa.codes
 
 ---
 

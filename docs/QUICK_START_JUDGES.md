@@ -21,7 +21,7 @@ including the world-first **Prompt Analyzer**.
 
 ### 1. Visit the Live Demo
 
-🔗 [https://aiwa-ai-demo.vercel.app](https://aiwa-ai-demo.vercel.app)
+🔗 [https://www.aiwa.codes/](https://www.aiwa.codes/)
 
 ### 2. Try the Prompt Analyzer
 
@@ -221,7 +221,7 @@ including the world-first **Prompt Analyzer**.
 
 ### Quick Links
 
-- [Live Demo](https://aiwa-ai-demo.vercel.app)
+- [Live Demo](https://www.aiwa.codes/)
 - [GitHub Repository](https://github.com/Alabs02/aiwa-ai)
 - [Feature Documentation](./FEATURES.md)
 - [AWS Tools Usage](./AWS_TOOLS_USAGE.md)
@@ -306,7 +306,7 @@ comprehensive testing, security features, and performance optimization.
 
 ### Q: Can I try it myself?
 
-**A**: Absolutely! Visit [https://aiwa-ai-demo.vercel.app](https://aiwa-ai-demo.vercel.app)
+**A**: Absolutely! Visit [https://www.aiwa.codes/](https://www.aiwa.codes/)
 and start building. No signup required for guest access.
 
 ---
@@ -316,7 +316,9 @@ and start building. No signup required for guest access.
 **Developer**: Alabs02  
 **Email**: alabson.inc@gmail.com  
 **GitHub**: [@Alabs02](https://github.com/Alabs02)  
-**AWS Builder ID**: alabson.inc@gmail.com
+**AWS Builder ID**: alabson.inc@gmail.com  
+**X (Twitter)**: [@aiwacodes](https://x.com/aiwacodes)  
+**Support**: support@aiwa.codes
 
 ---
 
@@ -331,4 +333,4 @@ comprehensive vibe coding solution.
 
 ---
 
-**Quick Start**: Visit the [live demo](https://aiwa-ai-demo.vercel.app) and try the Prompt Analyzer!
+**Quick Start**: Visit the [live demo](https://www.aiwa.codes/) and try the Prompt Analyzer!
