@@ -2,6 +2,32 @@
 
 ## ✅ Completed Updates
 
+### Roadmap Updated (Latest)
+
+The future roadmap has been updated to reflect the accelerated development timeline:
+
+**Phase 2 moved from Q1 2026 to December 2025:**
+- Custom domain support
+- Third-party integrations (Supabase, Firebase, Planetscale)
+- Collaborative editing (real-time)
+- Version control integration (Git)
+- Advanced project templates
+- API access for developers
+
+**Phase 3 consolidated to Q1 2026:**
+- Team workspaces
+- Advanced analytics
+- Plugin marketplace
+- Mobile app
+
+**Phase 4 extended to Q2-Q3 2026:**
+- Self-hosted option
+- SSO integration
+- Advanced security features
+- SLA guarantees
+
+See [docs/ROADMAP_UPDATE.md](./docs/ROADMAP_UPDATE.md) for detailed timeline.
+
 ### Contact Information Updated
 
 All documentation has been updated with the correct contact information:

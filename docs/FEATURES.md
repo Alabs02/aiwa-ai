@@ -562,26 +562,32 @@ Flexible pricing plans powered by Stripe.
 
 ## 🚀 Coming Soon
 
-### Q1 2026
+### December 2025 (Post-Hackathon)
 
 - Custom domain support
-- Third-party integrations (Supabase, Firebase)
-- Collaborative editing
-- Version control integration
+- Third-party integrations (Supabase, Firebase, Planetscale)
+- Collaborative editing (real-time)
+- Version control integration (Git)
+- Advanced project templates
+- API access for developers
 
-### Q2 2026
+### Q1 2026 (Growth & Scale)
 
 - Team workspaces
-- Advanced analytics
+- Advanced analytics & insights
 - Plugin marketplace
-- Mobile app
+- Mobile app (iOS & Android)
+- Enhanced AI capabilities
+- Performance optimizations
 
-### Q3 2026
+### Q2-Q3 2026 (Enterprise)
 
 - Self-hosted option
-- SSO integration
+- SSO integration (SAML, OAuth)
 - Advanced security features
 - SLA guarantees
+- Dedicated support
+- Custom integrations
 
 ---
 
