@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Wand2, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
-import { getFeatureAccess } from "@/lib/feature-access";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 
 interface ChatInputProps {
   message: string;
@@ -57,23 +57,16 @@ export function ChatInput({
   const [showEnhancer, setShowEnhancer] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
-  const [userPlan, setUserPlan] = useState<string>("free");
+
+  // Feature access hook - replaces manual plan state
+  const featureAccess = useFeatureAccess();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [blockedFeature, setBlockedFeature] = useState("");
 
-  useEffect(() => {
-    fetch("/api/billing/subscription")
-      .then((r) => r.json())
-      .then((data) => setUserPlan(data?.plan || "free"))
-      .catch(() => setUserPlan("free"));
-  }, []);
-
   const handleSpeechTranscript = useCallback(
     (transcript: string) => {
-      const access = getFeatureAccess(userPlan as any);
-
-      if (!access.canUsePromptLibrary) {
-        setBlockedFeature("Transcription");
+      if (!featureAccess.canUseTranscribe) {
+        setBlockedFeature("Speech-to-Text");
         setShowUpgradeDialog(true);
         return;
       }
@@ -90,7 +83,7 @@ export function ChatInput({
         }
       }, 100);
     },
-    [message, setMessage, textareaRef]
+    [message, setMessage, textareaRef, featureAccess.canUseTranscribe]
   );
 
   const handleSpeechError = useCallback((error: string) => {
@@ -163,8 +156,7 @@ export function ChatInput({
   };
 
   const handleOpenEnhancer = () => {
-    const access = getFeatureAccess(userPlan as any);
-    if (!access.canUsePromptEnhancer) {
+    if (!featureAccess.canUsePromptEnhancer) {
       setBlockedFeature("Prompt Enhancer");
       setShowUpgradeDialog(true);
       return;
@@ -173,8 +165,7 @@ export function ChatInput({
   };
 
   const handleOpenLibrary = () => {
-    const access = getFeatureAccess(userPlan as any);
-    if (!access.canUsePromptLibrary) {
+    if (!featureAccess.canUsePromptLibrary) {
       setBlockedFeature("Prompt Library");
       setShowUpgradeDialog(true);
       return;

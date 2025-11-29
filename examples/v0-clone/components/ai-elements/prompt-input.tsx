@@ -429,13 +429,17 @@ export const PromptInputModelSelectValue = ({
 );
 
 export type PromptInputMicButtonProps = ComponentProps<typeof Button> & {
+  canUseTranscribe?: boolean;
   onTranscript?: (transcript: string) => void;
+  onTriggerUpgrade?: () => void;
   onError?: (error: string) => void;
 };
 
 export const PromptInputMicButton = ({
   className,
+  canUseTranscribe = false,
   onTranscript,
+  onTriggerUpgrade,
   onError,
   disabled,
   ...props
@@ -540,9 +544,10 @@ export const PromptInputMicButton = ({
     if (isRecording) {
       stopRecording();
     } else {
-      startRecording();
+      if (canUseTranscribe) startRecording();
+      else typeof onTriggerUpgrade === "function" && onTriggerUpgrade();
     }
-  }, [isRecording, startRecording, stopRecording]);
+  }, [isRecording, startRecording, stopRecording, canUseTranscribe]);
 
   return (
     <Button

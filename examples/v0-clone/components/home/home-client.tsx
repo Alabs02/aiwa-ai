@@ -49,7 +49,7 @@ import { UserTemplates } from "../templates/user-templates";
 import { Loader } from "lucide-react";
 import { CreditWarningBanner } from "@/components/shared/credit-warning-banner";
 import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
-import { getFeatureAccess } from "@/lib/feature-access";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { WelcomeUpgradeDialog } from "@/components/shared/welcome-upgrade-dialog";
 import { AppFooter } from "@/components/shared/app-footer";
 import { toast } from "sonner";
@@ -161,7 +161,8 @@ export function HomeClient() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [promptAnalysis, setPromptAnalysis] = useState<any>(null);
 
-  const [userPlan, setUserPlan] = useState<string>("free");
+  // Feature access hook - replaces manual plan state
+  const featureAccess = useFeatureAccess();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [blockedFeature, setBlockedFeature] = useState("");
 
@@ -173,15 +174,6 @@ export function HomeClient() {
     show: false,
     remaining: 0
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetch("/api/billing/subscription")
-        .then((r) => r.json())
-        .then((data) => setUserPlan(data?.plan || "free"))
-        .catch(() => setUserPlan("free"));
-    }
-  }, [isAuthenticated]);
 
   useEffect(() => {
     const storedData = loadPromptFromStorage();
@@ -516,8 +508,7 @@ export function HomeClient() {
   };
 
   const handleOpenEnhancer = () => {
-    const access = getFeatureAccess(userPlan as any);
-    if (!access.canUsePromptEnhancer) {
+    if (!featureAccess.canUsePromptEnhancer) {
       setBlockedFeature("Prompt Enhancer");
       setShowUpgradeDialog(true);
       return;
@@ -526,8 +517,7 @@ export function HomeClient() {
   };
 
   const handleOpenLibrary = () => {
-    const access = getFeatureAccess(userPlan as any);
-    if (!access.canUsePromptLibrary) {
+    if (!featureAccess.canUsePromptLibrary) {
       setBlockedFeature("Prompt Library");
       setShowUpgradeDialog(true);
       return;
@@ -535,22 +525,29 @@ export function HomeClient() {
     setShowLibrary(true);
   };
 
-  const handleSpeechTranscript = useCallback((transcript: string) => {
-    const access = getFeatureAccess(userPlan as any);
+  const handleSpeechTranscript = useCallback(
+    (transcript: string) => {
+      if (!featureAccess.canUseTranscribe) {
+        setBlockedFeature("Speech-to-Text");
+        setShowUpgradeDialog(true);
+        return;
+      }
 
-    if (!access.canUsePromptLibrary) {
-      setBlockedFeature("Transcription");
-      setShowUpgradeDialog(true);
-      return;
-    }
+      setMessage((prev) => prev + (prev ? " " : "") + transcript);
+      setTimeout(() => {
+        textareaRef.current?.focus();
+        const len = textareaRef.current?.value.length || 0;
+        textareaRef.current?.setSelectionRange(len, len);
+      }, 100);
+    },
+    [featureAccess.canUseTranscribe]
+  );
 
-    setMessage((prev) => prev + (prev ? " " : "") + transcript);
-    setTimeout(() => {
-      textareaRef.current?.focus();
-      const len = textareaRef.current?.value.length || 0;
-      textareaRef.current?.setSelectionRange(len, len);
-    }, 100);
-  }, []);
+  const handleOnTriggerUpgrade = () => {
+    setBlockedFeature("Speech-to-Text");
+    setShowUpgradeDialog(true);
+    return;
+  };
 
   const handleSpeechError = useCallback((error: string) => {
     // Mic button already shows toasts, just log
@@ -752,9 +749,11 @@ export function HomeClient() {
                       <PromptInputTools>
                         {isAuthenticated && <ProjectSelector />}
                         <PromptInputMicButton
+                          canUseTranscribe={featureAccess.canUseTranscribe}
+                          disabled={isLoading}
+                          onTriggerUpgrade={handleOnTriggerUpgrade}
                           onTranscript={handleSpeechTranscript}
                           onError={(e) => handleSpeechError(e?.toString())}
-                          disabled={isLoading}
                         />
                         <PromptInputSubmit
                           disabled={
