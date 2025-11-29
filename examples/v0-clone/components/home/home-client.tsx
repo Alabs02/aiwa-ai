@@ -204,13 +204,23 @@ export function HomeClient() {
     }
   }, [currentChat]);
 
-  const handleReset = () => {
-    resetChatState();
+  // const handleReset = () => {
+  //   resetChatState();
+  //   setMessage("");
+  //   setAttachments([]);
+  //   setPromptAnalysis(null);
+  //   clearPromptFromStorage();
+  // };
+  const handleReset = useCallback(() => {
     setMessage("");
+    setCurrentChatId(null);
+    setIsLoading(false);
     setAttachments([]);
-    setPromptAnalysis(null);
-    clearPromptFromStorage();
-  };
+    setShowWelcomeDialog(false);
+
+    useChatStore.getState().clearCurrentChatId();
+    useChatsStore.getState().resetChats();
+  }, []);
 
   // FIXED: handleSendMessage - Initial submission from home page
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
