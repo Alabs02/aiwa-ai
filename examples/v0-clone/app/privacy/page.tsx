@@ -456,10 +456,10 @@ export default function PrivacyPage() {
                           Contact our privacy team for any concerns.
                         </p>
                         <a
-                          href="mailto:privacy@aiwa.app"
+                          href="mailto:privacy@aiwa.codes"
                           className="group inline-flex items-center gap-2 font-semibold text-orange-400 transition-colors hover:text-orange-300"
                         >
-                          <span>privacy@aiwa.app</span>
+                          <span>privacy@aiwa.codes</span>
                           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                         </a>
                       </div>
