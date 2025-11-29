@@ -52,7 +52,6 @@ import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { WelcomeUpgradeDialog } from "@/components/shared/welcome-upgrade-dialog";
 import { AppFooter } from "@/components/shared/app-footer";
-import { toast } from "sonner";
 
 function SearchParamsHandler({ onReset }: { onReset: () => void }) {
   const searchParams = useSearchParams();

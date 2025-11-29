@@ -489,10 +489,10 @@ export default function TermsPage() {
                           If you have any questions, please contact us.
                         </p>
                         <a
-                          href="mailto:support@aiwa.app"
+                          href="mailto:support@aiwa.codes"
                           className="group inline-flex items-center gap-2 font-semibold text-orange-400 transition-colors hover:text-orange-300"
                         >
-                          <span>support@aiwa.app</span>
+                          <span>support@aiwa.codes</span>
                           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                         </a>
                       </div>
