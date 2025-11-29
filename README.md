@@ -32,6 +32,7 @@
 **Developer:** Alabs02 ([@Alabs02](https://github.com/Alabs02))
 
 **AWS Tool Used:**
+
 - ✅ **Amazon Kiro IDE** - Primary development environment
 - ✅ **AWS Builder ID**: alabson.inc@gmail.com
 
@@ -185,17 +186,20 @@ Kiro's spec-driven approach was instrumental in building AIWA AI's complex featu
 #### Prompt Analyzer Spec
 
 **Requirements Phase:**
+
 - Defined user stories with EARS (Easy Approach to Requirements Syntax)
 - Created acceptance criteria for real-time analysis
 - Specified scoring algorithms (strength, clarity, specificity)
 
 **Design Phase:**
+
 - Architected React hooks for real-time analysis
 - Designed component structure (PromptAnalyzer, ScoreDisplay, SuggestionPanel)
 - Defined TypeScript interfaces and data models
 - Established correctness properties for score calculations
 
 **Implementation Phase:**
+
 - Kiro's AI agents generated the initial component structure
 - Implemented scoring algorithms with Kiro's assistance
 - Created unit tests and integration tests
@@ -204,16 +208,19 @@ Kiro's spec-driven approach was instrumental in building AIWA AI's complex featu
 #### Project Management Spec
 
 **Requirements Phase:**
+
 - Multi-tenant architecture requirements
 - Environment variable security specifications
 - Project-chat relationship modeling
 
 **Design Phase:**
+
 - Database schema design with Drizzle ORM
 - API route architecture
 - Security and access control patterns
 
 **Implementation Phase:**
+
 - Generated database migrations with Kiro
 - Implemented API routes with error handling
 - Created React components for project UI
@@ -222,16 +229,19 @@ Kiro's spec-driven approach was instrumental in building AIWA AI's complex featu
 #### Export Functionality Spec
 
 **Requirements Phase:**
+
 - GitHub API integration requirements
 - ZIP generation with environment variables
 - Error handling and edge cases
 
 **Design Phase:**
+
 - GitHub OAuth flow design
 - File structure for ZIP exports
 - Environment variable injection strategy
 
 **Implementation Phase:**
+
 - Kiro generated GitHub API integration code
 - Implemented ZIP generation with JSZip
 - Added progress indicators and error handling
@@ -248,23 +258,24 @@ Kiro's AI agents were used extensively throughout development:
 export function analyzePrompt(text: string): PromptAnalysis {
   // Strength: Based on length, specificity, and action verbs
   const strength = calculateStrength(text)
-  
+
   // Clarity: Based on sentence structure and ambiguity
   const clarity = assessClarity(text)
-  
+
   // Specificity: Based on technical terms and details
   const specificity = measureSpecificity(text)
-  
+
   return {
     strength,
     clarity,
     specificity,
-    suggestions: generateSuggestions(text, { strength, clarity, specificity })
+    suggestions: generateSuggestions(text, { strength, clarity, specificity }),
   }
 }
 ```
 
 **Kiro's agents helped generate:**
+
 - React components with TypeScript
 - API routes with error handling
 - Database schemas with Drizzle ORM
@@ -274,12 +285,14 @@ export function analyzePrompt(text: string): PromptAnalysis {
 #### Refactoring
 
 **Authentication System Refactoring:**
+
 - Kiro refactored the entire authentication flow
 - Updated 15+ files simultaneously
 - Ensured type safety across all changes
 - Generated migration scripts for database changes
 
 **Component Structure Optimization:**
+
 - Reorganized component hierarchy
 - Extracted reusable components
 - Improved prop types and interfaces
@@ -288,6 +301,7 @@ export function analyzePrompt(text: string): PromptAnalysis {
 #### Testing
 
 **Kiro generated comprehensive test suites:**
+
 - Unit tests for utility functions
 - Integration tests for API routes
 - E2E tests for critical user flows
@@ -330,6 +344,7 @@ When implementing the project-based workflow, Kiro edited 20+ files simultaneous
    - E2E tests
 
 **All changes were:**
+
 - Type-safe across the entire codebase
 - Consistent in naming and patterns
 - Properly tested
@@ -340,18 +355,21 @@ When implementing the project-based workflow, Kiro edited 20+ files simultaneous
 Kiro helped identify and fix numerous issues:
 
 **Performance Optimization:**
+
 - Identified unnecessary re-renders in React components
 - Suggested useMemo and useCallback optimizations
 - Optimized database queries with proper indexes
 - Implemented connection pooling
 
 **Security Improvements:**
+
 - Identified SQL injection risks (prevented by Drizzle ORM)
 - Fixed XSS vulnerabilities in user-generated content
 - Implemented proper CSRF protection
 - Added rate limiting for API routes
 
 **Type Safety:**
+
 - Fixed TypeScript errors across the codebase
 - Improved type definitions for better IntelliSense
 - Added proper error types for better error handling
@@ -359,6 +377,7 @@ Kiro helped identify and fix numerous issues:
 ### 5. Development Statistics
 
 **Kiro IDE Usage:**
+
 - **150+ hours** of active development
 - **50+ specs** created (requirements, design, tasks)
 - **1,000+ AI-assisted** code generations
@@ -368,6 +387,7 @@ Kiro helped identify and fix numerous issues:
 - **100+ tests** generated automatically
 
 **Key Features Built with Kiro:**
+
 1. ✅ Prompt Analyzer (world-first feature)
 2. ✅ Project Management System
 3. ✅ Environment Variable Management
@@ -393,19 +413,19 @@ Kiro helped identify and fix numerous issues:
 
 **Kiro Spec Development:**
 ![Kiro Spec Development](./docs/screenshots/kiro-spec-development.png)
-*Creating comprehensive specs with requirements, design, and tasks*
+_Creating comprehensive specs with requirements, design, and tasks_
 
 **Kiro Multi-File Editing:**
 ![Kiro Multi-File Editing](./docs/screenshots/kiro-multi-file-edit.png)
-*Editing 20+ files simultaneously for the project management feature*
+_Editing 20+ files simultaneously for the project management feature_
 
 **Kiro Agentic Workflows:**
 ![Kiro Agentic Workflows](./docs/screenshots/kiro-agentic-workflows.png)
-*AI agents generating code, tests, and documentation*
+_AI agents generating code, tests, and documentation_
 
 **Kiro Code Generation:**
 ![Kiro Code Generation](./docs/screenshots/kiro-code-generation.png)
-*Real-time code generation with context awareness*
+_Real-time code generation with context awareness_
 
 ### Why Kiro Made the Difference
 

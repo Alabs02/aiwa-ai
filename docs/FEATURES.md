@@ -32,16 +32,19 @@ Analyzer helps developers write better prompts, leading to better code generatio
 ### Features
 
 #### Real-Time Analysis
+
 - Analyzes your prompt as you type
 - Debounced for performance (300ms delay)
 - No manual trigger required
 
 #### Multi-Dimensional Scoring
+
 - **Strength Score** (0-100%): How effective your prompt is
 - **Clarity Rating** (0-100%): How well-defined your requirements are
 - **Specificity Level** (0-100%): How detailed your instructions are
 
 #### Visual Feedback
+
 - Color-coded indicators:
   - Red (0-40%): Needs significant improvement
   - Yellow (40-70%): Good, but can be better
@@ -50,11 +53,13 @@ Analyzer helps developers write better prompts, leading to better code generatio
 - Tooltips explaining each score
 
 #### Improvement Suggestions
+
 - Automatically generated when scores are below 70%
 - Specific, actionable recommendations
 - Context-aware suggestions
 
 #### Auto-Enhancement
+
 - One-click prompt improvement
 - Uses the Prompt Library for enhancement
 - Preserves your original intent
@@ -66,13 +71,13 @@ Analyzer helps developers write better prompts, leading to better code generatio
 const analyzePrompt = (text: string) => {
   // Strength: Length + action verbs + technical terms
   const strength = calculateStrength(text)
-  
+
   // Clarity: Sentence structure + ambiguity detection
   const clarity = assessClarity(text)
-  
+
   // Specificity: Technical terms + details + numbers
   const specificity = measureSpecificity(text)
-  
+
   return { strength, clarity, specificity, suggestions }
 }
 ```
@@ -80,17 +85,21 @@ const analyzePrompt = (text: string) => {
 ### Usage Example
 
 **Bad Prompt**:
+
 ```
 "app"
 ```
+
 **Analysis**: Strength: 15%, Clarity: 20%, Specificity: 10%  
 **Suggestions**: Add action verbs, specify technology, provide details
 
 **Good Prompt**:
+
 ```
 "Create a React TypeScript todo application with authentication,
 database integration, and real-time updates"
 ```
+
 **Analysis**: Strength: 95%, Clarity: 90%, Specificity: 92%  
 **Suggestions**: None needed!
 
@@ -106,22 +115,26 @@ add environment variables, and let the AI agent use your configurations automati
 ### Features
 
 #### Project Creation
+
 - Create unlimited projects
 - Add name and description
 - Organize chats under projects
 
 #### Environment Variables
+
 - Add API keys and secrets per project
 - Encrypted storage in database
 - AI agent automatically uses your variables
 - Export includes .env file
 
 #### Project Instructions
+
 - Customize AI behavior per project
 - Add project-specific guidelines
 - Context-aware code generation
 
 #### Chat Organization
+
 - Group related chats under projects
 - Easy navigation between project chats
 - Filter chats by project
@@ -129,11 +142,13 @@ add environment variables, and let the AI agent use your configurations automati
 ### Use Cases
 
 **E-commerce Project**:
+
 - Environment Variables: STRIPE_KEY, DATABASE_URL
 - Instructions: "Use Stripe for payments, PostgreSQL for database"
 - Chats: Product catalog, checkout flow, admin dashboard
 
 **SaaS Project**:
+
 - Environment Variables: SUPABASE_URL, SUPABASE_KEY
 - Instructions: "Use Supabase for auth and database"
 - Chats: Landing page, dashboard, user settings
@@ -149,6 +164,7 @@ Comprehensive code preview with multi-device views, live console, and codebase e
 ### Features
 
 #### Multi-Device Preview
+
 - **Mobile View**: iPhone-sized preview
 - **Tablet View**: iPad-sized preview
 - **Desktop View**: Full-width preview
@@ -156,6 +172,7 @@ Comprehensive code preview with multi-device views, live console, and codebase e
 - Responsive design testing
 
 #### Live Console
+
 - Real-time console.log output
 - Error tracking and display
 - Warning messages
@@ -163,6 +180,7 @@ Comprehensive code preview with multi-device views, live console, and codebase e
 - Timestamp for each log
 
 #### Codebase Explorer
+
 - Read-only preview of all generated files
 - Syntax highlighting
 - Line numbers
@@ -170,6 +188,7 @@ Comprehensive code preview with multi-device views, live console, and codebase e
 - Search functionality
 
 #### Animated Generation
+
 - Beautiful loading states during code creation
 - Progress indicators
 - Smooth transitions
@@ -186,6 +205,7 @@ Multiple deployment options to get your code from AIWA AI to production.
 ### Features
 
 #### Download as ZIP
+
 - Complete project structure
 - All generated files included
 - Environment variables in .env.example
@@ -193,6 +213,7 @@ Multiple deployment options to get your code from AIWA AI to production.
 - One-click download
 
 #### Export to GitHub
+
 - Direct repository creation
 - Automatic file upload
 - Environment variables template
@@ -200,12 +221,14 @@ Multiple deployment options to get your code from AIWA AI to production.
 - Public or private repos
 
 #### Deploy to Vercel
+
 - One-click deployment
 - Automatic build configuration
 - Environment variable setup
 - Custom domain support (coming soon)
 
 #### Custom Domains (Coming Soon)
+
 - Connect your own domain
 - SSL certificate management
 - DNS configuration
@@ -222,6 +245,7 @@ Curated collection of high-quality prompts to help you get started quickly.
 ### Features
 
 #### Pre-built Templates
+
 - Landing pages
 - Dashboards
 - E-commerce sites
@@ -230,18 +254,21 @@ Curated collection of high-quality prompts to help you get started quickly.
 - Authentication flows
 
 #### Community Prompts
+
 - User-contributed templates
 - Upvoting system
 - Comments and feedback
 - Sharing functionality
 
 #### Personal Collections
+
 - Save your best prompts
 - Organize by category
 - Private or public
 - Export/import functionality
 
 #### One-Click Enhancement
+
 - Automatically improve any prompt
 - Uses best practices from library
 - Preserves original intent
@@ -267,18 +294,21 @@ Hands-free prompt input powered by OpenAI Whisper via Vercel AI SDK.
 ### Features
 
 #### Voice Input
+
 - Click to start recording
 - Real-time audio capture
 - Visual recording indicator
 - Stop recording button
 
 #### High Accuracy
+
 - Powered by OpenAI Whisper
 - 95%+ accuracy
 - Handles accents and dialects
 - Background noise filtering
 
 #### Multi-Language Support
+
 - English
 - Spanish
 - French
@@ -288,6 +318,7 @@ Hands-free prompt input powered by OpenAI Whisper via Vercel AI SDK.
 - And more...
 
 #### Accessibility
+
 - Perfect for hands-free coding
 - Useful for developers with disabilities
 - Voice commands support (coming soon)
@@ -303,18 +334,21 @@ Discover and use pre-built templates to jumpstart your projects.
 ### Features
 
 #### Community Templates
+
 - User-submitted templates
 - Ratings and reviews
 - Preview before use
 - One-click import
 
 #### Curated Templates
+
 - Professionally designed
 - Best practices included
 - Fully documented
 - Regular updates
 
 #### Template Categories
+
 - Landing Pages
 - Dashboards
 - E-commerce
@@ -324,6 +358,7 @@ Discover and use pre-built templates to jumpstart your projects.
 - Admin Panels
 
 #### Template Details
+
 - Live preview
 - Code preview
 - Technology stack
@@ -341,24 +376,28 @@ Comprehensive tutorials and how-to guides to help you master AIWA AI.
 ### Features
 
 #### Tutorials
+
 - Getting started guide
 - Feature walkthroughs
 - Best practices
 - Tips and tricks
 
 #### How-To Guides
+
 - Build specific applications
 - Integrate with services
 - Deploy to production
 - Optimize performance
 
 #### Video Content
+
 - Screen recordings
 - Feature demonstrations
 - Live coding sessions
 - Q&A sessions
 
 #### Search Functionality
+
 - Find tutorials quickly
 - Filter by category
 - Sort by popularity
@@ -375,6 +414,7 @@ Stay updated with the latest news, tips, and best practices.
 ### Features
 
 #### Blog Posts
+
 - Latest updates
 - Feature announcements
 - Tips and tricks
@@ -382,6 +422,7 @@ Stay updated with the latest news, tips, and best practices.
 - User stories
 
 #### Categories
+
 - Product Updates
 - Tutorials
 - Best Practices
@@ -389,6 +430,7 @@ Stay updated with the latest news, tips, and best practices.
 - Technical Deep Dives
 
 #### Engagement
+
 - Comments
 - Likes
 - Sharing
@@ -405,18 +447,21 @@ Organize your projects and chats efficiently with workspace management.
 ### Features
 
 #### Workspace Organization
+
 - Multiple workspaces
 - Workspace switching
 - Shared workspaces (coming soon)
 - Workspace settings
 
 #### Project Organization
+
 - Group projects by workspace
 - Move projects between workspaces
 - Archive old projects
 - Search across workspaces
 
 #### Collaboration (Coming Soon)
+
 - Invite team members
 - Role-based access control
 - Real-time collaboration
@@ -433,17 +478,20 @@ Secure authentication system with multiple access levels.
 ### Features
 
 #### Authentication Methods
+
 - Email/password registration
 - Guest access
 - OAuth (coming soon)
 - SSO (coming soon)
 
 #### User Types
+
 - **Anonymous**: 3 chats/day, no persistence
 - **Guest**: 5 chats/day, session persistence
 - **Registered**: 50 chats/day, full persistence
 
 #### Security Features
+
 - Password hashing with bcrypt
 - Secure session cookies
 - CSRF protection
@@ -452,6 +500,7 @@ Secure authentication system with multiple access levels.
 - User data isolation
 
 #### Session Management
+
 - Secure session handling with NextAuth.js
 - Automatic session refresh
 - Remember me functionality
@@ -468,12 +517,14 @@ Flexible pricing plans powered by Stripe.
 ### Features
 
 #### Pricing Tiers
+
 - **Free**: 50 chats/month
 - **Pro**: Unlimited chats, priority support
 - **Team**: Multiple users, collaboration features
 - **Enterprise**: Custom limits, dedicated support
 
 #### Payment Processing
+
 - Powered by Stripe
 - Secure payment handling
 - Multiple payment methods
@@ -481,6 +532,7 @@ Flexible pricing plans powered by Stripe.
 - Invoice generation
 
 #### Subscription Management
+
 - Upgrade/downgrade anytime
 - Cancel anytime
 - Prorated billing
@@ -490,39 +542,42 @@ Flexible pricing plans powered by Stripe.
 
 ## 🎯 Feature Comparison
 
-| Feature | Free | Pro | Team | Enterprise |
-|---------|------|-----|------|------------|
-| Chats/Month | 50 | Unlimited | Unlimited | Unlimited |
-| Projects | 5 | Unlimited | Unlimited | Unlimited |
-| Environment Variables | ✅ | ✅ | ✅ | ✅ |
-| Prompt Analyzer | ✅ | ✅ | ✅ | ✅ |
-| Prompt Library | ✅ | ✅ | ✅ | ✅ |
-| Export to GitHub | ✅ | ✅ | ✅ | ✅ |
-| Download ZIP | ✅ | ✅ | ✅ | ✅ |
-| Speech-to-Text | ❌ | ✅ | ✅ | ✅ |
-| Priority Support | ❌ | ✅ | ✅ | ✅ |
-| Team Collaboration | ❌ | ❌ | ✅ | ✅ |
-| Custom Domains | ❌ | ❌ | ✅ | ✅ |
-| SSO | ❌ | ❌ | ❌ | ✅ |
-| Dedicated Support | ❌ | ❌ | ❌ | ✅ |
+| Feature               | Free | Pro       | Team      | Enterprise |
+| --------------------- | ---- | --------- | --------- | ---------- |
+| Chats/Month           | 50   | Unlimited | Unlimited | Unlimited  |
+| Projects              | 5    | Unlimited | Unlimited | Unlimited  |
+| Environment Variables | ✅   | ✅        | ✅        | ✅         |
+| Prompt Analyzer       | ✅   | ✅        | ✅        | ✅         |
+| Prompt Library        | ✅   | ✅        | ✅        | ✅         |
+| Export to GitHub      | ✅   | ✅        | ✅        | ✅         |
+| Download ZIP          | ✅   | ✅        | ✅        | ✅         |
+| Speech-to-Text        | ❌   | ✅        | ✅        | ✅         |
+| Priority Support      | ❌   | ✅        | ✅        | ✅         |
+| Team Collaboration    | ❌   | ❌        | ✅        | ✅         |
+| Custom Domains        | ❌   | ❌        | ✅        | ✅         |
+| SSO                   | ❌   | ❌        | ❌        | ✅         |
+| Dedicated Support     | ❌   | ❌        | ❌        | ✅         |
 
 ---
 
 ## 🚀 Coming Soon
 
 ### Q1 2026
+
 - Custom domain support
 - Third-party integrations (Supabase, Firebase)
 - Collaborative editing
 - Version control integration
 
 ### Q2 2026
+
 - Team workspaces
 - Advanced analytics
 - Plugin marketplace
 - Mobile app
 
 ### Q3 2026
+
 - Self-hosted option
 - SSO integration
 - Advanced security features

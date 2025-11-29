@@ -1,12 +1,14 @@
 # 🏆 AWS Global Vibe Hackathon Submission Checklist
 
 ## Developer Information
+
 - **Name**: Alabs02
 - **Email**: alabson.inc@gmail.com
 - **GitHub**: [@Alabs02](https://github.com/Alabs02)
 - **AWS Builder ID**: alabson.inc@gmail.com
 
 ## Track
+
 💼 AI-Powered Developer Tools
 
 ---
@@ -14,24 +16,28 @@
 ## ✅ Submission Requirements
 
 ### 1. Project Documentation ✅
+
 - [x] Complete README.md with project overview
 - [x] Technical documentation (FEATURES.md)
 - [x] AWS Tools usage documentation (AWS_TOOLS_USAGE.md)
 - [x] Clear explanation of solution and impact
 
 ### 2. Code/Prototype ✅
+
 - [x] Working code repository
 - [x] Functional prototype
 - [x] Live demo available
 - [x] Comprehensive demonstration materials
 
 ### 3. Video Pitch/Overview ⏳
+
 - [ ] Video presentation showcasing project
 - [ ] Clear explanation of features and functionality
 - [ ] Demo of key features
 - [ ] Recommended length: 3-5 minutes
 
 ### 4. AWS Tool Integration ✅
+
 - [x] Amazon Kiro IDE usage demonstrated
 - [x] Comprehensive documentation of tool usage
 - [x] Screenshots showing Kiro IDE in action
@@ -44,6 +50,7 @@
 ## 🎯 Scoring Criteria
 
 ### Video Demo (High Priority)
+
 - [ ] Record comprehensive video walkthrough
 - [ ] Show all major features in action
 - [ ] Demonstrate Kiro IDE usage
@@ -51,6 +58,7 @@
 - [ ] Upload to YouTube/Vimeo
 
 ### Tool Integration (Critical) ✅
+
 - [x] Strong showcase of Kiro IDE throughout development
 - [x] Spec-driven development examples
 - [x] Agentic workflow demonstrations
@@ -58,6 +66,7 @@
 - [x] Code generation examples
 
 ### Technical Quality ✅
+
 - [x] Polished, complete solution
 - [x] Well-architected codebase
 - [x] Production-ready features
@@ -65,6 +74,7 @@
 - [x] Type-safe implementation
 
 ### Documentation ✅
+
 - [x] Comprehensive README
 - [x] Setup instructions
 - [x] Feature documentation
@@ -72,18 +82,21 @@
 - [x] Architecture documentation
 
 ### Innovation ✅
+
 - [x] Unique features (Prompt Analyzer)
 - [x] Creative approach to problem-solving
 - [x] World-first capabilities
 - [x] Breakthrough innovations
 
 ### Impact ✅
+
 - [x] Addresses real-world problems
 - [x] Measurable benefits
 - [x] Developer productivity improvements
 - [x] Accessibility features
 
 ### Scalability ✅
+
 - [x] Growth potential demonstrated
 - [x] Practical deployment strategy
 - [x] Performance optimization
@@ -94,12 +107,14 @@
 ## 📸 Screenshots Needed
 
 ### Kiro IDE Usage (Critical)
+
 - [ ] kiro-spec-development.png
 - [ ] kiro-multi-file-edit.png
 - [ ] kiro-agentic-workflows.png
 - [ ] kiro-code-generation.png
 
 ### AIWA AI Features
+
 - [ ] prompt-analyzer.png
 - [ ] project-management.png
 - [ ] multi-device-preview.png
@@ -112,28 +127,33 @@
 ## 🎬 Video Content Outline
 
 ### Introduction (30 seconds)
+
 - Introduce AIWA AI
 - Mention AWS Global Vibe Hackathon
 - State the problem being solved
 
 ### Kiro IDE Usage (2 minutes)
+
 - Show spec-driven development
 - Demonstrate agentic workflows
 - Show multi-file editing
 - Highlight code generation
 
 ### Feature Demonstrations (2 minutes)
+
 - Prompt Analyzer in action
 - Project management workflow
 - Multi-device preview
 - Export options
 
 ### Impact & Innovation (30 seconds)
+
 - Unique features
 - Real-world impact
 - Future roadmap
 
 ### Conclusion (30 seconds)
+
 - Thank AWS and hackathon organizers
 - Call to action (try the demo)
 - Contact information
@@ -143,6 +163,7 @@
 ## 🚀 Pre-Submission Tasks
 
 ### Code Repository
+
 - [x] Clean up code
 - [x] Remove sensitive information
 - [x] Update .env.example
@@ -150,6 +171,7 @@
 - [x] Verify all features work
 
 ### Documentation
+
 - [x] Proofread all documents
 - [x] Check all links
 - [x] Verify screenshots references
@@ -157,6 +179,7 @@
 - [x] Add license information
 
 ### Demo Site
+
 - [ ] Deploy to production
 - [ ] Test all features
 - [ ] Verify performance
@@ -164,6 +187,7 @@
 - [ ] Test on different browsers
 
 ### Video
+
 - [ ] Record video
 - [ ] Edit video
 - [ ] Add captions
@@ -175,6 +199,7 @@
 ## 📋 Final Checks
 
 ### Before Submission
+
 - [ ] All code committed and pushed
 - [ ] README.md is complete
 - [ ] Screenshots are added
@@ -186,6 +211,7 @@
 - [ ] Kiro IDE usage is well-documented
 
 ### Submission Portal
+
 - [ ] Create DoraHacks account
 - [ ] Fill out project information
 - [ ] Upload all required materials
@@ -220,6 +246,7 @@
 ## 📞 Support & Questions
 
 If you have questions during submission:
+
 - Check hackathon documentation
 - Ask in Kiro Discord community
 - Review submission requirements

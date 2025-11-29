@@ -83,6 +83,7 @@ Created comprehensive requirements using EARS patterns in Kiro:
 so that I can write more effective prompts for AI code generation.
 
 **Acceptance Criteria**:
+
 1. WHEN a user types in the prompt input THEN the system SHALL analyze
    the prompt in real-time with debouncing
 2. WHEN analysis is complete THEN the system SHALL display strength,
@@ -97,12 +98,14 @@ so that I can write more effective prompts for AI code generation.
 Kiro helped design the architecture with AI assistance:
 
 **Components**:
+
 - PromptAnalyzer (main container)
 - ScoreDisplay (visual indicators)
 - SuggestionPanel (improvement tips)
 - EnhanceButton (one-click enhancement)
 
 **Data Models**:
+
 ```typescript
 interface PromptAnalysis {
   strength: number // 0-100
@@ -130,6 +133,7 @@ add environment variables. This feature required changes across 20+ files.
 Kiro edited **20+ files simultaneously** to implement this feature:
 
 **Files Updated**:
+
 1. Database Schema (lib/db/schema.ts)
 2. API Routes (5 files)
 3. React Components (8 files)
@@ -137,6 +141,7 @@ Kiro edited **20+ files simultaneously** to implement this feature:
 5. Tests (4 files)
 
 **All changes were**:
+
 - Type-safe across the entire codebase
 - Consistent in naming and patterns
 - Properly tested
@@ -198,18 +203,18 @@ Kiro generated comprehensive test suites for all features:
 
 ### Features Built with Kiro IDE
 
-| Feature | Files Generated | Tests Generated | Development Time |
-|---------|-----------------|-----------------|------------------|
-| Prompt Analyzer | 12 | 25 | 20 hours |
-| Project Management | 20 | 30 | 25 hours |
-| GitHub Export | 8 | 15 | 15 hours |
-| Environment Variables | 10 | 20 | 12 hours |
-| Multi-Device Preview | 15 | 10 | 18 hours |
-| Console Viewer | 6 | 8 | 8 hours |
-| Prompt Library | 10 | 12 | 15 hours |
-| Speech-to-Text | 7 | 10 | 10 hours |
-| Template Gallery | 12 | 15 | 12 hours |
-| Vibe Hub | 15 | 10 | 15 hours |
+| Feature               | Files Generated | Tests Generated | Development Time |
+| --------------------- | --------------- | --------------- | ---------------- |
+| Prompt Analyzer       | 12              | 25              | 20 hours         |
+| Project Management    | 20              | 30              | 25 hours         |
+| GitHub Export         | 8               | 15              | 15 hours         |
+| Environment Variables | 10              | 20              | 12 hours         |
+| Multi-Device Preview  | 15              | 10              | 18 hours         |
+| Console Viewer        | 6               | 8               | 8 hours          |
+| Prompt Library        | 10              | 12              | 15 hours         |
+| Speech-to-Text        | 7               | 10              | 10 hours         |
+| Template Gallery      | 12              | 15              | 12 hours         |
+| Vibe Hub              | 15              | 10              | 15 hours         |
 
 **Total: 150+ hours of development with Kiro IDE**
 
@@ -262,6 +267,7 @@ Amazon Kiro IDE was the cornerstone of AIWA AI's development. It transformed a
 complex vision into a production-ready platform in just 150 hours.
 
 **Key Achievements with Kiro:**
+
 - ✅ 20+ major features implemented
 - ✅ 50+ comprehensive specs created
 - ✅ 2,000+ lines of quality code generated
