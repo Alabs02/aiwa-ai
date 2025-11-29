@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UpgradePromptDialog } from "@/components/shared/upgrade-prompt-dialog";
-import { getFeatureAccess } from "@/lib/feature-access";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 
 import {
   WebPreview,
@@ -115,7 +115,8 @@ export function PreviewPanel({
   isGenerating = false,
   consoleLogs = []
 }: PreviewPanelProps) {
-  const [userPlan, setUserPlan] = useState<string>("free");
+  // Feature access hook - replaces manual plan state
+  const featureAccess = useFeatureAccess();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [blockedFeature, setBlockedFeature] = useState("");
 
@@ -160,14 +161,9 @@ export function PreviewPanel({
   });
 
   const handleDownload = async () => {
-    console.log({ userPlan });
-    const access = getFeatureAccess(userPlan as any);
-
-    console.log({ access });
-
     if (!currentChat?.id) return;
 
-    if (!access.canDownload) {
+    if (!featureAccess.canDownload) {
       setBlockedFeature("Download");
       setShowUpgradeDialog(true);
       return;
@@ -209,9 +205,7 @@ export function PreviewPanel({
   };
 
   const handleGitHubExport = () => {
-    const access = getFeatureAccess(userPlan as any);
-
-    if (!access.canUseGitHub) {
+    if (!featureAccess.canUseGitHub) {
       setBlockedFeature("GitHub Export");
       setShowUpgradeDialog(true);
       return;
@@ -219,13 +213,6 @@ export function PreviewPanel({
 
     setGithubDialogOpen(true);
   };
-
-  useEffect(() => {
-    fetch("/api/billing/subscription")
-      .then((r) => r.json())
-      .then((data) => setUserPlan(data?.plan || "free"))
-      .catch(() => setUserPlan("free"));
-  }, []);
 
   const getEmptyState = () => (
     <div className="flex h-full flex-1 items-center justify-center bg-gray-50 dark:bg-black">
