@@ -48,18 +48,30 @@
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" align="center">
 
 **Before: v0-clone**
-<img src="./examples/v0-clone/public/v0-clone-hero.webp" alt="Original v0-clone" width="100%" />
+
+<a href="https://clone-demo.v0-sdk.dev/" target="_blank">
+  <img src="./examples/v0-clone/public/v0-clone-hero.webp" alt="Original v0-clone" width="100%" />
+</a>
+
 <em>Basic chat interface with limited functionality</em>
 
+🔗 **[View v0-clone Demo](https://clone-demo.v0-sdk.dev/)**
+
 </td>
-<td width="50%">
+<td width="50%" align="center">
 
 **After: AIWA AI**
-<img src="./examples/v0-clone/public/aiwa-hero.webp" alt="AIWA AI" width="100%" />
+
+<a href="https://www.aiwa.codes/" target="_blank">
+  <img src="./examples/v0-clone/public/aiwa-hero.webp" alt="AIWA AI" width="100%" />
+</a>
+
 <em>Feature-rich platform with advanced capabilities</em>
+
+🔗 **[Try AIWA AI Live](https://www.aiwa.codes/)**
 
 </td>
 </tr>
@@ -178,6 +190,26 @@ Amazon Kiro IDE was the cornerstone of AIWA AI's development. As an AI-native ID
 3. **Multi-File Editing** - Simultaneous updates across multiple files with type safety
 4. **Intelligent Refactoring** - Context-aware refactoring with AI assistance
 5. **Integrated Testing** - Automated test generation and execution
+
+### 📸 Proof of Kiro IDE Usage
+
+<p align="center">
+  <img src="./kiro-ide-screenshot.png" alt="Kiro IDE Development Environment" width="100%" />
+</p>
+
+<p align="center">
+  <em>Amazon Kiro IDE in action - Building AIWA AI with spec-driven development, agentic workflows, and AI-assisted coding</em>
+</p>
+
+**Screenshot Details:**
+
+- **Developer**: Alabs02 (alabson.inc@gmail.com)
+- **AWS Builder ID**: alabson.inc@gmail.com
+- **Project**: AIWA AI (aiwa-ai repository)
+- **Environment**: Amazon Kiro IDE with full project structure
+- **Evidence**: Complete workspace showing files, folders, and development environment
+
+---
 
 ### 1. Spec-Driven Development
 
@@ -581,31 +613,284 @@ OPENAI_API_KEY=your_openai_api_key
 ```
 aiwa-ai/
 ├── examples/
-│   └── v0-clone/              # Main AIWA AI application
-│       ├── app/
-│       │   ├── (auth)/        # Authentication pages
-│       │   ├── api/           # API routes
-│       │   ├── billing/       # Stripe integration
-│       │   ├── blog/          # Blog system
-│       │   ├── chats/         # Chat interface
-│       │   ├── hub/           # Vibe hub
-│       │   ├── projects/      # Project management
-│       │   ├── templates/     # Template gallery
-│       │   └── workspace/     # Workspace management
-│       ├── components/
-│       │   ├── ai-elements/   # AI UI components
-│       │   ├── chat/          # Chat components
+│   └── v0-clone/                    # Main AIWA AI application
+│       ├── app/                     # Next.js 15 App Router
+│       │   ├── (auth)/              # Authentication routes
+│       │   │   ├── login/           # Login page
+│       │   │   ├── register/        # Registration page
+│       │   │   ├── actions.ts       # Auth server actions
+│       │   │   ├── auth.config.ts   # NextAuth configuration
+│       │   │   └── auth.ts          # Auth setup
+│       │   ├── api/                 # API routes
+│       │   │   ├── admin/           # Admin endpoints
+│       │   │   ├── ai-proxy/        # AI proxy endpoints
+│       │   │   ├── auth/            # NextAuth endpoints
+│       │   │   ├── billing/         # Stripe billing
+│       │   │   ├── blog/            # Blog CRUD
+│       │   │   ├── chat/            # Chat creation
+│       │   │   ├── chats/           # Chat management
+│       │   │   ├── cron/            # Scheduled tasks
+│       │   │   ├── github/          # GitHub export
+│       │   │   ├── hub/             # Vibe hub videos
+│       │   │   ├── projects/        # Project management
+│       │   │   ├── prompts/         # Prompt library
+│       │   │   ├── system/          # System utilities
+│       │   │   ├── transcribe/      # Speech-to-text
+│       │   │   └── user/            # User management
+│       │   ├── billing/             # Billing pages
+│       │   ├── blog/                # Blog pages
+│       │   │   └── [slug]/          # Blog post detail
+│       │   ├── chats/               # Chat pages
+│       │   │   └── [chatId]/        # Chat detail
+│       │   ├── css/                 # Custom CSS
+│       │   │   ├── animations.css   # Animation styles
+│       │   │   ├── message.css      # Message styles
+│       │   │   └── prompt-enhancer.css
+│       │   ├── hub/                 # Vibe hub pages
+│       │   │   └── [id]/            # Video detail
+│       │   ├── privacy/             # Privacy policy
+│       │   ├── projects/            # Projects page
+│       │   ├── studio/              # Studio page
+│       │   ├── templates/           # Template gallery
+│       │   ├── terms/               # Terms of service
+│       │   ├── workspace/           # Workspace page
+│       │   ├── favicon.ico          # Favicon
+│       │   ├── globals.css          # Global styles
+│       │   ├── layout.tsx           # Root layout
+│       │   └── page.tsx             # Home page
+│       │
+│       ├── components/              # React components
+│       │   ├── admin/               # Admin components
+│       │   │   ├── admin-analytics-charts.tsx
+│       │   │   ├── admin-dashboard.tsx
+│       │   │   ├── admin-users-table.tsx
+│       │   │   └── admin-webhook-logs.tsx
+│       │   ├── ai-elements/         # AI UI components
+│       │   │   ├── actions.tsx      # Action buttons
+│       │   │   ├── avatar.tsx       # User avatars
+│       │   │   ├── branch.tsx       # Branch UI
+│       │   │   ├── code-block.tsx   # Code display
+│       │   │   ├── code-viewer.tsx  # Code viewer
+│       │   │   ├── conversation.tsx # Chat conversation
+│       │   │   ├── image.tsx        # Image display
+│       │   │   ├── inline-citation.tsx
+│       │   │   ├── loader.tsx       # Loading states
+│       │   │   ├── message.tsx      # Message display
+│       │   │   ├── preview-loading-animations.tsx
+│       │   │   ├── prompt-input.tsx # Prompt input
+│       │   │   ├── reasoning.tsx    # AI reasoning
+│       │   │   ├── response.tsx     # AI response
+│       │   │   ├── source.tsx       # Source display
+│       │   │   ├── streaming-code-preview.tsx
+│       │   │   ├── suggestion.tsx   # Suggestions
+│       │   │   ├── task.tsx         # Task display
+│       │   │   ├── tool.tsx         # Tool display
+│       │   │   └── web-preview.tsx  # Web preview
+│       │   ├── billing/             # Billing components
+│       │   │   ├── billing-client.tsx
+│       │   │   └── credit-purchase-form.tsx
+│       │   ├── blog/                # Blog components
+│       │   │   ├── blog-card.tsx
+│       │   │   ├── blog-client.tsx
+│       │   │   ├── blog-post-client.tsx
+│       │   │   ├── index.ts
+│       │   │   └── post-blog-dialog.tsx
+│       │   ├── chat/                # Chat components
+│       │   │   ├── chat-input.tsx
+│       │   │   ├── chat-messages.tsx
+│       │   │   ├── github-export-dialog.tsx
+│       │   │   └── preview-panel.tsx
+│       │   ├── chats/               # Chats list
+│       │   │   ├── chat-detail-client.tsx
+│       │   │   └── chats-client.tsx
+│       │   ├── constants/           # Constants
+│       │   │   └── suggestions.tsx
+│       │   ├── dialogs/             # Dialog components
+│       │   │   ├── search-dialog.css
+│       │   │   └── search-dialog.tsx
+│       │   ├── gl/                  # WebGL components
+│       │   │   ├── shaders/         # GLSL shaders
+│       │   │   ├── index.tsx
+│       │   │   └── particles.tsx
+│       │   ├── home/                # Home page components
+│       │   │   ├── home-client.store.ts
+│       │   │   └── home-client.tsx
+│       │   ├── hub/                 # Vibe hub components
+│       │   │   ├── hub-client.tsx
+│       │   │   ├── index.ts
+│       │   │   ├── post-video-dialog.tsx
+│       │   │   ├── video-card.tsx
+│       │   │   └── video-preview-client.tsx
+│       │   ├── projects/            # Project components
+│       │   │   ├── create-project-dialog.tsx
+│       │   │   ├── edit-project-dialog.tsx
+│       │   │   ├── env-variables-dialog.tsx
+│       │   │   ├── project-card.tsx
+│       │   │   ├── project-selector.tsx
+│       │   │   └── projects-client.tsx
 │       │   ├── prompt-enhancement/  # Prompt analyzer
-│       │   └── shared/        # Shared components
-│       ├── lib/
-│       │   ├── db/            # Database schema & queries
-│       │   └── utils/         # Utility functions
-│       └── public/            # Static assets
-├── packages/
-│   ├── v0-sdk/                # Core v0 SDK
-│   ├── react/                 # React components
-│   └── ai-tools/              # AI tools
-└── docs/                      # Documentation
+│       │   │   ├── index.ts
+│       │   │   ├── prompt-enhancer-dialog.tsx
+│       │   │   ├── prompt-library-dialog.tsx
+│       │   │   └── prompt-quality-indicator.tsx
+│       │   ├── providers/           # Context providers
+│       │   │   ├── session-provider.tsx
+│       │   │   ├── swr-provider.tsx
+│       │   │   ├── theme-provider.tsx
+│       │   │   └── toast-provider.tsx
+│       │   ├── shared/              # Shared components
+│       │   │   ├── app-footer.tsx
+│       │   │   ├── app-header.tsx
+│       │   │   ├── app-sidebar.tsx
+│       │   │   ├── bottom-toolbar.tsx
+│       │   │   ├── chat-menu.tsx
+│       │   │   ├── chat-selector.store.ts
+│       │   │   ├── chat-selector.tsx
+│       │   │   ├── credit-warning-banner.tsx
+│       │   │   ├── index.ts
+│       │   │   ├── mobile-menu.tsx
+│       │   │   ├── navbar.tsx
+│       │   │   ├── resizable-layout.tsx
+│       │   │   ├── sidebar-layout.tsx
+│       │   │   ├── toolbar.tsx
+│       │   │   ├── upgrade-prompt-dialog.tsx
+│       │   │   └── welcome-upgrade-dialog.tsx
+│       │   ├── templates/           # Template components
+│       │   │   ├── card-skeleton.tsx
+│       │   │   ├── featured-client.tsx
+│       │   │   ├── featured-templates.tsx
+│       │   │   ├── templates-client.tsx
+│       │   │   └── user-templates.tsx
+│       │   ├── ui/                  # UI primitives
+│       │   │   ├── alert-dialog.tsx
+│       │   │   ├── alert.tsx
+│       │   │   ├── avatar.tsx
+│       │   │   ├── badge.tsx
+│       │   │   ├── border-beam.tsx
+│       │   │   ├── button.tsx
+│       │   │   ├── card.tsx
+│       │   │   ├── carousel.tsx
+│       │   │   ├── collapsible.tsx
+│       │   │   ├── dialog.tsx
+│       │   │   ├── dropdown-menu.tsx
+│       │   │   ├── hover-card.tsx
+│       │   │   ├── icons.tsx
+│       │   │   ├── input.tsx
+│       │   │   ├── label.tsx
+│       │   │   ├── magic-card.tsx
+│       │   │   ├── progress.tsx
+│       │   │   ├── ripple-button.tsx
+│       │   │   ├── scroll-area.tsx
+│       │   │   ├── select.tsx
+│       │   │   ├── skeleton.tsx
+│       │   │   ├── sonner.tsx
+│       │   │   ├── spinner.tsx
+│       │   │   ├── switch.tsx
+│       │   │   ├── table.tsx
+│       │   │   ├── tabs.tsx
+│       │   │   ├── textarea.tsx
+│       │   │   └── tooltip.tsx
+│       │   ├── workspace/           # Workspace components
+│       │   │   └── workspace-client.tsx
+│       │   ├── auth-form.tsx        # Auth form
+│       │   ├── env-setup.tsx        # Env setup
+│       │   ├── message-renderer.tsx # Message renderer
+│       │   ├── shared-components.tsx
+│       │   └── user-nav.tsx         # User navigation
+│       │
+│       ├── contexts/                # React contexts
+│       │   └── streaming-context.tsx
+│       │
+│       ├── hooks/                   # Custom hooks
+│       │   ├── use-chat.ts
+│       │   ├── use-debounce.ts
+│       │   ├── use-feature-access.ts
+│       │   ├── use-message.ts
+│       │   └── use-sidebar-collapse.ts
+│       │
+│       ├── lib/                     # Utilities & logic
+│       │   ├── constants/           # Constants
+│       │   │   └── default-instructions.ts
+│       │   ├── db/                  # Database layer
+│       │   │   ├── migrations/      # Drizzle migrations
+│       │   │   ├── billing-queries.ts
+│       │   │   ├── blog-queries.ts
+│       │   │   ├── connection.ts    # DB connection
+│       │   │   ├── hub-queries.ts
+│       │   │   ├── migrate.ts       # Migration runner
+│       │   │   ├── queries.ts       # General queries
+│       │   │   ├── schema.ts        # Drizzle schema
+│       │   │   └── utils.ts         # DB utilities
+│       │   ├── utils/               # Utility functions
+│       │   │   └── project-instructions.ts
+│       │   ├── chat-visibility.ts
+│       │   ├── client-utils.ts
+│       │   ├── constants.ts
+│       │   ├── credit-purchase-validation.ts
+│       │   ├── entitlements.ts
+│       │   ├── env-check.ts
+│       │   ├── errors.ts
+│       │   ├── feature-access.ts
+│       │   ├── sidebar-utils.ts
+│       │   ├── utils.ts             # General utilities
+│       │   ├── v0-token-parser.ts   # v0 token parser
+│       │   └── youtube.ts           # YouTube utilities
+│       │
+│       ├── plugins/                 # Custom plugins
+│       │   └── fonts.ts             # Font configuration
+│       │
+│       ├── public/                  # Static assets
+│       │   ├── AI-Dark.webp
+│       │   ├── AI-Light.webp
+│       │   ├── aiwa-dark.webp
+│       │   ├── aiwa-hero.webp
+│       │   ├── aiwa-light.webp
+│       │   ├── aiwa.webp
+│       │   └── v0-clone-hero.webp
+│       │
+│       ├── queries/                 # SWR queries
+│       │   └── use-chats.ts
+│       │
+│       ├── scripts/                 # Utility scripts
+│       │   ├── delete-user.ts
+│       │   ├── fix-subscription.ts
+│       │   ├── inspect.ts
+│       │   ├── migrate-subscriptions.ts
+│       │   ├── replenish-credits.ts
+│       │   └── set-admins.ts
+│       │
+│       ├── store/                   # Zustand stores
+│       │   └── user-subscription.store.ts
+│       │
+│       ├── types/                   # TypeScript types
+│       │   └── global.d.ts
+│       │
+│       ├── .env.example             # Environment template
+│       ├── .gitignore               # Git ignore
+│       ├── components.json          # shadcn/ui config
+│       ├── drizzle.config.ts        # Drizzle config
+│       ├── middleware.ts            # Next.js middleware
+│       ├── next.config.ts           # Next.js config
+│       ├── package.json             # Dependencies
+│       ├── postcss.config.mjs       # PostCSS config
+│       ├── prettier.config.mjs      # Prettier config
+│       ├── README.md                # Project README
+│       ├── tsconfig.json            # TypeScript config
+│       └── vercel.json              # Vercel config
+│
+├── packages/                        # Monorepo packages
+│   ├── v0-sdk/                      # Core v0 SDK
+│   ├── react/                       # React components
+│   └── ai-tools/                    # AI tools
+│
+└── docs/                            # Documentation
+    ├── screenshots/                 # Screenshots
+    ├── AWS_TOOLS_USAGE.md           # Kiro IDE evidence
+    ├── FEATURES.md                  # Feature docs
+    ├── LINKS_REFERENCE.md           # Quick links
+    ├── QUICK_START_JUDGES.md        # Judge's guide
+    ├── ROADMAP_UPDATE.md            # Detailed roadmap
+    └── SUBMISSION_CHECKLIST.md      # Submission guide
 ```
 
 ### Database Schema
