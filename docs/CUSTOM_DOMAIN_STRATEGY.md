@@ -3,6 +3,7 @@
 ## Executive Summary
 
 This document outlines a comprehensive strategy to implement:
+
 1. **Custom domains** for user projects (e.g., `myapp.com`)
 2. **AIWA subdomains** for generated apps (e.g., `sass-app.aiwa.live`)
 
@@ -14,12 +15,14 @@ This document outlines a comprehensive strategy to implement:
 ## 🎯 Goals
 
 ### Primary Goals
+
 1. Replace `*.vusercontent.net` URLs with `*.aiwa.live` subdomains
 2. Enable users to connect custom domains to their projects
 3. Maintain seamless integration with v0 SDK
 4. Leverage Vercel for deployment and domain management
 
 ### Secondary Goals
+
 1. Automatic SSL certificate provisioning
 2. Zero-downtime deployments
 3. Preview deployments for each version
@@ -71,16 +74,18 @@ This document outlines a comprehensive strategy to implement:
 
 ## 📋 Implementation Strategy
 
-### Phase 1: Subdomain Deployment (*.aiwa.live)
+### Phase 1: Subdomain Deployment (\*.aiwa.live)
 
 #### Step 1.1: Set Up Vercel Integration
 
 **What to do:**
+
 1. Create a Vercel team account for AIWA AI
 2. Set up Vercel API token with deployment permissions
 3. Configure wildcard domain `*.aiwa.live` in Vercel
 
 **How:**
+
 ```bash
 # 1. In Vercel Dashboard:
 #    - Go to Settings → Domains
@@ -95,6 +100,7 @@ This document outlines a comprehensive strategy to implement:
 ```
 
 **Vercel API Token:**
+
 - Go to Vercel → Settings → Tokens
 - Create token with `deployments:write` scope
 - Store in environment variable: `VERCEL_API_TOKEN`
@@ -106,6 +112,7 @@ This document outlines a comprehensive strategy to implement:
 **Purpose**: Handle deployment to Vercel with subdomain mapping
 
 **Key Functions:**
+
 ```typescript
 interface DeploymentConfig {
   chatId: string
@@ -118,16 +125,19 @@ interface DeploymentConfig {
 class VercelDeployer {
   // 1. Download files from v0 API
   async downloadVersionFiles(chatId: string, versionId: string): Promise<Files>
-  
+
   // 2. Create Vercel project
   async createVercelProject(projectName: string): Promise<VercelProject>
-  
+
   // 3. Deploy to Vercel
-  async deployToVercel(files: Files, config: DeploymentConfig): Promise<Deployment>
-  
+  async deployToVercel(
+    files: Files,
+    config: DeploymentConfig,
+  ): Promise<Deployment>
+
   // 4. Map subdomain
   async mapSubdomain(deploymentId: string, subdomain: string): Promise<Domain>
-  
+
   // 5. Complete deployment flow
   async deploy(config: DeploymentConfig): Promise<DeploymentResult>
 }
@@ -140,6 +150,7 @@ class VercelDeployer {
 **Purpose**: API endpoint to trigger deployment
 
 **Flow:**
+
 ```typescript
 POST /api/deployments/create
 {
@@ -169,21 +180,21 @@ CREATE TABLE deployments (
   chat_id VARCHAR(255) NOT NULL,
   version_id VARCHAR(255) NOT NULL,
   project_id VARCHAR(255),
-  
+
   -- Deployment details
   subdomain VARCHAR(255) UNIQUE NOT NULL,
   custom_domain VARCHAR(255) UNIQUE,
   vercel_project_id VARCHAR(255),
   vercel_deployment_id VARCHAR(255),
-  
+
   -- URLs
   deployment_url TEXT NOT NULL,
   preview_url TEXT,
-  
+
   -- Status
   status VARCHAR(50) DEFAULT 'building', -- building, ready, error
   error_message TEXT,
-  
+
   -- Metadata
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
@@ -203,6 +214,7 @@ CREATE INDEX idx_deployments_user ON deployments(user_id);
 **Purpose**: Generate unique, memorable subdomains
 
 **Strategy:**
+
 ```typescript
 function generateSubdomain(chatName?: string, chatId?: string): string {
   // Option 1: Use chat name (sanitized)
@@ -212,16 +224,16 @@ function generateSubdomain(chatName?: string, chatId?: string): string {
       .replace(/[^a-z0-9-]/g, '-')
       .replace(/-+/g, '-')
       .substring(0, 30)
-    
+
     // Add random suffix to ensure uniqueness
     const suffix = generateRandomString(6)
     return `${sanitized}-${suffix}`
   }
-  
+
   // Option 2: Generate from chatId
   const hash = hashChatId(chatId)
   return `app-${hash}`
-  
+
   // Option 3: Use memorable words (like Vercel)
   return `${randomAdjective()}-${randomNoun()}-${randomNumber()}`
 }
@@ -246,14 +258,14 @@ function generateSubdomain(chatName?: string, chatId?: string): string {
 class VercelAPI {
   private token: string
   private teamId: string
-  
+
   // 1. Create project
   async createProject(name: string): Promise<VercelProject> {
     return fetch('https://api.vercel.com/v9/projects', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
@@ -261,66 +273,69 @@ class VercelAPI {
         buildCommand: 'npm run build',
         outputDirectory: '.next',
         installCommand: 'npm install',
-        devCommand: 'npm run dev'
-      })
+        devCommand: 'npm run dev',
+      }),
     })
   }
-  
+
   // 2. Create deployment
   async createDeployment(projectId: string, files: Files): Promise<Deployment> {
     // Convert files to Vercel format
     const vercelFiles = Object.entries(files).map(([path, content]) => ({
       file: path,
-      data: Buffer.from(content).toString('base64')
+      data: Buffer.from(content).toString('base64'),
     }))
-    
+
     return fetch('https://api.vercel.com/v13/deployments', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: projectId,
         files: vercelFiles,
         projectSettings: {
-          framework: 'nextjs'
+          framework: 'nextjs',
         },
-        target: 'production'
-      })
+        target: 'production',
+      }),
     })
   }
-  
+
   // 3. Add domain to project
   async addDomain(projectId: string, domain: string): Promise<Domain> {
     return fetch(`https://api.vercel.com/v9/projects/${projectId}/domains`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: domain
-      })
+        name: domain,
+      }),
     })
   }
-  
+
   // 4. Set environment variables
-  async setEnvVars(projectId: string, envVars: Record<string, string>): Promise<void> {
+  async setEnvVars(
+    projectId: string,
+    envVars: Record<string, string>,
+  ): Promise<void> {
     const envs = Object.entries(envVars).map(([key, value]) => ({
       key,
       value,
       type: 'encrypted',
-      target: ['production', 'preview']
+      target: ['production', 'preview'],
     }))
-    
+
     return fetch(`https://api.vercel.com/v9/projects/${projectId}/env`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ envs })
+      body: JSON.stringify({ envs }),
     })
   }
 }
@@ -333,19 +348,19 @@ class VercelAPI {
 ```typescript
 async function downloadVersionFiles(
   chatId: string,
-  versionId: string
+  versionId: string,
 ): Promise<Files> {
   // Use v0 SDK's downloadVersion method
   const archive = await v0.chats.downloadVersion({
     chatId,
     versionId,
     format: 'zip',
-    includeDefaultFiles: true // Include package.json, config files, etc.
+    includeDefaultFiles: true, // Include package.json, config files, etc.
   })
-  
+
   // Extract files from archive
   const files = await extractZipFiles(archive)
-  
+
   return files
 }
 ```
@@ -357,24 +372,21 @@ async function downloadVersionFiles(
 **Purpose**: Inject project environment variables into deployment
 
 ```typescript
-async function injectEnvVars(
-  files: Files,
-  projectId: string
-): Promise<Files> {
+async function injectEnvVars(files: Files, projectId: string): Promise<Files> {
   // 1. Get project env vars from database
   const envVars = await getProjectEnvVars(projectId)
-  
+
   // 2. Create .env.local file
   const envContent = Object.entries(envVars)
     .map(([key, value]) => `${key}=${value}`)
     .join('\n')
-  
+
   // 3. Add to files
   files['.env.local'] = envContent
-  
+
   // 4. Also set in Vercel project settings
   // (handled by VercelAPI.setEnvVars)
-  
+
   return files
 }
 ```
@@ -394,41 +406,42 @@ class DomainVerifier {
   // 1. Generate verification token
   async generateVerificationToken(domain: string): Promise<string> {
     const token = generateSecureToken()
-    
+
     // Store in database
     await db.insert(domain_verifications).values({
       domain,
       token,
       status: 'pending',
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     })
-    
+
     return token
   }
-  
+
   // 2. Verify domain ownership
   async verifyDomain(domain: string): Promise<boolean> {
     const verification = await db.query.domain_verifications.findFirst({
-      where: eq(domain_verifications.domain, domain)
+      where: eq(domain_verifications.domain, domain),
     })
-    
+
     if (!verification) return false
-    
+
     // Check TXT record
     const txtRecords = await dns.resolveTxt(domain)
-    const hasToken = txtRecords.some(record => 
-      record.includes(`aiwa-verification=${verification.token}`)
+    const hasToken = txtRecords.some((record) =>
+      record.includes(`aiwa-verification=${verification.token}`),
     )
-    
+
     if (hasToken) {
       // Update status
-      await db.update(domain_verifications)
+      await db
+        .update(domain_verifications)
         .set({ status: 'verified', verified_at: new Date() })
         .where(eq(domain_verifications.domain, domain))
-      
+
       return true
     }
-    
+
     return false
   }
 }
@@ -437,6 +450,7 @@ class DomainVerifier {
 #### Step 3.2: Domain Connection Flow
 
 **User Flow:**
+
 1. User clicks "Connect Custom Domain"
 2. Enter domain name (e.g., `myapp.com`)
 3. System generates verification token
@@ -499,6 +513,7 @@ Response:
 **File**: `examples/v0-clone/components/chat/deployment-button.tsx`
 
 **Features:**
+
 - "Deploy to AIWA" button in chat interface
 - Shows deployment status (building, ready, error)
 - Displays deployment URL
@@ -508,22 +523,22 @@ Response:
 function DeploymentButton({ chatId, versionId }: Props) {
   const [deploying, setDeploying] = useState(false)
   const [deployment, setDeployment] = useState<Deployment | null>(null)
-  
+
   async function handleDeploy() {
     setDeploying(true)
-    
+
     const response = await fetch('/api/deployments/create', {
       method: 'POST',
       body: JSON.stringify({ chatId, versionId })
     })
-    
+
     const result = await response.json()
     setDeployment(result)
-    
+
     // Poll for deployment status
     pollDeploymentStatus(result.deploymentId)
   }
-  
+
   return (
     <div>
       {!deployment && (
@@ -531,7 +546,7 @@ function DeploymentButton({ chatId, versionId }: Props) {
           {deploying ? 'Deploying...' : 'Deploy to AIWA'}
         </Button>
       )}
-      
+
       {deployment && (
         <DeploymentStatus deployment={deployment} />
       )}
@@ -545,6 +560,7 @@ function DeploymentButton({ chatId, versionId }: Props) {
 **File**: `examples/v0-clone/app/deployments/page.tsx`
 
 **Features:**
+
 - List all user deployments
 - Deployment status and URLs
 - Custom domain management
@@ -605,27 +621,27 @@ CREATE TABLE deployments (
   chat_id VARCHAR(255) NOT NULL,
   version_id VARCHAR(255) NOT NULL,
   project_id VARCHAR(255),
-  
+
   -- Deployment details
   subdomain VARCHAR(255) UNIQUE NOT NULL,
   custom_domain VARCHAR(255) UNIQUE,
   vercel_project_id VARCHAR(255),
   vercel_deployment_id VARCHAR(255),
-  
+
   -- URLs
   deployment_url TEXT NOT NULL,
   preview_url TEXT,
-  
+
   -- Status
   status VARCHAR(50) DEFAULT 'building',
   error_message TEXT,
   build_logs TEXT,
-  
+
   -- Metadata
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
   deployed_at TIMESTAMP,
-  
+
   UNIQUE(chat_id, version_id)
 );
 
@@ -636,12 +652,12 @@ CREATE TABLE domain_verifications (
   domain VARCHAR(255) UNIQUE NOT NULL,
   token VARCHAR(255) NOT NULL,
   status VARCHAR(50) DEFAULT 'pending', -- pending, verified, failed
-  
+
   -- DNS records
   txt_record_verified BOOLEAN DEFAULT FALSE,
   a_record_verified BOOLEAN DEFAULT FALSE,
   cname_record_verified BOOLEAN DEFAULT FALSE,
-  
+
   -- Timestamps
   created_at TIMESTAMP DEFAULT NOW(),
   verified_at TIMESTAMP,
@@ -663,21 +679,25 @@ CREATE TABLE deployment_logs (
 ## 🔐 Security Considerations
 
 ### 1. Subdomain Isolation
+
 - Each deployment runs in isolated Vercel project
 - No cross-contamination between deployments
 - Separate environment variables per deployment
 
 ### 2. Domain Verification
+
 - Require TXT record verification before connecting custom domains
 - Prevent domain hijacking
 - Expire verification tokens after 24 hours
 
 ### 3. Access Control
+
 - Users can only deploy their own chats
 - Users can only manage their own deployments
 - Rate limiting on deployment creation
 
 ### 4. Environment Variables
+
 - Encrypt env vars in database
 - Never expose in logs or error messages
 - Inject securely during deployment
@@ -687,6 +707,7 @@ CREATE TABLE deployment_logs (
 ## 💰 Cost Considerations
 
 ### Vercel Pricing
+
 - **Pro Plan**: $20/month per member
   - Unlimited deployments
   - 100GB bandwidth
@@ -699,11 +720,13 @@ CREATE TABLE deployment_logs (
   - Advanced security
 
 ### Estimated Costs
+
 - **100 deployments/month**: ~$20-50/month
 - **1,000 deployments/month**: ~$100-200/month
 - **10,000 deployments/month**: Enterprise plan
 
 ### Cost Optimization
+
 1. **Deployment Limits**: Limit deployments per user tier
    - Free: 3 deployments
    - Pro: 50 deployments
@@ -718,6 +741,7 @@ CREATE TABLE deployment_logs (
 ## 📈 Monitoring & Analytics
 
 ### Deployment Metrics
+
 - Total deployments
 - Success/failure rate
 - Average deployment time
@@ -725,12 +749,14 @@ CREATE TABLE deployment_logs (
 - Bandwidth usage
 
 ### Domain Metrics
+
 - Custom domains connected
 - Domain verification success rate
 - SSL certificate status
 - DNS propagation time
 
 ### User Metrics
+
 - Deployments per user
 - Most deployed chats
 - Popular subdomains
@@ -741,30 +767,35 @@ CREATE TABLE deployment_logs (
 ## 🚀 Implementation Timeline
 
 ### Week 1: Foundation
+
 - [ ] Set up Vercel team and wildcard domain
 - [ ] Create database schema
 - [ ] Implement VercelAPI class
 - [ ] Implement file download from v0 API
 
 ### Week 2: Core Deployment
+
 - [ ] Implement VercelDeployer class
 - [ ] Create deployment API routes
 - [ ] Implement subdomain generation
 - [ ] Add deployment tracking to database
 
 ### Week 3: UI Integration
+
 - [ ] Add deployment button to chat interface
 - [ ] Create deployment status component
 - [ ] Build deployment management page
 - [ ] Add deployment list to user dashboard
 
 ### Week 4: Custom Domains
+
 - [ ] Implement domain verification
 - [ ] Create domain connection flow
 - [ ] Add DNS configuration UI
 - [ ] Test custom domain setup
 
 ### Week 5: Testing & Polish
+
 - [ ] End-to-end testing
 - [ ] Error handling and edge cases
 - [ ] Performance optimization
@@ -775,12 +806,14 @@ CREATE TABLE deployment_logs (
 ## 🎯 Success Criteria
 
 ### Phase 1 Success (Subdomains)
+
 - ✅ All new deployments use `*.aiwa.live` subdomains
 - ✅ No more `*.vusercontent.net` URLs
 - ✅ Deployment success rate > 95%
 - ✅ Average deployment time < 2 minutes
 
 ### Phase 2 Success (Custom Domains)
+
 - ✅ Users can connect custom domains
 - ✅ Domain verification works reliably
 - ✅ SSL certificates auto-provision
