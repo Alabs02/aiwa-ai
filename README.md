@@ -48,18 +48,30 @@
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" align="center">
 
 **Before: v0-clone**
-<img src="./examples/v0-clone/public/v0-clone-hero.webp" alt="Original v0-clone" width="100%" />
+
+<a href="https://clone-demo.v0-sdk.dev/" target="_blank">
+  <img src="./examples/v0-clone/public/v0-clone-hero.webp" alt="Original v0-clone" width="100%" />
+</a>
+
 <em>Basic chat interface with limited functionality</em>
 
+🔗 **[View v0-clone Demo](https://clone-demo.v0-sdk.dev/)**
+
 </td>
-<td width="50%">
+<td width="50%" align="center">
 
 **After: AIWA AI**
-<img src="./examples/v0-clone/public/aiwa-hero.webp" alt="AIWA AI" width="100%" />
+
+<a href="https://www.aiwa.codes/" target="_blank">
+  <img src="./examples/v0-clone/public/aiwa-hero.webp" alt="AIWA AI" width="100%" />
+</a>
+
 <em>Feature-rich platform with advanced capabilities</em>
+
+🔗 **[Try AIWA AI Live](https://www.aiwa.codes/)**
 
 </td>
 </tr>
@@ -178,6 +190,25 @@ Amazon Kiro IDE was the cornerstone of AIWA AI's development. As an AI-native ID
 3. **Multi-File Editing** - Simultaneous updates across multiple files with type safety
 4. **Intelligent Refactoring** - Context-aware refactoring with AI assistance
 5. **Integrated Testing** - Automated test generation and execution
+
+### 📸 Proof of Kiro IDE Usage
+
+<p align="center">
+  <img src="./kiro-ide-screenshot.png" alt="Kiro IDE Development Environment" width="100%" />
+</p>
+
+<p align="center">
+  <em>Amazon Kiro IDE in action - Building AIWA AI with spec-driven development, agentic workflows, and AI-assisted coding</em>
+</p>
+
+**Screenshot Details:**
+- **Developer**: Alabs02 (alabson.inc@gmail.com)
+- **AWS Builder ID**: alabson.inc@gmail.com
+- **Project**: AIWA AI (aiwa-ai repository)
+- **Environment**: Amazon Kiro IDE with full project structure
+- **Evidence**: Complete workspace showing files, folders, and development environment
+
+---
 
 ### 1. Spec-Driven Development
 
