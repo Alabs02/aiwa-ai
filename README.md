@@ -202,6 +202,7 @@ Amazon Kiro IDE was the cornerstone of AIWA AI's development. As an AI-native ID
 </p>
 
 **Screenshot Details:**
+
 - **Developer**: Alabs02 (alabson.inc@gmail.com)
 - **AWS Builder ID**: alabson.inc@gmail.com
 - **Project**: AIWA AI (aiwa-ai repository)
